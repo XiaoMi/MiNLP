@@ -24,15 +24,15 @@ try:
     installed_packages = pkg_resources.working_set
     tensorflow_pkgs = [i.key for i in installed_packages if 'tensorflow' in i.key]
     if 'tensorflow-gpu' in tensorflow_pkgs:
-        install_requires.append('tensorflow-gpu>=1.15,<2')
+        install_requires.append('tensorflow-gpu>=1.14')
     else:
-        install_requires.append('tensorflow>=1.15,<2')
+        install_requires.append('tensorflow>=1.14')
 except ImportError:
-    install_requires.append('tensorflow>=1.15,<2')
+    install_requires.append('tensorflow>=1.14')
 
 setup(
     name='minlp-tokenizer',
-    version='3.2.2',
+    version='3.2.3',
     description='MiNLP-Tokenizer中文分词工具',
     author='Yuankai Guo, Liang Shi, Yupeng Chen',
     author_email='guoyuankai@xiaomi.com, shiliang1@xiaomi.com',
@@ -40,6 +40,7 @@ setup(
     long_description_content_type='text/markdown',
     url='https://github.com/XiaoMi/MiNLP',
     license='Apache 2.0',
+    python_requires='>=3.5, <=3.8',
     packages=['minlptokenizer'],
     package_dir={'minlptokenizer': 'minlptokenizer'},
     package_data={'minlptokenizer': ['model/zh/*', 'vocab/*', 'lexicon/*', 'trans/*']},
