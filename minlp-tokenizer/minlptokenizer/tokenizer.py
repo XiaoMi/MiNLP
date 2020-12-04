@@ -15,6 +15,11 @@
 import regex
 import os
 import tensorflow as tf
+import itertools
+
+from joblib import Parallel, delayed
+from itertools import chain
+from functools import partial
 from minlptokenizer.config import configs
 from minlptokenizer.crf_viterbi import CRFViterbi
 from minlptokenizer.lexicon import Lexicon
@@ -26,9 +31,25 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 pwd = os.path.dirname(__file__)
 
 
-class MiNLPTokenizer:
+def minibatch(items, size=8):
+    """Iterate over batches of items. `size` may be an iterator,
+    so that batch-size can vary on each step.
+    """
+    if isinstance(size, int):
+        size_ = itertools.repeat(size)
+    else:
+        size_ = size
+    items = iter(items)
+    while True:
+        batch_size = next(size_)
+        batch = list(itertools.islice(items, int(batch_size)))
+        if len(batch) == 0:
+            break
+        yield list(batch)
 
-    def __init__(self, file_or_list=None, granularity='fine'):
+class MiNLPTokenizer:
+    tokenizer_singleton = None
+    def __init__(self, file_or_list=None, granularity='fine', tf_config = None):
         """
         分词器初始化
         :param file_or_list: 用户自定义词典文件或列表
@@ -49,7 +70,10 @@ class MiNLPTokenizer:
         g = tf.Graph()
         with g.as_default():
             tf.import_graph_def(graph_def, name='')
-        self.sess = tf.compat.v1.Session(graph=g)
+        if tf_config:
+            self.sess = tf.compat.v1.Session(graph=g, config=tf_config)
+        else:
+            self.sess = tf.compat.v1.Session(graph=g)
         self.char_ids_input = self.sess.graph.get_tensor_by_name('char_ids_batch:0')
         self.y_logits = self.sess.graph.get_tensor_by_name('logits:0')
         for lexicon_file in configs['lexicon_files']:
@@ -97,6 +121,27 @@ class MiNLPTokenizer:
             return list(map(lambda x, y: self.tag2words(x, y), texts, y_pred_results))
         else:
             raise UnSupportedException()
+
+    @staticmethod
+    def cut_batch_in_one_process(cls, file_or_list, granularity, text_batch):
+        if cls.tokenizer_singleton is None:
+            tf_config = tf.compat.v1.ConfigProto()
+            tf_config.gpu_options.allow_growth = True
+            cls.tokenizer_singleton = cls(file_or_list, granularity, tf_config=tf_config)
+        return cls.tokenizer_singleton.cut_batch(text_batch)
+
+    @classmethod
+    def cut_batch_multiprocess(cls, text_batch, file_or_list=None, granularity='fine', n_jobs=2):
+        """
+        使用多线程对多条本文进行分词操作，仅仅在GPU情况下有效
+        CPU场景下，TF会默认使用所用核心
+        """
+        tokenizer = cls.tokenizer_singleton
+        partitions = minibatch(text_batch, size=configs['tokenizer_limit']['max_batch_size'])
+        executor = Parallel(n_jobs=n_jobs, backend="multiprocessing", prefer="processes")
+        do = delayed(partial(cls.cut_batch_in_one_process, cls, file_or_list, granularity))
+        tasks = (do(batch) for i, batch in enumerate(partitions))
+        return list(chain(*executor(tasks)))
 
     def cut(self, text):
         """
