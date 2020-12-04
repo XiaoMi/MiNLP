@@ -20,6 +20,7 @@ with open('README.md', 'r', encoding='utf-8') as fh:
 install_requires = ['pyahocorasick', 'regex']
 try:
     import tensorflow
+
     # 若版本过低，则进行版本更新
     installed_packages = pkg_resources.working_set
     tensorflow_pkgs = [i.key for i in installed_packages if 'tensorflow' in i.key]
@@ -32,7 +33,7 @@ except ImportError:
 
 setup(
     name='minlp-tokenizer',
-    version='3.2.4',
+    version='3.4.0',
     description='MiNLP-Tokenizer中文分词工具',
     author='Yuankai Guo, Liang Shi, Yupeng Chen',
     author_email='guoyuankai@xiaomi.com, shiliang1@xiaomi.com',

@@ -14,11 +14,14 @@
 
 import ahocorasick
 from collections import Iterable
+import numpy as np
+from minlptokenizer.tag import Tag
 
 DEFAULT_INTERFERE_FACTOR = 2
 
 
 class Lexicon:
+    lexicon = None
 
     def __init__(self, file_or_list=None):
         self.ac = ahocorasick.Automaton(ahocorasick.STORE_LENGTH)
@@ -48,27 +51,29 @@ class Lexicon:
             for word in filter(lambda t: t and not t.startswith('#'), file_or_list):
                 self.ac.add_word(word)
 
-    def parse_unary_score(self, text, unary_score):
+    def product_factor(self, texts):
         """
-        干预发射权重
-        :param text:原始文本
-        :param unary_score: 发射概率矩阵
-        :return:
+        根据用户词典生成句子对应的干预权重矩阵
+        :param texts: 目标句子
+        :return: 干预权重矩阵
         """
-        if self.ac.get_stats()["nodes_count"] == 0:
-            return
         if self.ac.kind is not ahocorasick.AHOCORASICK:
             self.ac.make_automaton()
-        for (end_pos, length) in self.ac.iter(text):
-            start_pos = end_pos - length + 1
-            if length == 1:
-                unary_score[start_pos][1] = self.max_socre(unary_score[start_pos])  # S
-            else:
-                unary_score[start_pos][2] = self.max_socre(unary_score[start_pos])  # B
-                unary_score[end_pos][4] = self.max_socre(unary_score[end_pos])  # E
-                for i in range(start_pos + 1, end_pos):
-                    unary_score[i][3] = self.max_socre(unary_score[i])  # M
-        return unary_score
+        max_len = max(map(len, texts))
+        matrix = []
+        for text in texts:
+            factor_matrix = np.ones(shape=[max_len, Tag.__len__()])
+            for (end_pos, length) in self.ac.iter(text):
+                start_pos = end_pos - length + 1
+                if length == 1:
+                    factor_matrix[start_pos][1] *= self.interfere_factor
+                else:
+                    factor_matrix[start_pos][2] *= self.interfere_factor
+                    factor_matrix[end_pos][4] *= self.interfere_factor
+                    for i in range(start_pos + 1, end_pos):
+                        factor_matrix[i][3] *= self.interfere_factor
+            matrix.append(factor_matrix)
+        return matrix
 
     def max_socre(self, scores):
         return self.interfere_factor * abs(max(scores))
