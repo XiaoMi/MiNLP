@@ -15,7 +15,6 @@
 import unittest
 import os
 from time import time
-import sys
 import tensorflow as tf
 from minlptokenizer.tokenizer import MiNLPTokenizer
 
@@ -23,7 +22,7 @@ class TestSpeed(unittest.TestCase):
 
     def setUp(self):
         self.file_size = os.path.getsize('speed_test.txt') / 1024.0
-        self.file=open('speed_test.txt','r',encoding='utf-8')
+        self.file=open('E:\icwb2-data\scripts\speed_test.txt','r',encoding='utf-8')
         self.case_list=[sentence for sentence in self.file]
 
     def test_cut_speed(self):
