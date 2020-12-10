@@ -47,3 +47,11 @@ class UnSupportedException(Exception):
 
     def __str__(self):
         return '输入参数异常.'
+
+
+class ASCIIEncodeException(Exception):
+    def __int__(self):
+        super(Exception, self).__init__()
+
+    def __str__(self):
+        return 'temp_folder 路径编码异常，可能包含中文或特殊字符。请在cut_batch_multiprocess前使用MiNLPTokenizer.set_memmap_folder(your path)重新设置路径。'
