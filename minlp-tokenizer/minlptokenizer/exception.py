@@ -49,7 +49,7 @@ class UnSupportedException(Exception):
         return '输入参数异常.'
 
 
-class ASCIIEncodeException(Exception):
+class FolderException(Exception):
     def __int__(self):
         super(Exception, self).__init__()
 

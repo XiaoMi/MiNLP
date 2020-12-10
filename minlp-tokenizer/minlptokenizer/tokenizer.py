@@ -25,7 +25,8 @@ from minlptokenizer.crf_viterbi import CRFViterbi
 from minlptokenizer.lexicon import Lexicon
 from minlptokenizer.vocab import Vocab
 from minlptokenizer.tag import Tag
-from minlptokenizer.exception import MaxLengthException, ZeroLengthException, UnSupportedException, MaxBatchException,ASCIIEncodeException
+from minlptokenizer.exception import MaxLengthException, ZeroLengthException, UnSupportedException, MaxBatchException, \
+    FolderException
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 pwd = os.path.dirname(__file__)
@@ -51,6 +52,7 @@ def minibatch(items, size=8):
 class MiNLPTokenizer:
     tokenizer_singleton = None
     temp_folder = tempfile.gettempdir()
+
     def __init__(self, file_or_list=None, granularity='fine', tf_config=None):
         """
         分词器初始化
@@ -63,7 +65,6 @@ class MiNLPTokenizer:
         self.__vocab = Vocab(self.__char_dict_path)
         self.__lexicon = Lexicon(file_or_list)
         self.__crf = CRFViterbi(self.__trans_path)
-
 
         with tf.io.gfile.GFile(self.__pb_model_path, 'rb') as f:
             graph_def = tf.compat.v1.GraphDef()
@@ -139,13 +140,13 @@ class MiNLPTokenizer:
         CPU场景下，TF会默认使用所用核心
         """
         partitions = minibatch(text_batch, size=configs['tokenizer_limit']['max_batch_size'])
-        executor = Parallel(n_jobs=n_jobs, backend="multiprocessing", prefer="processes",temp_folder=cls.temp_folder)
+        executor = Parallel(n_jobs=n_jobs, backend="multiprocessing", prefer="processes", temp_folder=cls.temp_folder)
         do = delayed(partial(cls.cut_batch_in_one_process, cls, file_or_list, granularity))
         tasks = (do(batch) for i, batch in enumerate(partitions))
         try:
-            res=list(chain(*executor(tasks)))
+            res = list(chain(*executor(tasks)))
         except UnicodeEncodeError:
-            raise ASCIIEncodeException
+            raise FolderException
         return res
 
     def cut(self, text):
