@@ -125,7 +125,7 @@ class MiNLPTokenizer:
                 word = ''
         if word:
             words.append(word)
-        return regex.split(r'\s+', ' '.join(words))
+        return words
 
     def set_interfere_factor(self, interfere_factor):
         """
