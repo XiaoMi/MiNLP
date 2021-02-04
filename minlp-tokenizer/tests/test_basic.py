@@ -29,7 +29,7 @@ class TestBasic(unittest.TestCase):
             ['粗细', '粒度', '的', '区别', '包括', '三', '点', '十', '分', '2020', '年', '1', '月', '1', '日', '等', '。']
         )
         self.assertListEqual(
-            tokenizer.cut(self.case_list),
+            tokenizer.cut(self.case_list, 1),
             [['粗细', '粒度', '的', '区别', '包括', '三', '点', '十', '分', '2020', '年', '1', '月', '1', '日', '等', '。']] * 10
         )
 
@@ -40,7 +40,7 @@ class TestBasic(unittest.TestCase):
             ['粗细', '粒度', '的', '区别', '包括', '三点', '十分', '2020年', '1月', '1日', '等', '。']
         )
         self.assertListEqual(
-            tokenizer.cut(self.case_list),
+            tokenizer.cut(self.case_list, 1),
             [['粗细', '粒度', '的', '区别', '包括', '三点', '十分', '2020年', '1月', '1日', '等', '。']] * 10
         )
 

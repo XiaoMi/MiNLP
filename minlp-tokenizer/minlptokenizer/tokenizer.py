@@ -16,12 +16,12 @@ import regex
 import os
 import tensorflow as tf
 import math
-from minlptokenizer.config import configs
 from minlptokenizer.lexicon import Lexicon
 from minlptokenizer.vocab import Vocab
 from minlptokenizer.tag import Tag
-from minlptokenizer.exception import MaxLengthException, ZeroLengthException, UnSupportedException, MaxBatchException
-from multiprocessing import Pool, cpu_count
+from minlptokenizer.exception import *
+from multiprocessing import Pool
+import itertools
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 pwd = os.path.dirname(__file__)
@@ -93,12 +93,13 @@ class MiNLPTokenizer:
         for lexicon_file in configs['lexicon_files']:
             self.__lexicon.add_words(os.path.join(pwd, lexicon_file))
 
-    def __cut(self, text_batch):
+    def _cut(self, text_batch):
         """
         分词函数
         :param text_batch: 待分词字符串列表
         :return: 分词结果
         """
+        # pb模型加载
         if not MiNLPTokenizer.sess_dict[self.__granularity]:
             with tf.io.gfile.GFile(self.__pb_model_path, 'rb') as f:
                 graph_def = tf.compat.v1.GraphDef()
@@ -109,15 +110,13 @@ class MiNLPTokenizer:
             tf_config = tf.compat.v1.ConfigProto()
             tf_config.gpu_options.allow_growth = True  # 使用过程中动态申请显存，按需分配
             MiNLPTokenizer.sess_dict[self.__granularity] = tf.compat.v1.Session(graph=g, config=tf_config)
-
         sess = MiNLPTokenizer.sess_dict[self.__granularity]
         char_ids_input = sess.graph.get_tensor_by_name('char_ids_batch:0')
         factor_input = sess.graph.get_tensor_by_name('factor_batch:0')
         tag_ids = sess.graph.get_tensor_by_name('tag_ids:0')
-
+        # 模型预测
         texts = list(map(format_string, text_batch))
-
-        factor = self.__lexicon.product_factor(texts)
+        factor = self.__lexicon.get_factor(texts)
         input_char_id = self.__vocab.get_char_ids(texts)
         feed_dict = {
             char_ids_input: input_char_id,
@@ -126,22 +125,26 @@ class MiNLPTokenizer:
         predict_results = sess.run(tag_ids, feed_dict=feed_dict)
         return list(map(lambda x, y: tag2words(x, y), texts, predict_results))
 
-    def cut(self, text_or_list, n_jobs=cpu_count()):
+    def cut(self, text_or_list, n_jobs=1):
         """
         分词函数，支持传入字符串或者字符串列表
         :param text_or_list: 待分词字符串或者字符串列表
-        :param n_jobs: 进程数量，默认为核心数
+        :param n_jobs: 进程数量，默认为1，不开启多进程
         :return: 分词结果
         """
+        if n_jobs <= 0:
+            raise ThreadNumberException()
         if isinstance(text_or_list, str):
-            return self.__cut([text_or_list])[0]
+            return self._cut([text_or_list])[0]
         elif isinstance(text_or_list, list):
-            # generator = batch_generator(text_or_list, size=configs['tokenizer_limit']['max_batch_size'])
-            # return [self.__cut(batch) for batch in generator]
-
             generator = batch_generator(text_or_list, size=configs['tokenizer_limit']['max_batch_size'])
-            process_pool = Pool(n_jobs)
-            return process_pool.map(self.cut, generator)
+            if n_jobs == 1:
+                return list(itertools.chain.from_iterable([self._cut(batch) for batch in generator]))
+            else:
+                process_pool = Pool(n_jobs)
+                res = process_pool.map(self._cut, generator)
+                process_pool.close()
+                return list(itertools.chain.from_iterable(res))
         else:
             raise UnSupportedException()
 

@@ -33,7 +33,7 @@ except ImportError:
 
 setup(
     name='minlp-tokenizer',
-    version='3.4.0',
+    version='3.3.0',
     description='MiNLP-Tokenizer中文分词工具',
     author='Yuankai Guo, Liang Shi, Yupeng Chen',
     author_email='guoyuankai@xiaomi.com, shiliang1@xiaomi.com',

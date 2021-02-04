@@ -21,8 +21,6 @@ DEFAULT_INTERFERE_FACTOR = 2
 
 
 class Lexicon:
-    lexicon = None
-
     def __init__(self, file_or_list=None):
         self.ac = ahocorasick.Automaton(ahocorasick.STORE_LENGTH)
         if file_or_list:
@@ -51,7 +49,7 @@ class Lexicon:
             for word in filter(lambda t: t and not t.startswith('#'), file_or_list):
                 self.ac.add_word(word)
 
-    def product_factor(self, texts):
+    def get_factor(self, texts):
         """
         根据用户词典生成句子对应的干预权重矩阵
         :param texts: 目标句子
@@ -60,23 +58,18 @@ class Lexicon:
         if self.ac.kind is not ahocorasick.AHOCORASICK:
             self.ac.make_automaton()
         max_len = max(map(len, texts))
-        matrix = []
-        for text in texts:
-            factor_matrix = np.ones(shape=[max_len, Tag.__len__()])
+        factor_matrix = np.zeros(shape=[len(texts), max_len, Tag.__len__()])  # 干预矩阵中0表示非干预，非零位表示对应位置干预系数
+        for index, text in enumerate(texts):
             for (end_pos, length) in self.ac.iter(text):
                 start_pos = end_pos - length + 1
                 if length == 1:
-                    factor_matrix[start_pos][1] *= self.interfere_factor
+                    factor_matrix[index][start_pos][1] = self.interfere_factor
                 else:
-                    factor_matrix[start_pos][2] *= self.interfere_factor
-                    factor_matrix[end_pos][4] *= self.interfere_factor
+                    factor_matrix[index][start_pos][2] = self.interfere_factor
+                    factor_matrix[index][end_pos][4] = self.interfere_factor
                     for i in range(start_pos + 1, end_pos):
-                        factor_matrix[i][3] *= self.interfere_factor
-            matrix.append(factor_matrix)
-        return matrix
-
-    def max_socre(self, scores):
-        return self.interfere_factor * abs(max(scores))
+                        factor_matrix[index][i][3] = self.interfere_factor
+        return factor_matrix
 
     def set_interfere_factor(self, interfere_factor):
         """
