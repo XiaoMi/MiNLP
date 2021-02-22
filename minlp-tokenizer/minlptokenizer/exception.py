@@ -47,3 +47,11 @@ class UnSupportedException(Exception):
 
     def __str__(self):
         return '输入参数异常.'
+
+
+class ThreadNumberException(Exception):
+    def __init__(self):
+        super(Exception, self).__init__()
+
+    def __str__(self):
+        return '多进程数必须大于等于1'
