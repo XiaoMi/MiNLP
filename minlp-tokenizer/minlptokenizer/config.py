@@ -18,19 +18,17 @@ configs = {
     'tokenizer_granularity': {
         'fine': {
             'model': 'model/zh/b-fine-cnn-crf-an2cn.pb',
-            'trans': 'trans/b-fine.300d.trans'
         },
         'coarse': {
             'model': 'model/zh/b-coarse-cnn-crf-an2cn.pb',
-            'trans': 'trans/b-coarse.300d.trans'
         }
     },
     'tokenizer_limit': {
-        'max_batch_size': 512,
+        'max_batch_size': 128,
         'max_string_length': 1024
     },
     'lexicon_files': [
         'lexicon/default.txt',
         'lexicon/chengyu.txt',
-    ],
+    ]
 }
