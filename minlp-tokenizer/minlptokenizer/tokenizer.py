@@ -55,7 +55,7 @@ def format_string(ustring):
         inside_code = ord(uchar)
         if inside_code == 12288:  # 全角空格直接转换
             inside_code = 32
-        elif 65281 <= inside_code <= 65374:  # 全角字符（除空格）转化
+        elif 65296 <= inside_code <= 65305 or 65313 <= inside_code <= 65339:  # 全角字符（除空格和英文标点）转化
             inside_code -= 65248
         half_wide_string += chr(inside_code)
 
