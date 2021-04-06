@@ -1,0 +1,14 @@
+[
+  {"target": "白羊座", "lexeme": ["白羊", "牧羊"]},
+  {"target": "金牛座", "lexeme": ["金牛", "牡牛"]},
+  {"target": "双子座", "lexeme": ["双子", "阴阳"]},
+  {"target": "巨蟹座", "lexeme": ["巨蟹", "天蟹"]},
+  {"target": "处女座", "lexeme": ["处女", "室女"]},
+  {"target": "天秤座", "lexeme": ["天平", "天秤"]},
+  {"target": "天蝎座", "lexeme": ["天蝎"]},
+  {"target": "射手座", "lexeme": ["射手", "人马"]},
+  {"target": "摩羯座", "lexeme": ["摩羯", "魔蝎"]},
+  {"target": "水瓶座", "lexeme": ["水瓶", "宝瓶"]},
+  {"target": "双鱼座", "lexeme": ["双鱼", "南鱼"]},
+  {"target": "狮子座", "lexeme": ["狮子"]}
+]

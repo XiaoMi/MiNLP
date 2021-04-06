@@ -1,0 +1,1 @@
+bloop run factoid --main com.xiaomi.ai.nlp.factoid.FactoidTester -- $1
