@@ -1,0 +1,19 @@
+.DS_Store
+
+# Intellij
+.idea
+*.iml
+
+# sbt
+project/project
+project/target
+target
+
+# bloop
+.bloop
+out
+.bsp
+
+duckling.log
+/release/
+/server/naive_bayes.json

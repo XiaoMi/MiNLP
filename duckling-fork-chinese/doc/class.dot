@@ -1,0 +1,80 @@
+digraph G {
+        fontsize = 8
+
+        node [
+                shape = "record"
+        ]
+
+        edge [
+        ]
+
+        Entity [
+                label = "{Entity|+ dim: Text\l+ body: Text\l+ value: ResolvedVal\l+ start/end: Int\l+ latent: Bool\l+ enode: Node\l|}"
+        ]
+
+        ResolvedVal [
+          label = "{ResolvedVal|+ dim: Dimension\l+ value: ResolvedValue\l|}"
+        ]
+
+        Dimension [
+          label = "{Dimension|+ name: Text\l+ dimRules: [Rule]\l+ dimDependents: [Dimension]|}"
+        ]
+
+        nNode [
+          label = "{Node|+ nodeRange: Range\l+ token: Token\l+ children: [Node]\l+ rule: Maybe Text\l|}"
+        ]
+
+        ResolvedValue [
+          label = "{ResolvedValue|○ NumeralValue\l○ ...\l|}"
+        ]
+
+        Range [
+          label = "{Range|+ start: Int\l+ end: Int\l|}"
+        ]
+
+        Token [
+          label = "{Token|+ dim: Dimension\l+ data: Resolvable\l|}"
+        ]
+
+        Resolvable [
+          label = "{Resolvable|○ NumeralData\l○ GroupMatch\l|+ resolve() =\> Maybe (ResolvedValue Bool)}"
+        ]
+
+        Rule [
+          label = "{Rule|+ name: Text\l+ pattern: [PatternItem]\l|+ prod: [Token] =\> Maybe Token}"
+        ]
+
+        PatternItem [
+          label = "{PatternItem|○ Regex\l○ Predicate: Token =\> Bool\l}"
+        ]
+
+        ResolvedToken [
+          label = "{ResolvedToken|+ range: Range\l+ node: Node\l+ rval: ResolvedVal\l+ isLatent: Bool\l|}"
+        ]
+
+        Candidate [
+          label = "{Candidate|+ resolvedToken: ResolvedToken\l+ score: Double\l+ isTargetDomain: Bool\l|}"
+        ]
+
+        Document [
+          label = "{Document|+ rawInput: Text\l+ firstNonAdjacent: [Int]\l|+ fromText(String)\l+ isPositionValid(int)\l+ isRangeValid(int, int)\l}"
+        ]
+
+        Entity -> ResolvedVal
+        Entity -> nNode
+        ResolvedVal -> Dimension
+        ResolvedVal -> ResolvedValue
+        nNode -> Range
+        nNode -> Token
+        Token -> Resolvable
+        Resolvable -> ResolvedValue
+        Dimension -> Rule
+        Rule -> PatternItem
+        PatternItem -> Document
+        PatternItem -> Token
+
+        ResolvedToken -> Range
+        ResolvedToken -> Token
+        ResolvedToken -> ResolvedVal
+        Candidate -> ResolvedToken
+}

@@ -1,0 +1,2 @@
+bloop run core --main duckling.task.NaiveBayesDebug -- $@
+

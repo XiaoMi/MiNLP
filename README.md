@@ -5,6 +5,8 @@ MiNLP-Tokenizer中文分词工具经过不断优化和实战打磨，已于2020�
 
 我们计划在2021年Q2完成所有词法工具（词性标注和命名实体识别）的开源，从2021年Q3开始，我们将逐步开源句法分析和部分语义分析工具，和开发者一起打造功能强大、效果领先的NLP平台。
 
+duckling-fork-chinese中文结构化解析工具，是在facebook/duckling的基础上做的一个JVM fork，满足从文本到结构化对象的转换。目前工具在小爱生产环境大量使用，最重要的应用是在数字和时间上的解析。
+
 ## 模块
 中文分词：MiNLP-Tokenizer（[传送门](./minlp-tokenizer)）
 
@@ -13,3 +15,5 @@ MiNLP-Tokenizer中文分词工具经过不断优化和实战打磨，已于2020�
 命名实体识别：敬请期待
 
 依存句法分析：敬请期待
+
+结构化解析：[duckling-fork-chinese](./duckling-fork-chinese)
