@@ -1,5 +1,5 @@
 # duckling-fork-chinese
-![workflow](https://github.com/XiaoMi/MiNLP/actions/workflows/main.yml/badge.svg)
+![workflow](https://github.com/XiaoMi/MiNLP/actions/workflows/duckling.yml/badge.svg)
 
 [facebook/duckling](https://github.com/facebook/duckling)项目的scala复刻版，本项目录目前只服务于中文解析，暂时只提供中文文档。
 
