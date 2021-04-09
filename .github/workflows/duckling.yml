@@ -25,3 +25,4 @@ jobs:
         cd duckling-fork-chinese
         sbt clean coverage test
         sbt coverageAggregate
+        bash <(curl -s https://codecov.io/bash) -r du00cs/MiNLP
