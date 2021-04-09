@@ -3,10 +3,10 @@ name: duckling-fork-chinese
 on: 
   push:
     paths:
-    - duckling-fork-chinese
+    - 'duckling-fork-chinese/**'
   pull_request:
     paths:
-    - duckling-fork-chinese
+    - 'duckling-fork-chinese/**'
 
 jobs:
   build:
