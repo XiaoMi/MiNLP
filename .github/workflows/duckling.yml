@@ -4,6 +4,9 @@ on:
   pull_request:
     paths:
     - 'duckling-fork-chinese/**'
+  push:
+    paths:
+    - 'duckling-fork-chinese/**'
 
 jobs:
   build:
