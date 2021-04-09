@@ -1,5 +1,5 @@
 # duckling-fork-chinese
-[![Build](https://travis-ci.com/XiaoMi/MiNLP.svg?branch=master)](https://travis-ci.com/XiaoMi/MiNLP.svg?branch=master) [![codecov](https://codecov.io/gh/XiaoMi/MiNLP/branch/master/graph/badge.svg?token=5CFWSYJHG7)](https://codecov.io/gh/XiaoMi/MiNLP)
+![workflow](https://github.com/XiaoMi/MiNLP/actions/workflows/main.yml/badge.svg)
 
 [facebook/duckling](https://github.com/facebook/duckling)项目的scala复刻版，本项目录目前只服务于中文解析，暂时只提供中文文档。
 
