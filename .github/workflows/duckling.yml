@@ -1,9 +1,6 @@
 name: duckling-fork-chinese
 
 on: 
-  push:
-    paths:
-    - 'duckling-fork-chinese/**'
   pull_request:
     paths:
     - 'duckling-fork-chinese/**'
