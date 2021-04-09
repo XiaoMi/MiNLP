@@ -1,10 +1,12 @@
 name: duckling-fork-chinese
 
-on:
+on: 
   push:
-    branches: [ main ]
+    paths:
+    - duckling-fork-chinese
   pull_request:
-    branches: [ main ]
+    paths:
+    - duckling-fork-chinese
 
 jobs:
   build:
