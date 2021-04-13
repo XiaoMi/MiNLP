@@ -132,6 +132,20 @@ trait Rules extends DimRules {
   val ruleMMdd2 = mmddRule("MM.dd", '.')
   val ruleMMdd3 = mmddRule("MM/dd", '/')
 
+  val rule_yyyyMM1 = Rule(
+    name = "date - yyyy/mm",
+    pattern = List("(\\d{4})[-./](\\d{1,2})".regex),
+    prod = regexMatch {
+      case _ :: yyyy :: mm :: _ =>
+        for {
+          y <- parseInt(yyyy).toOption if y > 1950 && y <= 2050
+          m <- parseInt(mm).toOption if m > 0 && m <= 12
+        } yield {
+          Token(Date, TimeData(TimeDatePredicate(year = y, month = m), timeGrain = Month))
+        }
+    }
+  )
+
   val ruleYearNumericWithYearSymbol = Rule(
     name = "date - year (numeric with year symbol)",
     pattern = List(yearOf1000to9999.predicate, "(年?版|年)".regex),
