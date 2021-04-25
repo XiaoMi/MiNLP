@@ -31,7 +31,7 @@ import duckling.dimension.time.enums._
 import duckling.dimension.time.form.{Form, PartOfDay, TimeOfDay}
 import duckling.dimension.time.grain.TimeGrain
 import duckling.dimension.time.helper.TimeObjectHelpers._
-import duckling.dimension.time.predicates.{IntersectTimePredicate, SequencePredicate, TimeDatePredicate, TimePredicate}
+import duckling.dimension.time.predicates.{IntersectTimePredicate, SequencePredicate, SeriesPredicate, TimeDatePredicate, TimePredicate}
 import duckling.dimension.time.unitNumber.UnitNumber
 import duckling.exceptions.LunarOutOfRangeException
 import duckling.ranking.Types.{DiscreteFeature, Feature}
@@ -113,7 +113,7 @@ case class TimeData(timePred: TimePredicate,
         val tv =
           TimeValue(
             timeValue(valueOpt.get),
-            simple = generateSimple(timePred),
+            simple = generateSimple(timePred).scheme(),
             holiday = holiday,
             partOfDay = partOfDay
           )
@@ -127,30 +127,66 @@ case class TimeData(timePred: TimePredicate,
     }
   }
 
-  def generateSimple(timePred: TimePredicate): Option[String] = {
-    timePred match {
-      case TimeDatePredicate(_, _, _, _, _, dayOfMonth, month, year, _) =>
-        val y = year.map(_.toString).getOrElse("x")
-        val (m, d) = timeGrain match {
-          case Grain.Year => ("x", "x")
-          case Grain.Month =>
-            month.map(s => (s.toString, "x")).getOrElse(("-", "-"))
-          case Grain.Day =>
-            val m = month.map(_.toString).getOrElse("x")
-            val d = dayOfMonth.map(_.toString).getOrElse("x")
-            (m, d)
-          case _ => ("-", "-")
+  case class Simple(year: Option[Int] = None,
+                    month: Option[Int] = None,
+                    day: Option[Int] = None,
+                    hour: Option[(Boolean, Int)] = None,
+                    minute: Option[Int] = None,
+                    second: Option[Int] = None) {
+    val y = year.map(v => "%04d".format(v)).getOrElse("x")
+    val m = month.map(v => "%02d".format(v)).getOrElse("x")
+    val d = day.map(v => "%02d".format(v)).getOrElse("x")
+    val h = hour.map(v => "%02d".format(v._2)).getOrElse("x")
+    val min = minute.map(v => "%02d".format(v)).getOrElse("x")
+    val s = second.map(v => "%02d".format(v)).getOrElse("x")
+
+
+    def scheme(): Option[String] = {
+      if (y == m == d == h == min == s == "x") {
+        None
+      } else {
+        timeGrain match {
+          case Grain.Year => Some(s"$y-x-xTx:x:x")
+          case Grain.Month => Some(s"$y-$m-xTx:x:x")
+          case Grain.Day => Some(s"$y-$m-${d}Tx:x:x")
+          case Grain.Hour => Some(s"$y-$m-${d}T$h:x:x")
+          case Grain.Minute => Some(s"$y-$m-${d}T$h:$min:x")
+          case Grain.Second => Some(s"$y-$m-${d}T$h:$min:$s")
+          case _ => None
         }
-        if (y == m && m == d && d == "x") None
-        else if (m == "-" && d == "-") None
-        else Some(s"$y-$m-$d")
+      }
+    }
+  }
+
+  def generateSimple(timePred: TimePredicate): Simple = {
+    timePred match {
+      case TimeDatePredicate(second, minute, hour, _, _, dayOfMonth, month, year, _) =>
+        Simple(year, month, dayOfMonth, hour, minute, second)
+      case IntersectTimePredicate(TimeDatePredicate(second, minute, hour, _, _, _, _, _, _), IntersectTimePredicate(TimeDatePredicate(_, _, _, _, _, dayOfMonth, month, _, _), SeriesPredicate(_))) =>
+        // 如： 明年三月一号十二点三十分, 年份隐式表达SeriesPredicate
+        Simple(None, month, dayOfMonth, hour, minute, second)
       case IntersectTimePredicate(SequencePredicate(_), TimeDatePredicate(_, _, _, _, _, _, _, year, _)) =>
-        val y = year.map(_.toString).getOrElse("x") // 如：2021年除夕， 除夕需要根据农历最后一天计算具体日期，只抽取年
-      val (m, d) = ("x", "x")
-        if (y == m && m == d && d == "x") None
-        else if (m == "-" && d == "-") None
-        else Some(s"$y-$m-$d")
-      case _ => None
+        // 如： 2021年除夕， 除夕需要根据农历最后一天计算具体日期，只抽取年，除夕SequencePredicate
+        Simple(year)
+      case IntersectTimePredicate(TimeDatePredicate(second, minute, hour, _, _, _, _, _, _), SequencePredicate(_)) =>
+        // 如：除夕十二点三十分，没有年份表达，除夕SequencePredicate
+        Simple(hour=hour, minute=minute, second=second)
+      case IntersectTimePredicate(TimeDatePredicate(second, minute, hour, _, _, _, _, _, _), IntersectTimePredicate(SequencePredicate(_), SequencePredicate(_))) =>
+        // 如：今年除夕十二点三十分，年份隐式表达，除夕SequencePredicate
+        Simple(hour=hour, minute=minute, second=second)
+      case IntersectTimePredicate(TimeDatePredicate(second, minute, hour, _, _, _, _, _, _), IntersectTimePredicate(_, TimeDatePredicate(_, _, _, _, _, _, _, year, _))) =>
+        //如：2021年[除夕、节气]十二点三十分，有具体年份表达，除夕SequencePredicate
+        Simple(year=year, hour=hour, minute=minute, second=second)
+      case IntersectTimePredicate(TimeDatePredicate(second, minute, hour, _, _, _, _, _, _), IntersectTimePredicate(SeriesPredicate(_), SeriesPredicate(_))) =>
+        // 如：明年清明节十二点三十分，年份隐式表达，节气SeriesPredicate
+        Simple(hour=hour, minute=minute, second=second)
+      case IntersectTimePredicate(SeriesPredicate(_), TimeDatePredicate(second, minute, hour, _, _, _, _, year, _)) =>
+        // 如：2021年清明节， 节气需要根据年份查表获取具体日期，只抽取年，节气SeriesPredicate
+        Simple(year=year, hour=hour, minute=minute, second=second)
+      case IntersectTimePredicate(TimeDatePredicate(second, minute, hour, _, _, dayOfMonth, month, _, _), SeriesPredicate(_)) =>
+        // 如：清明节十二点三十分,今年国庆节，明年中秋节，年份隐式表达和节气SeriesPredicate
+        Simple(None, month, dayOfMonth, hour, minute, second)
+      case _ => Simple()
     }
   }
 
