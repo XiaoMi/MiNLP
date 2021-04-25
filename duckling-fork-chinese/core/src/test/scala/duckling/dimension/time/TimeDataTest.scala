@@ -39,7 +39,7 @@ class TimeDataTest extends FunSpec with Matchers with LazyLogging {
           dt.year shouldBe 2018
           dt.month shouldBe 5
           grain shouldBe Grain.Month
-          simple shouldBe "2018-5-x"
+          simple shouldBe "2018-05-xTx:x:x"
       }
     }
 

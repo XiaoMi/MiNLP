@@ -39,7 +39,7 @@ trait Rules extends DimRules {
     pattern = List(isDigits.predicate, seasonPattern),
     prod = {
       case t1 :: _ =>
-        for (i <- getIntValue(t1)) yield season(i.toInt)
+        for (i <- getIntValue(t1)) yield season(i.toInt, true)
     }
   )
 

@@ -21,12 +21,11 @@ import java.util.Locale
 
 import org.json4s.jackson.Serialization.write
 import org.json4s.FieldSerializer
-
 import com.typesafe.scalalogging.LazyLogging
-
 import duckling.{Document, JsonSerde}
 import duckling.Types._
 import duckling.dimension.place.PlaceData
+import duckling.dimension.quantity.QuantityData
 import duckling.dimension.time.TimeValue
 
 object Testing extends LazyLogging {
@@ -52,7 +51,11 @@ object Testing extends LazyLogging {
     case ("level", _) => None
   })
 
-  implicit val formats = JsonSerde.formats + sTimeValue + sNumeralValue + sPlaceData
+  val sQuantityValue = FieldSerializer[QuantityData]({
+    case ("isLatent", _) => None
+  })
+
+  implicit val formats = JsonSerde.formats + sTimeValue + sNumeralValue + sPlaceData + sQuantityValue
 
   val testContext: Context =
     Context(

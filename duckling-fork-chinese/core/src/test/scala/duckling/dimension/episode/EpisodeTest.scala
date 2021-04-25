@@ -50,4 +50,25 @@ class EpisodeTest extends FunSpec with Matchers with TableDrivenPropertyChecks {
 			}
 		}
 	}
+
+	describe("EpisodeLatentTest") {
+		val testCases = List(
+			("倒数第三集", false),
+			("第三集", false),
+			("三集", true),
+			("第九回", false),
+			("三期", true),
+			("第十九讲", false),
+			("最新一章", false),
+			("斗罗大陆七十三集", true)
+		)
+
+		it("Latent eq") {
+			testCases.foreach{
+				case (query, target) =>
+					val answers = analyze(query, testContext, options)
+					answers(0).token.isLatent shouldBe (target)
+			}
+		}
+	}
 }

@@ -46,7 +46,7 @@ class TimeTest extends FunSpec with Matchers with TableDrivenPropertyChecks {
     it("零一年五月八月") {
       val a = parse("零一年五月八月", combinationOptions)
       a.head.token.value match {
-        case TimeValue(_, _, _, Some(x), _) => x shouldBe "2001-5-x"
+        case TimeValue(_, _, _, Some(x), _) => x shouldBe "2001-05-xTx:x:x"
         case _ => true shouldBe false
       }
     }
@@ -102,6 +102,44 @@ class TimeTest extends FunSpec with Matchers with TableDrivenPropertyChecks {
           case _ => 0
         }
       }.headOption should contain (2021)
+    }
+  }
+
+  describe("TimeSimpleTest") {
+    val testCases = List(
+      ("2021年", "2021-x-xTx:x:x"),
+      ("三月", "x-03-xTx:x:x"),
+      ("10号", "x-x-10Tx:x:x"),
+      ("12点", "x-x-xT12:x:x"),
+      ("12点三分", "x-x-xT12:03:x"),
+      ("今天十二点三十分", "x-x-xT12:30:x"),
+      ("10号十二点三十分", "x-x-10T12:30:x"),
+      ("10月九号八点三十分", "x-10-09T08:30:x"),
+      ("今年国庆节", "x-10-01Tx:x:x"),
+      ("今年中秋节", "x-08-15Tx:x:x"),
+      ("2021年除夕", "2021-x-xTx:x:x"),
+      ("2021年清明", "2021-x-xTx:x:x"),
+      ("2021年国庆节", "2021-10-01Tx:x:x"),
+      ("2021年中秋节", "2021-08-15Tx:x:x"),
+      ("2021年除夕下午六点三十分", "2021-x-xT18:30:x"),
+      ("2021年清明上午九点三十分", "2021-x-xT09:30:x"),
+      ("2021年国庆节六点三十分", "2021-10-01T06:30:x"),
+      ("2021年中秋节晚上八点三十分", "2021-08-15T20:30:x"),
+      ("今年三月十二", "x-03-12Tx:x:x"),
+      ("三月十二", "x-03-12Tx:x:x"),
+      ("2021年三月十二", "2021-03-12Tx:x:x"),
+      ("2021年三月十二下午三点十八分", "2021-03-12T15:18:x")
+    )
+
+    it("simple eq") {
+      testCases.foreach {
+        case (query, target) =>
+          val answers = analyze(query, testContext, options)
+          answers.head.token.value match {
+            case TimeValue(_, _, _, x, _) => x shouldBe Some(target)
+            case _ => true shouldBe false
+          }
+      }
     }
   }
 }

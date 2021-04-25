@@ -48,4 +48,25 @@ class SeasonTest extends FunSpec with Matchers with TableDrivenPropertyChecks {
 			}
 		}
 	}
+
+	describe("SeasonLatentTest") {
+		val testCases = List(
+			("倒数第三季", false),
+			("十九季", true),
+			("第三部", false),
+			("倒第三部", false),
+			("第一百一十一卷", false),
+			("卷一", false),
+			("九版", true),
+			("一百一十一卷", true)
+		)
+
+		it("Latent eq") {
+			testCases.foreach{
+				case (query, target) =>
+					val answers = analyze(query, testContext, options)
+					answers(0).token.isLatent shouldBe (target)
+			}
+		}
+	}
 }

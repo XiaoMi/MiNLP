@@ -23,5 +23,5 @@ import duckling.dimension.quantity.QuantityData
 package object season {
   val reversePattern = "(最后|最新|倒数第)".regex
 
-  def season(i: Int): Token = Token(Season, QuantityData(i, "季", "季"))
+  def season(i: Int, isLatent: Boolean = false): Token = Token(Season, QuantityData(i, "季", "季", isLatent))
 }

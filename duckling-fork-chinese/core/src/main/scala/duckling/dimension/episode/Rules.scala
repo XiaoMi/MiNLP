@@ -41,7 +41,7 @@ trait Rules extends DimRules {
     pattern = List(isNatural.predicate, episodePattern),
     prod = {
       case t1 :: _ =>
-        for (i <- getIntValue(t1)) yield Token(Episode, QuantityData(i, "集", "集"))
+        for (i <- getIntValue(t1)) yield Token(Episode, QuantityData(i, "集", "集", true))
     }
   )
 
