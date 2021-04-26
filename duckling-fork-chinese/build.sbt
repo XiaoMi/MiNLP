@@ -7,7 +7,7 @@ import xerial.sbt.Sonatype.autoImport._
 // 大量参考了 Scalaz [[https://github.com/scalaz/scalaz]]项目的配置
 
 lazy val sharedSettings = Seq(
-  organization := "duckling",
+  organization := "com.xiaomi.duckling",
   scalaVersion := "2.11.12",
   // cross scala versions 还需要摸索
   // crossScalaVersions := Seq("2.11.12", "2.12.12"),
