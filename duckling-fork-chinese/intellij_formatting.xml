@@ -1,32 +1,46 @@
 <code_scheme name="duckling" version="173">
-    <JSON>
-        <option name="OBJECT_WRAPPING" value="5"/>
-        <option name="ARRAY_WRAPPING" value="5"/>
-    </JSON>
-    <ScalaCodeStyleSettings>
-        <option name="classCountToUseImportOnDemand" value="4"/>
-        <option name="importLayout">
-            <array>
-                <option value="_______ blank line _______"/>
-                <option value="java"/>
-                <option value="_______ blank line _______"/>
-                <option value="scala"/>
-                <option value="_______ blank line _______"/>
-                <option value="org"/>
-                <option value="_______ blank line _______"/>
-                <option value="com"/>
-                <option value="_______ blank line _______"/>
-                <option value="all other imports"/>
-                <option value="_______ blank line _______"/>
-                <option value="duckling"/>
-            </array>
-        </option>
-        <option name="sortAsScalastyle" value="true"/>
-        <option name="SCALAFMT_CONFIG_PATH" value=".scalafmt.conf"/>
-        <option name="FORMATTER" value="1"/>
-    </ScalaCodeStyleSettings>
-    <codeStyleSettings language="JSON">
-        <option name="KEEP_LINE_BREAKS" value="false"/>
-        <option name="WRAP_ON_TYPING" value="0"/>
-    </codeStyleSettings>
+  <JSON>
+    <option name="OBJECT_WRAPPING" value="5" />
+    <option name="ARRAY_WRAPPING" value="5" />
+  </JSON>
+  <JavaCodeStyleSettings>
+    <option name="IMPORT_LAYOUT_TABLE">
+      <value>
+        <package name="" withSubpackages="true" static="false" />
+        <emptyLine />
+        <package name="javax" withSubpackages="true" static="false" />
+        <package name="java" withSubpackages="true" static="false" />
+        <emptyLine />
+        <package name="" withSubpackages="true" static="true" />
+        <emptyLine />
+        <package name="com.xiaomi.duckling" withSubpackages="true" static="false" />
+      </value>
+    </option>
+  </JavaCodeStyleSettings>
+  <ScalaCodeStyleSettings>
+    <option name="classCountToUseImportOnDemand" value="4" />
+    <option name="importLayout">
+      <array>
+        <option value="_______ blank line _______" />
+        <option value="java" />
+        <option value="_______ blank line _______" />
+        <option value="scala" />
+        <option value="_______ blank line _______" />
+        <option value="org" />
+        <option value="_______ blank line _______" />
+        <option value="com" />
+        <option value="_______ blank line _______" />
+        <option value="all other imports" />
+        <option value="_______ blank line _______" />
+        <option value="com.xiaomi.duckling" />
+      </array>
+    </option>
+    <option name="sortAsScalastyle" value="true" />
+    <option name="SCALAFMT_CONFIG_PATH" value=".scalafmt.conf" />
+    <option name="FORMATTER" value="1" />
+  </ScalaCodeStyleSettings>
+  <codeStyleSettings language="JSON">
+    <option name="KEEP_LINE_BREAKS" value="false" />
+    <option name="WRAP_ON_TYPING" value="0" />
+  </codeStyleSettings>
 </code_scheme>
