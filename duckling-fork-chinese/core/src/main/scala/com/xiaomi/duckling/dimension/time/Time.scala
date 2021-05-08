@@ -143,7 +143,7 @@ case class TimeData(timePred: TimePredicate,
 
 
     def scheme(): Option[String] = {
-      if (y == m == d == h == min == s == "x") {
+      if (y == m && m == d && d == h && h == min && min == s && s == "x") {
         None
       } else {
         timeGrain match {
