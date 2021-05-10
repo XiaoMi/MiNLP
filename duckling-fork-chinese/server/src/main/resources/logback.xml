@@ -1,5 +1,5 @@
 <configuration>
-    <statusListener class="ch.qos.logback.core.status.NopStatusListener" />
+    <statusListener class="ch.qos.logback.core.status.NopStatusListener"/>
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>duckling.log</file>
         <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
@@ -24,6 +24,7 @@
     </appender>
 
     <root level="INFO">
-        <appender-ref ref="FILE"/>
+<!--        <appender-ref ref="FILE"/>-->
+        <appender-ref ref="STDOUT"/>
     </root>
 </configuration>

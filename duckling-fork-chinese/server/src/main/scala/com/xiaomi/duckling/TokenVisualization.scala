@@ -21,11 +21,14 @@ import org.apache.commons.text.StringEscapeUtils
 import com.xiaomi.duckling.Types.Answer
 import com.xiaomi.duckling.dimension.time.TimeValue
 import com.xiaomi.duckling.dimension.time.Types.{IntervalValue, SimpleValue}
-import com.xiaomi.duckling.WebServer.template
 import com.xiaomi.duckling.dimension.time.duration.DurationData
 import com.xiaomi.duckling.types.Node
 
+import scala.collection.JavaConverters._
+
 object TokenVisualization {
+
+  val template = Resources.readLines("/template.html").mkString("\n")
 
   val tableTemplate =
     """
@@ -90,6 +93,10 @@ object TokenVisualization {
       .replace("${value}", value)
       .replace("${grain}", grain)
       .replace("${tokens}", tokens)
+  }
+
+  def toHtml(query: String, answers: java.util.List[Answer]): String = {
+    toHtml(query, answers.asScala.toList)
   }
 
   def toHtml(query: String, answers: List[Answer]): String = {
