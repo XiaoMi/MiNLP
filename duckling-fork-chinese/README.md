@@ -94,7 +94,7 @@ answers.stream().map(answer -> {
 ```bash
 sbt
 > project server
-> runMain duckling.WebServer
+> runMain com.xiaomi.duckling.server.DucklingApplication
 ```
 
 **打包**
@@ -115,7 +115,7 @@ bash bin/duckling-server
 
 在线体验Demo：`/duckling?dim=...&query=...`
 
-[晚上八点提醒我跑十分钟二十公里](https://duckling-preview.ai.xiaomi.com/duckling?dim=numeral,time,duration&query=%E6%99%9A%E4%B8%8A%E5%85%AB%E7%82%B9%E6%8F%90%E9%86%92%E6%88%91%E8%B7%91%E5%8D%81%E5%88%86%E9%92%9F%E4%BA%8C%E5%8D%81%E5%85%AC%E9%87%8C)
+[晚上八点提醒我跑十分钟二十公里](https://duckling-preview.ai.xiaomi.com/)
 
 ![示例Query](./doc/web_query.png)
 

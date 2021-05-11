@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>DUCKLING演示</title>
+    <script type="text/javascript"></script>
+
+    <!-- 引入vue -->
+    <script src="../js/vue.js"></script>
+
+    <!-- 引入样式 -->
+    <link rel="stylesheet" href="../css/index.css">
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/element-ui.css">
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.bootcss.com/bootstrap-select/1.12.1/css/bootstrap-select.min.css" >
+
+    <!-- 引入组件库 -->
+    <script src="../js/index.js"></script>
+    <script src="../js/constants.js"></script>
+    <script src="../js/axios.min.js"></script>
+    <script src="../js/jquery.min.js"></script>
+    <script src="../js/bfwone.js" id="bfwone" data="dep=jquery.17&err=0" type="text/javascript"></script>
+    <script src="../js/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+    <script src="https://cdn.bootcss.com/bootstrap-select/1.12.1/js/bootstrap-select.min.js"></script>
+
+    <link rel="stylesheet" href="../css/solarized_dark.css">
+    <link rel="stylesheet" href="../css/font-awesome.css">
+    <!-- build:css(resources/public) /css/duckling.css -->
+    <link rel="stylesheet" href="../css/fancy_select.css">
+    <link rel="stylesheet" href="../css/main.css">
+</head>
+<style>
+    header {
+        background-color:#3c78d8;
+        text-align:center;
+        padding:30px 0px;
+        margin-top:0px
+        width: 100%;
+        font-size:30px;
+        color:white;
+    }
+
+    .main-page {
+        text-align:center;
+        width:80%;
+        margin-left:10%;
+        margin-right:10%;
+    }
+
+    .sentence {
+        text-align:left;
+        width:100%;
+        margin-top: 10px;
+    }
+
+    .twotdrow{
+        display:table;
+        width:100%;
+        padding: 0px 0px;
+    }
+    .twotdrow .left{
+        display:table-cell;
+        width:90%;
+        padding: 0px 0px;
+        vertical-align:middle;
+    }
+    .twotdrow .right{
+        display:table-cell;
+        width:10%;
+        padding: 0px 0px;
+        vertical-align:middle;
+    }
+
+    .button {
+        background-color: #4CAF50;
+        border: none;
+        color: white;
+        padding: 10px 32px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 16px;
+    }
+
+    .en-markup-crop-options {
+        top: 18px !important;
+        left: 50% !important;
+        margin-left: -100px !important;
+        width: 200px !important;
+        border: 2px rgba(255, 255, 255, .38) solid !important;
+        border-radius: 4px !important;
+    }
+
+    .en-markup-crop-options div div:first-of-type {
+        margin-left: 0px !important;
+    }
+</style>
+<body>
+<div>
+    <header> DUCKLING-FOR-CHINESE 演示 </header>
+
+    <div id="app" class="main-page">
+        <el-form :model="extractInfo" @keyup.enter.native="extractDuckling">
+            <el-form-item >
+                <el-input type="textarea" v-model="extractInfo.sentence" rows="5" placeholder="输入待抽取文本"></el-input>
+            </el-form-item>
+
+            <div class="twotdrow">
+                <div class="left">
+                    <el-form-item>
+                        <el-select style="width:100%"  placeholder="请选择抽取类型(默认全部)" multiple v-model="extractInfo.dims">
+                            <el-option v-for="item in dimList" :label="item.label" :value="item.value" :key="item.value"></el-option>
+                        </el-select>
+                    </el-form-item>
+                </div>
+                <div class="right">
+                    <el-form-item>
+                        <el-button style="width:90%" type="success" @click="extractDuckling"  round>抽取</el-button>
+                    </el-form-item>
+                </div>
+            </div>
+            <div>
+                <el-tabs type="card">
+                    <el-tab-pane label="抽取结果">
+                        <p v-html="extractRes">{{extractRes}}</p>
+                    </el-tab-pane>
+                </el-tabs>
+            </div>
+        </el-form>
+    </div>
+</div>
+</body>
+<script src="../js/axios.min.js"></script>
+<script src="../js/duckling-extract.js"></script>
+</html>
