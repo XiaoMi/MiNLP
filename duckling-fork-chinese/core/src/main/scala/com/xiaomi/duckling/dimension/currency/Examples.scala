@@ -30,6 +30,7 @@ trait Examples extends DimExamples {
     (0.99, List("九角九分", "九毛九")),
     (0.90, List("九毛钱")),
     (0.090, List("九分钱")),
-    (2.99, List("两块九毛九"))
-  ).map { case (v, list) => (QuantityValue(v, "元", "货币:*"), list) }
+    (2.99, List("两块九毛九")),
+    (2.99, List("RMB两块九毛九", "两块九毛九RMB"))
+  ).map { case (v, list) => (QuantityValue(v, "元", "货币:CNY"), list) }
 }
