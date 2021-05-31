@@ -29,6 +29,7 @@ import com.xiaomi.duckling.engine.LexiconLookup.Dict
 object Holidays {
   private val provdier = Class
       .forName(conf.getString("dimension.time.holiday.provider"))
+      .getDeclaredConstructor()
       .newInstance()
       .asInstanceOf[HolidayProvider]
 
