@@ -20,10 +20,12 @@ import com.xiaomi.duckling.Types._
 import com.xiaomi.duckling.dimension.DimRules
 import com.xiaomi.duckling.dimension.implicits._
 import com.xiaomi.duckling.dimension.matcher.GroupMatch
+import com.xiaomi.duckling.dimension.numeral.NumeralData
 import com.xiaomi.duckling.dimension.numeral.Predicates._
 
-// TODO 九毛九，九块九，16.3元
 trait Rules extends DimRules {
+
+  val RMB = "CNY"
 
   val numberUnit = Rule(
     name = "<number> <RMB unit>",
@@ -36,7 +38,7 @@ trait Rules extends DimRules {
             case "角" | "毛" =>.1
             case "分" =>.01
           }
-          token(CurrencyData(v, scalar, s, end = s0.endsWith("钱")))
+          token(CurrencyData(v, scalar, s, end = s0.endsWith("钱"), code = RMB))
         }
     }
   )
@@ -48,7 +50,11 @@ trait Rules extends DimRules {
     prod = {
       case Token(_, cd1: CurrencyData) :: Token(_, cd2: CurrencyData) :: _
         if cd1.scalar / cd2.scalar > 9.9 =>
-        token(CurrencyData(cd1.v * cd1.scalar / cd2.scalar + cd2.v, cd2.scalar, "", compose = true))
+        if (cd1.code.nonEmpty && cd2.code.nonEmpty && cd1.code != cd2.code) None
+        else {
+          val code = if (cd1.code.nonEmpty) cd1.code else cd2.code
+          token(CurrencyData(cd1.v * cd1.scalar / cd2.scalar + cd2.v, cd2.scalar, "", compose = true, code = code))
+        }
     }
   )
 
@@ -59,11 +65,35 @@ trait Rules extends DimRules {
     name = "<currency u1> <number>",
     pattern = List(and(isNotFen, isNotEnd).predicate, isIntegerBetween(1, 9).predicate),
     prod = {
-      case Token(_, CurrencyData(v, scalar, unitText, _, _, _)) :: t2 :: _
+      case Token(_, CurrencyData(v, scalar, unitText, _, _, _, _)) :: t2 :: _
         if unitText == "块" || unitText == "毛" =>
         for (i <- getIntValue(t2)) yield {
-          token(CurrencyData(v * 10 + i, scalar * 0.1, "", abbr = true))
+          token(CurrencyData(v * 10 + i, scalar * 0.1, "", abbr = true, code = RMB))
         }
+    }
+  )
+
+  val rmb1 = Rule(
+    name = "RMB <number>",
+    pattern = List("(?i)rmb".regex, or(isNumeralDimension, isDimension(Currency)).predicate),
+    prod = {
+      case _ :: Token(_, c @ CurrencyData(_, _, _, _, _, _, code)) :: _ =>
+        if (code.nonEmpty && code.get != RMB) None
+        else token(c.copy(code = RMB))
+      case _ :: Token(_, NumeralData(value, _, _, _, _, _)) :: _ =>
+        token(CurrencyData(value, 1, "", code = RMB))
+    }
+  )
+
+  val rmb2 = Rule(
+    name = "<number> RMB",
+    pattern = List(or(isNumeralDimension, isDimension(Currency)).predicate, "(?i)rmb".regex),
+    prod = {
+      case Token(_, c @ CurrencyData(_, _, _, _, _, _, code)) :: _ =>
+        if (code.nonEmpty && code.get != RMB) None
+        else token(c.copy(code = RMB))
+      case Token(_, NumeralData(value, _, _, _, _, _)) :: _ :: _ =>
+        token(CurrencyData(value, 1, "", code = RMB))
     }
   )
 }

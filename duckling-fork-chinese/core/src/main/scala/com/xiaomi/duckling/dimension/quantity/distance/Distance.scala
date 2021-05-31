@@ -14,24 +14,13 @@
  * limitations under the License.
  */
 
-package com.xiaomi.duckling.dimension
+package com.xiaomi.duckling.dimension.quantity.distance
 
-import com.typesafe.scalalogging.LazyLogging
+import com.xiaomi.duckling.dimension.Dimension
+import com.xiaomi.duckling.dimension.numeral.Numeral
 
-import com.xiaomi.duckling.ranking.Testing.Corpus
-import com.xiaomi.duckling.Types.{conf, Rule}
+case object Distance extends Dimension with Rules with Examples {
+  override val name: String = "Distance"
 
-object CorpusSets extends LazyLogging {
-
-  type CorpusSet = (Dimension, Corpus, List[Rule])
-
-  val dims = {
-    val className = conf.getString("dims")
-    logger.info(s"pick up dims of: $className")
-    Class.forName(className).getConstructor().newInstance().asInstanceOf[Dimensions].dims
-  }
-
-  val namedDimensions: Map[String, Dimension] = Dimension.dimDependents(dims)
-    .map(dim => (dim.name.toLowerCase(), dim))
-    .toMap
+  override val dimDependents: List[Dimension] = List(Numeral)
 }

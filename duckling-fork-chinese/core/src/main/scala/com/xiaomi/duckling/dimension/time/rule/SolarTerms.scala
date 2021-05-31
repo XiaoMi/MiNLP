@@ -34,6 +34,7 @@ object SolarTerms {
 
   private val provdier = Class
     .forName(conf.getString("dimension.time.solar.provider"))
+    .getDeclaredConstructor()
     .newInstance()
     .asInstanceOf[SolarTermProvider]
 

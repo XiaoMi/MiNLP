@@ -34,10 +34,12 @@ case class CurrencyData(v: Double,
                         unit: String,
                         abbr: Boolean = false,
                         compose: Boolean = false,
-                        end: Boolean = false)
+                        end: Boolean = false,
+                        code: Option[String] = None)
   extends Resolvable {
   override def resolve(context: Types.Context,
                        options: Types.Options): Option[(Types.ResolvedValue, Boolean)] = {
-    (QuantityValue(v * scalar, "元", "货币:*"), false)
+    val dim = code.getOrElse("*")
+    (QuantityValue(v * scalar, "元", s"货币:$dim"), false)
   }
 }
