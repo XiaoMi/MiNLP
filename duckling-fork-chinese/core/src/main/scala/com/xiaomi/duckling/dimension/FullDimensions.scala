@@ -34,6 +34,7 @@ import com.xiaomi.duckling.dimension.ordinal.Ordinal
 import com.xiaomi.duckling.dimension.phoneno.PhoneNumber
 import com.xiaomi.duckling.dimension.place.Place
 import com.xiaomi.duckling.dimension.quantity.Quantity
+import com.xiaomi.duckling.dimension.quantity.area.Area
 import com.xiaomi.duckling.dimension.quantity.distance.Distance
 import com.xiaomi.duckling.dimension.quantity.velocity.Velocity
 import com.xiaomi.duckling.dimension.rating.Rating
@@ -47,6 +48,7 @@ import com.xiaomi.duckling.dimension.url.DuckURL
 class FullDimensions extends Dimensions {
   override val dims: List[Dimension] = List(
     Age,
+    Area,
     BloodType,
     Constellation,
     Currency,
