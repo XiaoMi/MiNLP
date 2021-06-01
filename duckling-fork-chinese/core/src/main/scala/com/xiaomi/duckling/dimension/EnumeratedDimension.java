@@ -19,6 +19,7 @@ package com.xiaomi.duckling.dimension;
 
 public enum EnumeratedDimension {
     Age(com.xiaomi.duckling.dimension.age.Age$.MODULE$),
+    Area(com.xiaomi.duckling.dimension.quantity.area.Area$.MODULE$),
     BloodType(com.xiaomi.duckling.dimension.bloodtype.BloodType$.MODULE$),
     Constellation(com.xiaomi.duckling.dimension.constellation.Constellation$.MODULE$),
     Currency(com.xiaomi.duckling.dimension.currency.Currency$.MODULE$),

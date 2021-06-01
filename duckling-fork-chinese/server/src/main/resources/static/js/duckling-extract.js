@@ -8,6 +8,7 @@ new Vue({
             },
             dimList: [
                 {value: 'Age', label: '年龄'},
+                {value: 'Area', label: '面积'},
                 {value: 'BloodType', label: '血型'},
                 {value: 'Constellation', label: '星座'},
                 {value: 'Currency', label: '货币'},
