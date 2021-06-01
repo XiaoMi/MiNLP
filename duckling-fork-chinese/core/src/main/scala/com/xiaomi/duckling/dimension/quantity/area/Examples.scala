@@ -22,6 +22,7 @@ import com.xiaomi.duckling.dimension.quantity.QuantityValue
 
 trait Examples extends DimExamples {
   override def pairs: List[(Types.ResolvedValue, List[String])] = List(
-    (QuantityValue(3, "平方米", "Area"), List("三平方", "三平方米", "三个平方"))
+    (QuantityValue(3, "平方米", "Area"), List("三平方", "三平方米", "三个平方", "三平米", "三平")),
+    (QuantityValue(3, "平方千米", "Area"), List("三平方千米", "三平方公里"))
   )
 }
