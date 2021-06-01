@@ -40,9 +40,9 @@ public class DucklingController {
         Options options;
         if (StringUtils.isNotBlank(dims)) {
             Set<String> set = Arrays.stream(dims.split(",")).map(String::toLowerCase).collect(Collectors.toSet());
-            options = new Options(set, false);
+            options = new Options(set, false).withTimeout(-1);
         } else {
-            options = new Options(DEFAULT_DIMENSION_LIST, false);
+            options = new Options(DEFAULT_DIMENSION_LIST, false).withTimeout(-1);
         }
         return Api.analyzeJ(text, new Context(ZonedDateTime.now(), Locale.CHINA), options);
     }

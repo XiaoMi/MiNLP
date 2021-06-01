@@ -11,6 +11,7 @@ new Vue({
                 {value: 'BloodType', label: '血型'},
                 {value: 'Constellation', label: '星座'},
                 {value: 'Currency', label: '货币'},
+                {value: 'Distance', label: '距离'},
                 {value: 'Episode', label: 'Episode'},
                 {value: 'Gender', label: '性别'},
                 {value: 'Level', label: 'Level'},
