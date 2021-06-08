@@ -38,7 +38,7 @@ object LunarDates {
       // 避免农历八月初八按[农历]八月初八和[农历八月]初八结合两次
       and(isTimeDatePredicate, isNotHint(Hint.Intersect), isNotHint(Hint.YearMonth)).predicate
     ),
-    prod = {
+    prod = tokens {
       case _ :: Token(Date, td: TimeData) :: _ =>
         val t = lunar(td).copy(calendar = Lunar(false), hint = Hint.Lunar)
         Token(Date, t)
@@ -64,7 +64,7 @@ object LunarDates {
   val ruleLunarDayOfMonth = Rule(
     name = "<lunar:day of month> 初/廿/卅",
     pattern = List("(初|廿|卅)".regex, isIntegerBetween(1, 10).predicate),
-    prod = {
+    prod = tokens {
       case Token(_, GroupMatch(s :: _)) :: t2 :: _ =>
         def nday(n: Int): Option[Int] = {
           s match {

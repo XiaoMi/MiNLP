@@ -83,7 +83,11 @@ object predicates {
 
   val singleNumeber: Predicate = isIntegerBetween(0, 9)
 
-  val yearOf1000to9999: Predicate = isIntegerBetween(1000, 9999)
+  val seqYearOf1000to9999: Predicate = {
+    case Token(DigitSequence, DigitSequenceData(seq, zh, raw)) if seq.length == 4 =>
+      val v = seq.toDouble
+      v > 1000 && v < 9999
+  }
 
   val arabicSeqOf1950to2050: Predicate = {
     case Token(DigitSequence, DigitSequenceData(seq, zh, raw)) if !zh =>

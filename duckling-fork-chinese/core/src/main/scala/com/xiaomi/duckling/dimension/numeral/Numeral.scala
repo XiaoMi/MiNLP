@@ -36,20 +36,7 @@ case class NumeralData(value: Double,
                        precision: Int = 0)
     extends Resolvable {
   override def resolve(context: Context, options: Options): Option[(ResolvedValue, Boolean)] = {
-    sequence match {
-      case Some(seq) =>
-        val asNumber =
-        // 0 开头的数字序列
-          seq.startsWith("0") && options.numeralOptions.allowZeroLeadingDigits ||
-            // 中文数字序列，如一九八七
-            options.numeralOptions.cnSequenceAsNumber && isCnSeq ||
-            // 数字序列
-            !isCnSeq
-        if (asNumber) {
-          (NumeralValue(value, precision), false)
-        } else None
-      case None => (NumeralValue(value, precision), false)
-    }
+    (NumeralValue(value, precision), false)
   }
 
   def isCnSeq: Boolean = sequence.exists(s => !s.headOption.exists(c => c >= '0' && c <= '9'))

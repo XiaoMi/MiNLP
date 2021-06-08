@@ -34,7 +34,7 @@ import com.xiaomi.duckling.dimension.time.{Time, TimeData}
 
 object Times {
 
-  val ruleNow = Rule(name = "now", pattern = List("(现在|此时(此刻)?|此刻|当前|这会儿?)".regex), prod = {
+  val ruleNow = Rule(name = "now", pattern = List("(现在|此时(此刻)?|此刻|当前|这会儿?)".regex), prod = tokens {
     case _ => tt(now)
   })
 
@@ -55,7 +55,7 @@ object Times {
   val ruleTimeOfDayOClock = Rule(
     name = "<time-of-day> o'clock",
     pattern = List(and(isIntegerBetween(0, 24), not(isCnSequence)).predicate, "(点(整|钟)?|时)".regex),
-    prod = {
+    prod = tokens {
       case (t1@Token(_, nd: NumeralData)) :: Token(_, GroupMatch(s :: _)) :: _ =>
         if (nd.isCnSeq) None
         else
@@ -70,7 +70,7 @@ object Times {
   val ruleIntegerLatentTimeOfDay = Rule(
     name = "<integer> (latent time-of-day)",
     pattern = List(isIntegerBetween(0, 23).predicate),
-    prod = {
+    prod = tokens {
       case token :: _ =>
         for {
           v <- getIntValue(token)
@@ -82,7 +82,7 @@ object Times {
   val ruleDimTimePartOfDay = Rule(
     name = "<dim time> <part-of-day>",
     pattern = List(isADayOfMonth.predicate, isAPartOfDay.predicate),
-    prod = {
+    prod = tokens {
       case Token(Time, td1: TimeData) :: Token(Time, td2: TimeData) :: _ =>
         for (td <- intersect(td1, td2)) yield {
           tt(td.copy(form = td2.form, hint = Hint.PartOfDayAtLast))
@@ -93,7 +93,7 @@ object Times {
   val rulePartOfDayDimTime = Rule(
     name = "<part-of-day> <dim time>",
     pattern = List(isAPartOfDay.predicate, isNotLatent.predicate),
-    prod = {
+    prod = tokens {
       case Token(Time, td1: TimeData) :: Token(Time, td2: TimeData) :: _ =>
         intersect(td1, td2).flatMap(tt)
     }
@@ -102,7 +102,7 @@ object Times {
   val ruleRelativeMinutesAfterPastIntegerOClockOfDay = Rule(
     name = "<integer> o'clock (hour-of-day): 八点",
     pattern = List(isAnHourOfDay.predicate, "点钟?".regex),
-    prod = {
+    prod = tokens {
       case Token(Time, TimeData(_, _, _, _, Some(TimeOfDay(Some(h), _)), _, _, _, _, _, _)) :: _ :: _ =>
         for {
           t <- tt(hour(is12H = true, h))
@@ -113,7 +113,7 @@ object Times {
   val ruleRelativeMinutesAfterPastIntegerHourOfDay = Rule(
     name = "<HH:mm>: 八点五十",
     pattern = List(isAnHourOfDay.predicate, "点".regex, isIntegerBetween(10, 59).predicate),
-    prod = {
+    prod = tokens {
       case Token(Time, TimeData(_, _, _, _, Some(TimeOfDay(Some(hour), _)), _, _, _, _, _, _)) :: _ :: token :: _ =>
         for {
           n <- getIntValue(token)
@@ -125,7 +125,7 @@ object Times {
   val ruleRelativeMinutesAfterPastIntegerHourAndHalfOfDay = Rule(
     name = "half (hour-of-day):一点半/一十/二十五",
     pattern = List(isAnHourOfDay.predicate, "点(半|零[一二三四五六七八九]|一十)".regex),
-    prod = {
+    prod = tokens {
       case Token(Time, TimeData(_, _, _, _, Some(TimeOfDay(Some(hour), _)), _, _, _, _, _, _)) ::
             Token(RegexMatch, GroupMatch(_ :: g1 :: _)) :: _ =>
         val m =
@@ -144,7 +144,7 @@ object Times {
       isIntegerBetween(0, 59).predicate,
       "(分(?!贝)钟?|刻)".regex
     ),
-    prod = {
+    prod = tokens {
       case Token(Time, TimeData(_, _, _, _, Some(TimeOfDay(Some(h), is12H)), _, _, _, _, _, _)) :: _ :: t1
             :: Token(RegexMatch, GroupMatch(u :: _)) :: _ =>
         val mOpt = getIntValue(t1).map(_.toInt)
@@ -161,7 +161,7 @@ object Times {
   val ruleTimeOfDayAMPM = Rule(
     name = "<time-of-day> AM|PM",
     pattern = List(isATimeOfDay.predicate, "(?i)([ap])(\\s|\\.)?m\\.?".regex),
-    prod = {
+    prod = tokens {
       case Token(Time, td: TimeData) :: Token(RegexMatch, GroupMatch(_ :: ap :: _)) :: _ =>
         tt(timeOfDayAMPM(ap == "a", td))
     }

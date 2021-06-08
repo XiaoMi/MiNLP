@@ -56,7 +56,7 @@ trait Rules extends DimRules {
       ).predicate,
       isNotLatentGrain.predicate
     ),
-    prod = {
+    prod = tokens {
       case t1 :: Token(TimeGrain, GrainData(g, _)) :: _ =>
         if (isDimension(UnitNumber)(t1) && !compatibleWithUnitNumber(g)) None
         else {
@@ -79,7 +79,7 @@ trait Rules extends DimRules {
   val ruleFewDuration = Rule(
     name = "few <unit-of-duration>",
     pattern = List("几个?".regex, isDimension(TimeGrain).predicate),
-    prod = {
+    prod = tokens {
       case _ :: Token(TimeGrain, GrainData(g, _)) :: _ =>
         Token(Duration, DurationData(3, g, latent = true))
     }
@@ -88,7 +88,7 @@ trait Rules extends DimRules {
   val ruleDurationQuarterOfAnHour = Rule(
     name = "quarter of an hour",
     pattern = List(and(isNatural, isNumberOrUnitNumber).predicate, "刻钟?".regex),
-    prod = {
+    prod = tokens {
       case t1 :: _ =>
         for (i <- getIntValue(t1)) yield tt(15 * i.toInt, Minute)
     }
@@ -112,7 +112,7 @@ trait Rules extends DimRules {
   val ruleDurationHalfATimeGrain = Rule(
     name = "half a <time-grain>",
     pattern = List("半个?".regex, isDimension(TimeGrain).predicate),
-    prod = {
+    prod = tokens {
       case _ :: Token(TimeGrain, GrainData(grain, _)) :: _ =>
         for (d <- timesOneAndAHalf(grain, 0)) yield Token(Duration, d)
     }
@@ -121,7 +121,7 @@ trait Rules extends DimRules {
   val ruleDurationNumberGrainAndHalf = Rule(
     name = "<natural> <unit-of-duration> and a half",
     pattern = List(isNatural.predicate, isDimension(TimeGrain).predicate, "半钟?".regex),
-    prod = {
+    prod = tokens {
       case t1 :: Token(TimeGrain, GrainData(g, _)) :: _ =>
         for {
           i <- getIntValue(t1)
@@ -133,7 +133,7 @@ trait Rules extends DimRules {
   val ruleDurationNumberHalfGrain = Rule(
     name = "<natural> half <unit-of-duration>",
     pattern = List(isDimension(UnitNumber).predicate, "半".regex, isDimension(TimeGrain).predicate),
-    prod = {
+    prod = tokens {
       case t1 :: _ :: Token(TimeGrain, GrainData(g, _)) :: _ =>
         for {
           i <- getIntValue(t1)
@@ -146,7 +146,7 @@ trait Rules extends DimRules {
     name = "composite <duration> <duration>",
     pattern =
       List(isNatural.predicate, isDimension(TimeGrain).predicate, isDimension(Duration).predicate),
-    prod = {
+    prod = tokens {
       case t1 :: Token(TimeGrain, GrainData(g, _)) :: Token(_, dd@DurationData(_, dg, _)) :: _
         if g > dg && g != Month =>
         for (i <- getIntValue(t1)) yield Token(Duration, DurationData(i.toInt, g) + dd)
@@ -164,7 +164,7 @@ trait Rules extends DimRules {
       "(零|外加|加上|加)".regex,
       isDimension(Duration).predicate
     ),
-    prod = {
+    prod = tokens {
       case t1 :: Token(TimeGrain, GrainData(g, _)) :: _ :: Token(_, dd@DurationData(_, dg, _)) :: _
         if g > dg && g != Month =>
         for (i <- getIntValue(t1)) yield Token(Duration, DurationData(i.toInt, g) + dd)

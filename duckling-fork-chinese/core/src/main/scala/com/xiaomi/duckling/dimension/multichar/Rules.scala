@@ -27,7 +27,7 @@ trait Rules extends DimRules {
   val rule = Rule(
     name = "multi-char symbol", //
     pattern = List(ItemMultiChar),
-    prod = {
+    prod = tokens {
       case Token(MultiCharMatch, MultiCharMatches(text)) :: _ =>
         val _alias = EmojiParser.parseToAliases(text)
         val alias = if (_alias == text) None else Some(_alias)

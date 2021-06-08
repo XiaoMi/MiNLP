@@ -27,13 +27,13 @@ trait Rules extends DimRules {
   val ruleOrdinalDigits = Rule(
     name = "ordinal (digits)",
     pattern = List("第".regex, isNumeralDimension.predicate),
-    prod = {
+    prod = tokens {
       case _ :: Token(Numeral, NumeralData(v, _, _, _, _, _)) :: _ => ordinal(math.floor(v).toLong)
     }
   )
 
   val ruleOrdinalDigitsGe =
-    Rule(name = "ordinal (digits) 个", pattern = List(notEndsWithGe.predicate, "个".regex), prod = {
+    Rule(name = "ordinal (digits) 个", pattern = List(notEndsWithGe.predicate, "个".regex), prod = tokens {
       case Token(Ordinal, OrdinalData(value, _)) :: _ =>
         ordinal(value, ge = true)
     })

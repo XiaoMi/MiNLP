@@ -146,8 +146,8 @@ trait Rules extends DimRules {
 
   val ruleYearNumericWithYearSymbol = Rule(
     name = "date - year (numeric with year symbol)",
-    pattern = List(yearOf1000to9999.predicate, "(年?版|年)".regex),
-    prod = {
+    pattern = List(seqYearOf1000to9999.predicate, "(年?版|年)".regex),
+    prod = tokens {
       case token :: _ => getIntValue(token).map(i => Token(Date, year(i.toInt)))
     }
   )
@@ -155,7 +155,7 @@ trait Rules extends DimRules {
   val ruleYearNumericWithoutYearSymbol = Rule(
     name = "date - year (numeric without year symbol)",
     pattern = List(arabicSeqOf1950to2050.predicate),
-    prod = {
+    prod = tokens {
       case Token(DigitSequence, DigitSequenceData(seq, zh, raw)) :: _ =>
         val y = seq.toDouble
         (if (y >= 1950 && y <= 2050) year(y.toInt)
@@ -166,7 +166,7 @@ trait Rules extends DimRules {
   val ruleYearCnSequenceWithoutYearSymbol = Rule(
     name = "date - year (cn without year symbol)",
     pattern = List(cnSeqOf1950to2050.predicate),
-    prod = {
+    prod = tokens {
       case Token(DigitSequence, DigitSequenceData(seq, _, _)) :: _ =>
         Token(Date, year(seq.toInt))
     }
@@ -177,7 +177,7 @@ trait Rules extends DimRules {
   val ruleTwoDigitYear = Rule(
     name = "date - year (like 九八年)",
     pattern = List(singleNumberPredicate, singleNumberPredicate, "(年?版|年)".regex),
-    prod = {
+    prod = tokens {
       case t1 :: t2 :: _ =>
         val y = for {
           thirdDigit <- getIntValue(t1)
@@ -205,7 +205,7 @@ trait Rules extends DimRules {
   val ruleMonthNumericWithMonthSymbol = Rule(
     name = "date: month (numeric with month symbol)",
     pattern = List(isIntegerBetween(1, 12).predicate, "月(份)?".regex),
-    prod = {
+    prod = tokens {
       case token :: _ =>
         for (m <- getIntValue(token)) yield {
           Token(Date, month(m.toInt))
@@ -216,7 +216,7 @@ trait Rules extends DimRules {
   val ruleDayOfMonthWithSymbol = Rule(
     name = "date: day of month (numeric with day symbol)",
     pattern = List(isIntegerBetween(1, 31).predicate, "(号|日)".regex),
-    prod = {
+    prod = tokens {
       case token :: Token(_, GroupMatch(s :: _)) :: _ =>
         for (d <- getIntValue(token)) yield {
           // 单独的一日/七日 与3号这样的还是有区别的
@@ -229,7 +229,7 @@ trait Rules extends DimRules {
     name = "date: <named-month> <day-of-month>",
     pattern =
       List(and(isAMonth, isHint(Hint.MonthOnly)).predicate, isIntegerBetween(1, 31).predicate),
-    prod = {
+    prod = tokens {
       case Token(Date, td: TimeData) :: token :: _ =>
         for (td <- intersectDOM(td, token)) yield {
           Token(Date, td.at(Hint.MonthDay))
@@ -257,7 +257,7 @@ trait Rules extends DimRules {
   val ruleDecade = Rule(
     name = "date: tens of decade",
     pattern = List(isADecade.predicate, "年代".regex),
-    prod = {
+    prod = tokens {
       case t1 :: _ =>
         val y = getIntValue(t1).get.toInt
         val adjustY = if (y > 20) 1900 + y else y + 2000
@@ -270,7 +270,7 @@ trait Rules extends DimRules {
   val ruleQuarter = Rule(
     name = "date - <ordinal> <quarter>",
     pattern = List("第".regex, isAQuarterOfYear.predicate),
-    prod = {
+    prod = tokens {
       case _ :: Token(Duration, DurationData(value, _, _)) :: _ =>
         for (td <- interval(Closed, month(3 * value - 2), month(3 * value))) yield {
           Token(Date, td.copy(reset = (Grain.resetTo(Quarter), 0)))
@@ -278,21 +278,21 @@ trait Rules extends DimRules {
     }
   )
 
-  val ruleSpecial0 = Rule(name = "date - special days: 今明两天", pattern = List("今明两天".regex), prod = {
+  val ruleSpecial0 = Rule(name = "date - special days: 今明两天", pattern = List("今明两天".regex), prod = tokens {
     case _ =>
       val from = cycleNth(Day, 0, Day)
       val to = cycleNth(Day, 1, Day)
       for (td <- interval(Open, from, to)) yield Token(Date, td)
   })
 
-  val ruleSpecial1 = Rule(name = "date - special days: 元月", pattern = List("元月份?".regex), prod = {
+  val ruleSpecial1 = Rule(name = "date - special days: 元月", pattern = List("元月份?".regex), prod = tokens {
     case _ => Token(Date, month(1))
   })
 
   val ruleSpecial2 = Rule(
     name = "date - special days: 最近",
     pattern = List("(最近|近期|这段时间)".regex),
-    prod = {
+    prod = tokens {
       case _ =>
         val from = cycleNth(Day, 0, Day)
         val to = cycleNth(Day, 2, Day)
@@ -302,14 +302,14 @@ trait Rules extends DimRules {
     }
   )
 
-  val ruleSpecial3 = Rule(name = "date - special days: 明后天", pattern = List("明后两?天".regex), prod = {
+  val ruleSpecial3 = Rule(name = "date - special days: 明后天", pattern = List("明后两?天".regex), prod = tokens {
     case _ =>
       val from = cycleNth(Day, 1, Day)
       val to = cycleNth(Day, 2, Day)
       for (td <- interval(Open, from, to)) yield Token(Date, td)
   })
 
-  val ruleEndOfMonth = Rule(name = "date - 月底", pattern = List("月(底|末)".regex), prod = {
+  val ruleEndOfMonth = Rule(name = "date - 月底", pattern = List("月(底|末)".regex), prod = tokens {
     case _ =>
       val td1 = TimeData(EndOfGrainPredicate, timeGrain = Day)
       val td = TimeData(SequencePredicate(List(cycleNth(Month, 0), td1)), timeGrain = Day)
@@ -324,7 +324,7 @@ trait Rules extends DimRules {
         // "一日"单独是latent，但是可以参与组合
         and(isDimension(Date), or(isNotLatent, isADayOfMonth)).predicate
       ),
-      prod = {
+      prod = tokens {
         case Token(Date, td1: TimeData) :: Token(Date, td2: TimeData) :: _
             if td1.timeGrain > td2.timeGrain =>
           // 破除(y-m)-d和y-(m-d)均构造出来的问题
@@ -366,7 +366,7 @@ trait Rules extends DimRules {
       "的".regex,
       and(isDimension(Date), or(isNotLatent, isADayOfMonth)).predicate
     ),
-    prod = {
+    prod = tokens {
       case Token(Date, td1: TimeData) :: _ :: Token(Date, td2: TimeData) :: _
           if td1.timeGrain > td2.timeGrain =>
         if (td1.timeGrain > Day && td2.timeGrain < Day) None

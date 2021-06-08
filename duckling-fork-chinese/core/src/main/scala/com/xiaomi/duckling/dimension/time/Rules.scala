@@ -46,7 +46,7 @@ trait Rules extends DimRules {
       // ❌ 下周一早上 =>  下[周一早上]
       and(isDimension(Time), isNotLatent, not(isHint(Intersect)), not(isAPartOfDay)).predicate
     ),
-    prod = {
+    prod = tokens {
       case Token(RegexMatch, GroupMatch(s :: _)) :: (t @ Token(Time, td: TimeData)) :: _ =>
         val offset =
           s(0) match {
@@ -83,7 +83,7 @@ trait Rules extends DimRules {
     name = "nth <time> of <time>",
     pattern =
       List(isDimension(Time).predicate, isDimension(Ordinal).predicate, isNotLatent.predicate),
-    prod = {
+    prod = tokens {
       case Token(Time, td1: TimeData) ::
             Token(Ordinal, od: OrdinalData)
             :: Token(Time, td2: TimeData) :: _ if td1.timeGrain > td2.timeGrain && od.ge =>
@@ -104,7 +104,7 @@ trait Rules extends DimRules {
       isDimension(Ordinal).predicate,
       isNotLatent.predicate
     ),
-    prod = {
+    prod = tokens {
       case Token(Time, td1: TimeData) :: _ ::
             Token(Ordinal, od: OrdinalData)
             :: Token(Time, td2: TimeData) :: _ if td1.timeGrain > td2.timeGrain && od.ge =>
@@ -126,7 +126,7 @@ trait Rules extends DimRules {
         // "一日"单独是latent，但是可以参与组合
         and(isDimension(Time), or(and(isNotLatent, not(isAPartOfDay)), isADayOfMonth)).predicate
       ),
-      prod = {
+      prod = tokens {
         case Token(Time, td1: TimeData) :: Token(Time, td2: TimeData) :: _
             if td1.timeGrain > td2.timeGrain && !(td1.hint == Date && td2.hint == Date) =>
           // 破除(y-m)-d和y-(m-d)均构造出来的问题
@@ -149,7 +149,7 @@ trait Rules extends DimRules {
     name = "intersect: <x> 的 <y>",
     // "一日"单独是latent，但是可以参与组合
     pattern = List(isNotLatent.predicate, "的".regex, or(isNotLatent, isADayOfMonth).predicate),
-    prod = {
+    prod = tokens {
       case Token(Time, td1: TimeData) :: _ :: Token(Time, td2: TimeData) :: _
           if td1.timeGrain > td2.timeGrain =>
         if (td1.timeGrain > Day && td2.timeGrain < Day) None
@@ -170,7 +170,7 @@ trait Rules extends DimRules {
     name = "this <cycle>",
     pattern =
       List("(这个?|今个?|本|下+一?个?|上+一?个?|去|昨|明|大*前|大*后)".regex, isDimension(TimeGrain).predicate),
-    prod = {
+    prod = tokens {
       case Token(_, GroupMatch(s :: _)) :: Token(TimeGrain, GrainData(g, _)) :: _ =>
         val td: Option[TimeData] = s(0) match {
           case '这' => cycleNthThis(0, g, Year, Month, Hour, Week)
@@ -209,7 +209,7 @@ trait Rules extends DimRules {
   val ruleLastNextNCycle = Rule(
     name = "recent/last/next <duration>",
     pattern = List(RecentPattern.regex, isDimension(Duration).predicate),
-    prod = {
+    prod = tokens {
       case Token(_, GroupMatch(s :: _)) :: Token(Duration, DurationData(v, g, _)) :: _ =>
         // 月必须是x个月
         s match {
@@ -256,7 +256,7 @@ trait Rules extends DimRules {
   val ruleNCycleNextLast1 = Rule(
     name = "n <cycle> next/last 1: <duration> 之后",
     pattern = List(isDimension(Duration).predicate, "((之|以)?(后|前))|过后".regex),
-    prod = {
+    prod = tokens {
       case Token(Duration, DurationData(v, grain, _)) :: Token(_, GroupMatch(s :: _)) :: _ =>
         val offset = if (s.endsWith("后")) v else -v
         tt(cycleNth(grain, offset, NoGrain))
@@ -269,7 +269,7 @@ trait Rules extends DimRules {
   val ruleNCycleNext2 = Rule(
     name = "n <cycle> next/last: 过 <duration>",
     pattern = List("过".regex, isDimension(Duration).predicate),
-    prod = {
+    prod = tokens {
       case _ :: Token(Duration, DurationData(v, grain, _)) :: _ =>
         tt(cycleNth(grain, v, NoGrain))
     }
@@ -281,7 +281,7 @@ trait Rules extends DimRules {
   val ruleNCycleNext3 = Rule(
     name = "n <cycle> next/last 3:过 <duration> 之后",
     pattern = List("过".regex, isDimension(Duration).predicate, "之?(后|前)".regex),
-    prod = {
+    prod = tokens {
       case _ :: Token(Duration, DurationData(v, grain, _)) :: _ =>
         tt(cycleNth(grain, v, NoGrain))
     }
@@ -293,7 +293,7 @@ trait Rules extends DimRules {
   val ruleDurationIntersectTime = Rule(
     name = "<duration> before/after <time>",
     pattern = List(isDimension(Duration).predicate, "之?(前|后)的?".regex, isNotLatent.predicate),
-    prod = {
+    prod = tokens {
       case Token(Duration, DurationData(v, g, _)) :: Token(_, GroupMatch(_ :: s :: _)) :: Token(
             Time,
             td: TimeData
@@ -321,7 +321,7 @@ trait Rules extends DimRules {
   val ruleFromToInterval = Rule(
     name = "<from> 到 <to>",
     pattern = List(isNotLatent.predicate, "(至|到)".regex, isNotLatent.predicate),
-    prod = {
+    prod = tokens {
       case Token(Time, td1 @ TimeData(pred1, _, g1, _, _, _, _, _, _, _, _)) :: _ ::
             Token(Time, td2 @ TimeData(pred2, _, g2, _, _, _, _, _, _, _, _)) :: _ =>
         val grainCompare = for {
@@ -351,7 +351,7 @@ trait Rules extends DimRules {
   val ruleInAInterval = Rule(
     name = "in a <duration>",
     pattern = List(isDimension(Duration).predicate, "内".regex),
-    prod = {
+    prod = tokens {
       case Token(Duration, DurationData(value, grain, _)) :: _ =>
         tt(cycleN(notImmediate = false, grain, value, NoGrain))
     }
@@ -403,7 +403,7 @@ trait Rules extends DimRules {
       "(之后)?的".regex,
       and(isNotHint(ReplacePartOfTime), isNotHint(Sequence)).predicate
     ),
-    prod = {
+    prod = tokens {
       case Token(_, td1: TimeData) :: _ :: Token(_, td2: TimeData) :: _ =>
         sequenceProd(td1, td2)
     }
@@ -418,7 +418,7 @@ trait Rules extends DimRules {
       and(isNotLatent, isGrainGeDay).predicate,
       and(isHint(RecentNominal, Recent), isNotHint(Sequence)).predicate
     ),
-    prod = {
+    prod = tokens {
       case Token(_, td1: TimeData) :: Token(_, td2: TimeData) :: _
           if td1.timeGrain > td2.timeGrain ||
             td1.timeGrain == td2.timeGrain && !(recentHint(td1.hint) && recentHint(td2.hint)) =>
@@ -433,7 +433,7 @@ trait Rules extends DimRules {
     name = "sequence3: <recent nominal> <duration>",
     pattern =
       List(isHint(RecentNominal).predicate, "之?(前|后)的?".regex, isDimension(Duration).predicate),
-    prod = {
+    prod = tokens {
       case Token(_, td1: TimeData) :: Token(_, GroupMatch(_ :: s :: _)) :: Token(
             _,
             DurationData(value, grain, latent)
@@ -448,7 +448,7 @@ trait Rules extends DimRules {
   val ruleEndOfGrain = Rule(
     name = "end of grain",
     pattern = List(and(isTimeDatePredicate, or(isAMonth, isAYear)).predicate, "(月|年)?底".regex),
-    prod = {
+    prod = tokens {
       case Token(Time, td: TimeData) :: Token(RegexMatch, GroupMatch(s :: _)) :: _ =>
         if (s.startsWith("年") && td.timeGrain != Year) None
         else if (s.startsWith("月") && td.timeGrain != Month) None

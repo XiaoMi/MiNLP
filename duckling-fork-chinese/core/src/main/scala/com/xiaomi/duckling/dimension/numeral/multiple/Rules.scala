@@ -26,7 +26,7 @@ trait Rules extends DimRules {
   val rule = Rule(
     name = "multiple",
     pattern = List(isPositive.predicate, "倍".regex),
-    prod = {
+    prod = tokens {
       case Token(_, NumeralData(value, _, _, _, _, _)) :: _ =>
         multiple(value)
     }

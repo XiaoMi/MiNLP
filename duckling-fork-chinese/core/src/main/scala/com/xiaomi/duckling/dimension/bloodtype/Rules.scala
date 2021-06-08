@@ -22,7 +22,7 @@ import com.xiaomi.duckling.dimension.implicits._
 import com.xiaomi.duckling.dimension.matcher.GroupMatch
 
 trait Rules extends DimRules {
-  val rule = Rule(name = "blood type", pattern = List("(?i)(ab|a|b|o)(型血?|血型)".regex), prod = {
+  val rule = Rule(name = "blood type", pattern = List("(?i)(ab|a|b|o)(型血?|血型)".regex), prod = tokens {
     case Token(_, GroupMatch(_ :: bt :: _)) :: _ =>
       Token(BloodType, BloodTypeData(bt.toUpperCase))
   })

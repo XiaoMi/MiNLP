@@ -30,7 +30,7 @@ trait Rules extends DimRules {
   val ordinalSeason = Rule(
     name = "<ordinal> episode",
     pattern = List(notEndsWithGe.predicate, episodePattern),
-    prod = {
+    prod = tokens {
       case t1 :: _ =>
         for (i <- getIntValue(t1)) yield Token(Episode, QuantityData(i, "集", "集"))
     }
@@ -39,7 +39,7 @@ trait Rules extends DimRules {
   val numberSeason = Rule(
     name = "<postive integer> episode",
     pattern = List(isNatural.predicate, episodePattern),
-    prod = {
+    prod = tokens {
       case t1 :: _ =>
         for (i <- getIntValue(t1)) yield Token(Episode, QuantityData(i, "集", "集", true))
     }
@@ -48,7 +48,7 @@ trait Rules extends DimRules {
   val reverseSeason = Rule(
     name = "reverse episode",
     pattern = List(reversePattern, isNatural.predicate, episodePattern),
-    prod = {
+    prod = tokens {
       case _ :: t1 :: _ =>
         for (i <- getIntValue(t1)) yield Token(Episode, QuantityData(-i, "集", "集"))
     }

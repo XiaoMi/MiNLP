@@ -30,7 +30,7 @@ trait Rules extends DimRules {
   val numberUnit = Rule(
     name = "<number> <RMB unit>",
     pattern = List(isNatural.predicate, "(元|块|角|毛|分)钱?".regex),
-    prod = {
+    prod = tokens {
       case t1 :: Token(_, GroupMatch(s0 :: s :: _)) :: _ =>
         for (v <- getIntValue(t1)) yield {
           val scalar = s match {
@@ -43,18 +43,33 @@ trait Rules extends DimRules {
     }
   )
 
-  val compose = Rule(
+  def compose(cd1: CurrencyData, cd2: CurrencyData): Option[Token] = {
+    if (cd1.scalar / cd2.scalar > 9.9) {
+      if (cd1.code.nonEmpty && cd2.code.nonEmpty && cd1.code != cd2.code) None
+      else {
+        val code = if (cd1.code.nonEmpty) cd1.code else cd2.code
+        Some(token(CurrencyData(cd1.v * cd1.scalar / cd2.scalar + cd2.v, cd2.scalar, "", compose = true, code = code)))
+      }
+    } else None
+  }
+
+  val compose1 = Rule(
     name = "<currency u1> <currency u2>",
     // 限定组合嵌套只能出现在左侧
     pattern = List(and(isNotAbbr, isNotEnd).predicate, isNotComposed.predicate),
-    prod = {
-      case Token(_, cd1: CurrencyData) :: Token(_, cd2: CurrencyData) :: _
-        if cd1.scalar / cd2.scalar > 9.9 =>
-        if (cd1.code.nonEmpty && cd2.code.nonEmpty && cd1.code != cd2.code) None
-        else {
-          val code = if (cd1.code.nonEmpty) cd1.code else cd2.code
-          token(CurrencyData(cd1.v * cd1.scalar / cd2.scalar + cd2.v, cd2.scalar, "", compose = true, code = code))
-        }
+    prod = tokens {
+      case Token(_, cd1: CurrencyData) :: Token(_, cd2: CurrencyData) :: _ =>
+        compose(cd1, cd2)
+    }
+  )
+
+  val compose2 = Rule(
+    name = "<currency u1> 零 <currency u2>",
+    // 限定组合嵌套只能出现在左侧
+    pattern = List(and(isNotAbbr, isNotEnd).predicate, "零".regex, isNotComposed.predicate),
+    prod = tokens {
+      case Token(_, cd1: CurrencyData) :: _ :: Token(_, cd2: CurrencyData) :: _ =>
+        compose(cd1, cd2)
     }
   )
 
@@ -64,7 +79,7 @@ trait Rules extends DimRules {
   val abbr = Rule(
     name = "<currency u1> <number>",
     pattern = List(and(isNotFen, isNotEnd).predicate, isIntegerBetween(1, 9).predicate),
-    prod = {
+    prod = tokens {
       case Token(_, CurrencyData(v, scalar, unitText, _, _, _, _)) :: t2 :: _
         if unitText == "块" || unitText == "毛" =>
         for (i <- getIntValue(t2)) yield {
@@ -76,7 +91,7 @@ trait Rules extends DimRules {
   val rmb1 = Rule(
     name = "RMB <number>",
     pattern = List("(?i)rmb".regex, or(isNumeralDimension, isDimension(Currency)).predicate),
-    prod = {
+    prod = tokens {
       case _ :: Token(_, c @ CurrencyData(_, _, _, _, _, _, code)) :: _ =>
         if (code.nonEmpty && code.get != RMB) None
         else token(c.copy(code = RMB))
@@ -88,7 +103,7 @@ trait Rules extends DimRules {
   val rmb2 = Rule(
     name = "<number> RMB",
     pattern = List(or(isNumeralDimension, isDimension(Currency)).predicate, "(?i)rmb".regex),
-    prod = {
+    prod = tokens {
       case Token(_, c @ CurrencyData(_, _, _, _, _, _, code)) :: _ =>
         if (code.nonEmpty && code.get != RMB) None
         else token(c.copy(code = RMB))

@@ -42,7 +42,7 @@ trait Rules extends DimRules {
   val rulePlace = Rule(
     name = "place: any",
     pattern = List(faultTolerantPlaceRecognize.phrase(1, 2)),
-    prod = {
+    prod = tokens {
       case Token(PhraseMatch, Phrase(w)) :: _ =>
         val c1 = getPlaceByName(w)
         val (candidates, isBirth) =
@@ -56,7 +56,7 @@ trait Rules extends DimRules {
     Rule(
       name = "place: place + 省/市/州",
       pattern = List(isPlaceLevel1.predicate, levels.dict),
-      prod = {
+      prod = tokens {
         case Token(Place, PlaceData(candidates, isBirthPlace, _, _)) ::
           Token(PhraseMatch, Phrase(level)) :: _ =>
           if (isBirthPlace) None
@@ -81,7 +81,7 @@ trait Rules extends DimRules {
     Rule(
       name = "place: merge",
       pattern = List(isPlace.predicate, isPlace.predicate),
-      prod = {
+      prod = tokens {
         case Token(_, PlaceData(c1, i1, l1, _)) :: Token(_, PlaceData(c2, i2, l2, _)) :: _ if l1 >= l2 =>
           if (!i1) {
             val list = merge(c1, c2)

@@ -115,7 +115,7 @@ object FuzzyDayIntervals {
       and(isAPartOfDay, not(isHint(PartOfDayAtLast))).predicate,
       and(isNotLatent, or(isATimeOfDay, isIntervalOfDay)).predicate
     ),
-    prod = {
+    prod = tokens {
       case Token(Time, td0: TimeData) :: Token(Time, td: TimeData) :: _ =>
         fuzzyIntervalTimeOfDay(td0, td)
     }
@@ -129,7 +129,7 @@ object FuzzyDayIntervals {
       "的".regex,
       and(isNotLatent, or(isATimeOfDay, isIntervalOfDay)).predicate
     ),
-    prod = {
+    prod = tokens {
       case Token(Time, td0: TimeData) :: _ :: Token(Time, td: TimeData) :: _ =>
         fuzzyIntervalTimeOfDay(td0, td)
     }
@@ -153,7 +153,7 @@ object FuzzyDayIntervals {
   val rule24OClockOfDay = Rule(
     name = "24 o'clock of day",
     pattern = List(isADayOfMonth.predicate, is24oClockOfDay.predicate),
-    prod = {
+    prod = tokens {
       case Token(Time, td1: TimeData) :: Token(Time, td2: TimeData) :: _ =>
         val pred = SequencePredicate(List(td1, td2))
         tt(TimeData(pred, timeGrain = Hour))

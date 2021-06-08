@@ -31,7 +31,7 @@ object Prods {
     * group(1): 第一个分组
     */
   val regexMatch: TextsTokenPF => Production = (f: TextsTokenPF) => {
-    case tokens: List[Token] =>
+    case (_, tokens: List[Token]) =>
       tokens.headOption.flatMap {
         case Token(RegexMatch, GroupMatch(patterns)) => f(patterns) orElse None
         case _                                       => None
@@ -62,6 +62,6 @@ object Prods {
     * 仅有词典匹配
     */
   val dictMatch: TextTokenPF => Production = (f: TextTokenPF) => {
-    case Token(PhraseMatch, Phrase(text)) :: _ => f(text)
+    case (_, Token(PhraseMatch, Phrase(text)) :: _) => f(text)
   }
 }

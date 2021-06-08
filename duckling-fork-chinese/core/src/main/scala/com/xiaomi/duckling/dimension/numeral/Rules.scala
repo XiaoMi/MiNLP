@@ -46,7 +46,7 @@ trait Rules extends DimRules {
   val ruleInteger = Rule(
     name = "integer (0..10)",
     pattern = List("(〇|零|幺|一|二|两|兩|三|四|五|六|七|八|九|十|壹|贰|叁|肆|伍|陆|柒|捌|玖|拾)".regex),
-    prod = {
+    prod = tokens {
       case Token(RegexMatch, GroupMatch(m :: _)) :: _ =>
         integerMap.get(m).flatMap(i => long(i))
     }
@@ -54,7 +54,7 @@ trait Rules extends DimRules {
   val ruleNumeralsPrefixWithNegativeOrMinus = Rule(
     name = "numbers prefix with -, negative or minus",
     pattern = List("(-|负)".regex, isPositive.predicate),
-    prod = {
+    prod = tokens {
       case _ :: Token(Numeral, nd: NumeralData) :: _ => double(-nd.value, nd.precision)
     }
   )
@@ -81,7 +81,7 @@ trait Rules extends DimRules {
         "(点|\\.)".regex,
         or(isIntegerBetween(0, 9), isDimension(DigitSequence)).predicate
       ),
-      prod = {
+      prod = tokens {
         case Token(_, data1) :: _ :: Token(_, data2) :: _ =>
           val intPart = data1 match {
             case NumeralData(v, _, _, _, _, _) => v
@@ -109,7 +109,7 @@ trait Rules extends DimRules {
   val ruleNumeralsIntersectNonconsectiveUnit = Rule(
     name = "integer with nonconsecutive unit modifiers",
     pattern = List(isPositive.predicate, "(零|〇)".regex, isPositive.predicate),
-    prod = {
+    prod = tokens {
       case Token(Numeral, nd1: NumeralData) :: _ :: Token(Numeral, nd2: NumeralData) :: _
         if nd1.value > nd2.value =>
         def sumConnectedNumbers(d: Int): Option[Double] = {
@@ -127,7 +127,7 @@ trait Rules extends DimRules {
   val ruleRomanNumeric = Rule(
     name = "Roman (numeric)",
     pattern = List("(Ⅰ|Ⅱ|Ⅲ|Ⅳ|Ⅴ|Ⅵ|Ⅶ|Ⅷ|Ⅸ)".regex),
-    prod = {
+    prod = tokens {
       case Token(RegexMatch, GroupMatch(m :: _)) :: _ =>
         romanToIntergerMap.get(m).flatMap(long)
     }
@@ -138,7 +138,7 @@ trait Rules extends DimRules {
       and(isPositive, isComposable).predicate,
       and(isInteger, isPositive, not(isMultipliable), not(isCnSequence)).predicate
     ),
-    prod = {
+    prod = tokens {
       case Token(_, n1: NumeralData) :: Token(_, n2: NumeralData)
         :: _ =>
         def sumConnectedNumbers(d: Int): Option[Double] = {
@@ -158,7 +158,7 @@ trait Rules extends DimRules {
     name = "compose by multiplication of [十百千万亿]",
     pattern =
       List(and(isNumeralDimension, not(isCnSequence)).predicate, numeralSuffixListPattern.regex),
-    prod = {
+    prod = tokens {
       case (t1@Token(_, NumeralData(value, _, _, _, _, _))) :: Token(_, GroupMatch(unit :: _)) :: _ =>
         // 不支持 3.5千/百/十
         if (!isInteger(value) && unit.matches("[十百千]")) None
@@ -180,7 +180,7 @@ trait Rules extends DimRules {
       numeralSuffixWithoutTenPattern.regex,
       s"(?i)(一|二|三|四|五|六|七|八|九)$numeralSuffixNegativePattern".regex
     ),
-    prod = {
+    prod = tokens {
       case t1 :: Token(_, GroupMatch(unit :: _)) :: Token(_, GroupMatch(c :: _)) :: _ =>
         for (v <- multiply(t1, numeralSuffixList(unit.toLowerCase()), integerMap(c))) yield {
           Token(Numeral, NumeralData(v, composable = false))
@@ -191,9 +191,9 @@ trait Rules extends DimRules {
   val ruleCnSequence = Rule(
     name = "cn sequence like 幺幺四",
     pattern = List(and(isZhDigit, isDigitLengthLt(50)).predicate),
-    prod = {
-      case Token(DigitSequence, DigitSequenceData(seq, _, raw)) :: _
-        if !raw.contains("两二") && !raw.contains("二两") =>
+    prod = opt {
+      case (options: NumeralOptions, Token(DigitSequence, DigitSequenceData(seq, _, raw)) :: _)
+        if options.cnSequenceAsNumber && !raw.contains("两二") && !raw.contains("二两") =>
         Token(Numeral, NumeralData(value = seq.toDouble, sequence = raw))
     }
   )
@@ -201,8 +201,9 @@ trait Rules extends DimRules {
   val rule0DigitSequence = Rule(
     name = "sequence like 00011",
     pattern = List(and(isDigitLeading0, isDigitLengthLt(50)).predicate),
-    prod = {
-      case Token(DigitSequence, DigitSequenceData(seq, _, raw)) :: _ =>
+    prod = opt {
+      case (options: NumeralOptions, Token(DigitSequence, DigitSequenceData(seq, _, raw)) :: _)
+        if options.allowZeroLeadingDigits =>
         Token(Numeral, NumeralData(value = seq.toDouble, sequence = raw))
     }
   )

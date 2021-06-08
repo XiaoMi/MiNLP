@@ -67,7 +67,7 @@ trait Rules extends DimRules {
   val explicitRule = Rule(
     name = "Lyric:Explicit",
     pattern = RolePattern.regex :: colon.regex :: (2, 50, Excludes).varchar :: Nil,
-    prod = {
+    prod = tokens {
       case Token(_, GroupMatch(role :: _)) :: _ :: Token(_, Varchar(s, _)) :: Nil =>
         val names = s.split("[/,、]").map(_.trim).toList
         // 使用SortedMap保证Json序列化时不会出现顺序不一致
@@ -79,7 +79,7 @@ trait Rules extends DimRules {
   val implicitRule = Rule(
     name = "Lyric:Implicit",
     pattern = RolePattern.regex :: (2, 50, Excludes).varchar :: Nil,
-    prod = {
+    prod = tokens {
       case Token(_, GroupMatch(role :: _)) :: Token(_, Varchar(s, _)) :: Nil =>
         val names = s.split("[/,、]").map(_.trim).toList
         // 使用SortedMap保证Json序列化时不会出现顺序不一致
@@ -91,7 +91,7 @@ trait Rules extends DimRules {
   val compose0 = Rule(
     name = "Lyric:Compose",
     pattern = List(isDimension(Lyric).predicate, isDimension(Lyric).predicate),
-    prod = {
+    prod = tokens {
       case Token(_, LyricData(m1)) :: Token(_, LyricData(m2)) :: _ =>
         Token(Lyric, LyricData(m1 |+| m2))
     }
@@ -100,7 +100,7 @@ trait Rules extends DimRules {
   val compose1 = Rule(
     name = "Lyric:Compose with split",
     pattern = List(isDimension(Lyric).predicate, "[|/]+".regex, isDimension(Lyric).predicate),
-    prod = {
+    prod = tokens {
       case Token(_, LyricData(m1)) :: _ :: Token(_, LyricData(m2)) :: _ =>
         Token(Lyric, LyricData(m1 |+| m2))
     }
