@@ -27,13 +27,23 @@ trait Rules extends DimRules {
 
   val dim = "Distance"
 
+  private val scalar = Map(
+    "千米" -> 1000,
+    "公里" -> 1000,
+    "km" -> 1000,
+    "米" -> 1,
+    "m" -> 1
+  )
+
   val numberKm = Rule(
     name = "<number> km",
-    pattern = List(isDimension(Numeral).predicate, "(?i)千米|米|公里|km".regex),
+    pattern = List(isDimension(Numeral).predicate, "(?i)千米|米|公里|km|m".regex),
     prod = tokens {
       case Token(_, NumeralData(value, _, _, _, _, _)) :: Token(_, GroupMatch(s :: _)) :: _ =>
-        val v = if (s == "米") value else 1000 * value
-        Token(Distance, QuantityData(v, "米", dim))
+        scalar.get(s.toLowerCase) match {
+          case Some(t) => Token(Distance, QuantityData(value * t, "米", dim))
+          case None => throw new IllegalArgumentException(s"unknown scalar found: $s")
+        }
     }
   )
 }
