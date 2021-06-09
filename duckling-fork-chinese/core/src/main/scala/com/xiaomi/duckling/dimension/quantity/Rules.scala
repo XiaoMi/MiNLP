@@ -30,7 +30,7 @@ trait Rules extends DimRules {
   val rule = Rule(
     name = "<number> unit",
     pattern = List(isDimension(Numeral).predicate, units.mkString("(", "|", ")").regex),
-    prod = {
+    prod = tokens {
       case Token(Numeral, NumeralData(v, _, _, _, _, _)) :: Token(RegexMatch, GroupMatch(s :: _))
             :: _ =>
         Token(Quantity, QuantityData(v, s, "?"))

@@ -28,7 +28,7 @@ trait Rules extends DimRules {
   val numeratedSeason = Rule(
     name = "<ordinal> season",
     pattern = List(notEndsWithGe.predicate, seasonPattern),
-    prod = {
+    prod = tokens {
       case t1 :: _ =>
         for (i <- getIntValue(t1)) yield season(i.toInt)
     }
@@ -37,13 +37,13 @@ trait Rules extends DimRules {
   val integerSeason = Rule(
     name = "<positive integer> episode",
     pattern = List(isDigits.predicate, seasonPattern),
-    prod = {
+    prod = tokens {
       case t1 :: _ =>
         for (i <- getIntValue(t1)) yield season(i.toInt, true)
     }
   )
 
-  val juan = Rule(name = "<number> season", pattern = List("卷".regex, isNatural.predicate), prod = {
+  val juan = Rule(name = "<number> season", pattern = List("卷".regex, isNatural.predicate), prod = tokens {
     case _ :: t1 :: _ =>
       for (i <- getIntValue(t1)) yield season(i.toInt)
   })
@@ -51,7 +51,7 @@ trait Rules extends DimRules {
   val reverseSeason = Rule(
     name = "reverse season",
     pattern = List(reversePattern, isNatural.predicate, seasonPattern),
-    prod = {
+    prod = tokens {
       case _ :: t1 :: _ =>
         for (i <- getIntValue(t1)) yield season(-i.toInt)
     }

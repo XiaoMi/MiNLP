@@ -26,7 +26,7 @@ trait Rules extends DimRules {
   val ordinal = Rule(
     name = "<ordinal> level",
     pattern = List(notEndsWithGe.predicate, "(级(?!别)|档)".regex),
-    prod = {
+    prod = tokens {
       case Token(_, OrdinalData(value, _)) :: _ => Token(Level, NumeralData(value))
     }
   )
@@ -34,7 +34,7 @@ trait Rules extends DimRules {
   val numeral = Rule(
     name = "<numeral> level",
     pattern = List(isDimension(Numeral).predicate, "(级(?!别)|档)".regex),
-    prod = {
+    prod = tokens {
       case t1 :: _ => t1.copy(dim = Level)
     }
   )

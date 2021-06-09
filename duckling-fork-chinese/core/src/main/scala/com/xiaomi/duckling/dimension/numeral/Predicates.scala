@@ -18,6 +18,7 @@ package com.xiaomi.duckling.dimension.numeral
 
 import com.xiaomi.duckling.Types._
 import com.xiaomi.duckling.dimension.implicits._
+import com.xiaomi.duckling.dimension.numeral.seq.DigitSequenceData
 import com.xiaomi.duckling.dimension.ordinal.{Ordinal, OrdinalData}
 import com.xiaomi.duckling.dimension.time.unitNumber.UnitNumber
 
@@ -71,6 +72,7 @@ object Predicates {
   def getIntValue(token: Token): Option[Long] = token match {
     case Token(_, NumeralData(v, _, _, _, _, _)) => getIntValue(v)
     case Token(Ordinal, OrdinalData(v, _)) => v
+    case Token(_, DigitSequenceData(seq, zh, raw)) => java.lang.Long.valueOf(seq): Long
     case _ => None
   }
 

@@ -26,7 +26,7 @@ import com.xiaomi.duckling.dimension.time.predicates.{TimeDatePredicate, TimePre
 object Helpers {
 
   def mkSingleRegexRule(name: String, pattern: String, token: Option[Token]): Rule = {
-    Rule(name, pattern = List(pattern.regex), prod = {
+    Rule(name, pattern = List(pattern.regex), prod = tokens {
       case _ => token
     })
   }

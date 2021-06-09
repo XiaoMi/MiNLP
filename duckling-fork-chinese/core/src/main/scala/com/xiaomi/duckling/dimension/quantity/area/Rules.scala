@@ -33,7 +33,7 @@ trait Rules extends DimRules {
   val numberUnit = Rule(
     name = "<number> <area unit>",
     pattern = List(isDimension(Numeral).predicate, "(个?(平方米?|平米)|平)".regex),
-    prod = {
+    prod = tokens {
       case Token(_, NumeralData(value, _, _, _, _, _)) :: Token(_, GroupMatch(s :: _)) :: _ =>
         Token(Area, QuantityData(value, "平方米", dim))
     }
@@ -42,7 +42,7 @@ trait Rules extends DimRules {
   val numberSKM = Rule(
     name = "<number> 平方公里",
     pattern = List(isDimension(Numeral).predicate, "平方(公里|千米)".regex),
-    prod = {
+    prod = tokens {
       case Token(_, NumeralData(value, _, _, _, _, _)) :: _ =>
         Token(Area, QuantityData(value, "平方千米", dim))
     }

@@ -41,7 +41,7 @@ object Holidays {
   val rule = Rule(
     name = "<holidays>",
     pattern = List(dict.lexicon),
-    prod = {
+    prod = tokens {
       case Token(LexiconMatch, LexiconMatches(s, t)) :: _ =>
 				holidayTokenMap.get(t)
     }

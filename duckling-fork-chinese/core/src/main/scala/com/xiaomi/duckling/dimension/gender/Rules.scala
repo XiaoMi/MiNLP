@@ -38,7 +38,7 @@ trait Rules extends DimRules {
 
 
   val rule =
-    Rule(name = "gender", pattern = List(dict.lexicon), prod = {
+    Rule(name = "gender", pattern = List(dict.lexicon), prod = tokens {
       case Token(_, LexiconMatches(_, n)) :: _ =>
         Token(Gender, GenderData(n))
     })

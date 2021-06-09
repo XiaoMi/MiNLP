@@ -31,7 +31,7 @@ trait Rules extends DimRules {
   val concrete = Rule(
     name = "concrete rating <number>",
     pattern = List(isDimension(Numeral).predicate, "分(?!钟)".regex),
-    prod = {
+    prod = tokens {
       case Token(_, NumeralData(value, _, _, _, _, _)) :: _ =>
         token(NumeralValue(value))
     }
@@ -40,7 +40,7 @@ trait Rules extends DimRules {
   val concrete2 = Rule(
     name = "concrete rating <number/rating>",
     pattern = List(s"${Grade}在?".regex, or(isConcreteRating, isDimension(Numeral)).predicate),
-    prod = {
+    prod = tokens {
       case _ :: Token(_, data) :: _ =>
         val n = data match {
           case NumeralData(value, _, _, _, _, _) => NumeralValue(value)
@@ -54,7 +54,7 @@ trait Rules extends DimRules {
     name = "rating > |rating/number|",
     pattern =
       List(s"$Grade(大于|高于|超过|不低于)".regex, or(isConcreteRating, isDimension(Numeral)).predicate),
-    prod = {
+    prod = tokens {
       case _ :: Token(_, data) :: _ =>
         val n = data match {
           case RatingData(NumeralValue(n, _))    => n
@@ -68,7 +68,7 @@ trait Rules extends DimRules {
     name = "rating < |rating|",
     pattern =
       List(s"$Grade(小于|低于|不超过|不高于)".regex, or(isConcreteRating, isDimension(Numeral)).predicate),
-    prod = {
+    prod = tokens {
       case _ :: Token(_, data) :: _ =>
         val n = data match {
           case RatingData(NumeralValue(n, _))    => n
@@ -81,7 +81,7 @@ trait Rules extends DimRules {
   val ratingUpDown = Rule(
     name = "<rating> up/down",
     pattern = List(isConcreteRating.predicate, "以(上|下)".regex),
-    prod = {
+    prod = tokens {
       case Token(_, RatingData(NumeralValue(n, _))) :: Token(_, GroupMatch(_ :: s :: _)) :: _ =>
         val direction = if (s == "上") After else Before
         token(OpenIntervalValue(n, direction))
@@ -95,7 +95,7 @@ trait Rules extends DimRules {
       "(到|至)".regex,
       isConcreteRating.predicate
     ),
-    prod = {
+    prod = tokens {
       case Token(_, d1) :: _ :: Token(_, d2) :: _ =>
         for {
           n1 <- valueOfRating(d1)
@@ -114,7 +114,7 @@ trait Rules extends DimRules {
       "(到|至)".regex,
       or(isConcreteRating, isDimension(Numeral)).predicate
     ),
-    prod = {
+    prod = tokens {
       case _ :: Token(_, d1) :: _ :: Token(_, d2) :: _ =>
         for {
           n1 <- valueOfRating(d1)
@@ -128,7 +128,7 @@ trait Rules extends DimRules {
   val rangeOfRatingsWithSuffix = Rule(
     name = "range of rating <suffix>",
     pattern = List(isDoubleSideRating.predicate, "之间".regex),
-    prod = {
+    prod = tokens {
       case t1 :: _ => t1
     }
   )

@@ -45,7 +45,7 @@ object SolarTerms {
   val rule = Rule(
     name = "<solar term>",
     pattern = List(dict.lexicon),
-    prod = {
+    prod = tokens {
       case Token(LexiconMatch, LexiconMatches(s, t)) :: _ =>
         val td = TimeData(
           timePred = solarTermPredicate(t),

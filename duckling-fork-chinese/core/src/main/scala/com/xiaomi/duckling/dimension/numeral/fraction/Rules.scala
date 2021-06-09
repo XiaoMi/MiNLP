@@ -27,7 +27,7 @@ trait Rules extends DimRules {
   val fenZhi = Rule(
     name = "<number> 分之 <number>",
     pattern = List(isDimension(Numeral).predicate, "分之".regex, isPositive.predicate),
-    prod = {
+    prod = tokens {
       case Token(_, n1: NumeralData) :: _ :: Token(_, n2: NumeralData) :: _ =>
         val v = if (n1.value == 0) 0 else n2.value / n1.value
         fraction(v, n2.value, n1.value)
@@ -37,7 +37,7 @@ trait Rules extends DimRules {
   val slashSymbol = Rule(
     name = "<number> / <number>",
     pattern = List(isDimension(Numeral).predicate, "/".regex, isDimension(Numeral).predicate),
-    prod = {
+    prod = tokens {
       case Token(_, n1: NumeralData) :: _ :: Token(_, n2: NumeralData) :: _ =>
         val v = if (n2.value == 0) 0 else n1.value / n2.value
         fraction(v, n1.value, n2.value)
@@ -47,7 +47,7 @@ trait Rules extends DimRules {
   val percentLike = Rule(
     name = "|thousand|th of <number>",
     pattern = List("(百|千|万)分之".regex, isDimension(Numeral).predicate),
-    prod = {
+    prod = tokens {
       case Token(_, GroupMatch(_ :: s :: _)) :: Token(_, n: NumeralData) :: _ =>
         val scalar = s match {
           case "百" => 100.0
@@ -61,7 +61,7 @@ trait Rules extends DimRules {
   val percentSymbol = Rule(
     name = "<number> percent symbol",
     pattern = List(isDimension(Numeral).predicate, "(%|‰)".regex),
-    prod = {
+    prod = tokens {
       case Token(_, n: NumeralData) :: Token(_, GroupMatch(s :: _)) :: _ =>
         val scalar = s match {
           case "%" => 0.01
@@ -72,14 +72,14 @@ trait Rules extends DimRules {
   )
 
   val oneHalf =
-    Rule(name = "<1> half", pattern = List(isIntegerBetween(1, 1).predicate, "半".regex), prod = {
+    Rule(name = "<1> half", pattern = List(isIntegerBetween(1, 1).predicate, "半".regex), prod = tokens {
       case _ => fraction(0.5, 50.0, 100.0)
     })
 
   val hundredPercentRule = Rule(
     name = "100%",
     pattern = List("百分之?百".regex),
-    prod = {
+    prod = tokens {
       case _ => fraction(1.0, 100.0, 100.0)
     }
   )

@@ -29,7 +29,7 @@ trait Rules extends DimRules {
   val concrete = Rule(
     name = "<number> concrete age",
     pattern = List(isDimension(Numeral).predicate, "岁半?".regex),
-    prod = {
+    prod = tokens {
       case t1 :: Token(_, GroupMatch(s :: _)) :: _ =>
         for (i <- getIntValue(t1)) yield {
           val n = if (s.endsWith("半")) i + 0.5 else i
@@ -42,7 +42,7 @@ trait Rules extends DimRules {
   val greater = Rule(
     name = "greater than <age>",
     pattern = List("(大于|高于|超过|不低于)".regex, isConcreteAge.predicate),
-    prod = {
+    prod = tokens {
       case Token(_, GroupMatch(_ :: _)) :: Token(_, AgeData(NumeralValue(n, _))) :: _ =>
         token(OpenIntervalValue(n, After))
     }
@@ -52,7 +52,7 @@ trait Rules extends DimRules {
   val less = Rule(
     name = "less than <age>",
     pattern = List("(小于|低于|不超过|不高于)".regex, isConcreteAge.predicate),
-    prod = {
+    prod = tokens {
       case _ :: Token(_, AgeData(NumeralValue(n, _))) :: _ =>
         token(OpenIntervalValue(n, Before))
     }
@@ -61,7 +61,7 @@ trait Rules extends DimRules {
   val ageGreaterOrLess = Rule(
     name = "<age> up/down",
     pattern = List(isConcreteAge.predicate, "以(上|下)".regex),
-    prod = {
+    prod = tokens {
       case Token(_, AgeData(NumeralValue(n, _))) :: Token(_, GroupMatch(_ :: s :: _)) :: _ =>
         val direction = if (s == "上") After else Before
         token(OpenIntervalValue(n, direction))
@@ -71,7 +71,7 @@ trait Rules extends DimRules {
   val ageToAge = Rule(
     name = "<age> to <age>",
     pattern = List(or(isConcreteAge, isPositive).predicate, "(到|至)".regex, isConcreteAge.predicate),
-    prod = {
+    prod = tokens {
       case Token(_, data) :: _ :: Token(_, AgeData(NumeralValue(n2, _))) :: _ =>
         val n1 = data match {
           case AgeData(NumeralValue(n, _))       => n

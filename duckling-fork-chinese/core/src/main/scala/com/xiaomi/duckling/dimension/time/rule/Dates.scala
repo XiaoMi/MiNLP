@@ -23,7 +23,7 @@ import com.xiaomi.duckling.dimension.time.enums.Hint
 import com.xiaomi.duckling.dimension.time.{Time, TimeData}
 
 object Dates {
-  val ruleSimpleDates = Rule(name = "<date>", pattern = List(isDimension(Date).predicate), prod = {
+  val ruleSimpleDates = Rule(name = "<date>", pattern = List(isDimension(Date).predicate), prod = tokens {
     case Token(_, td: TimeData) :: _ => Token(Time, td.copy(hint = Hint.Date))
   })
 

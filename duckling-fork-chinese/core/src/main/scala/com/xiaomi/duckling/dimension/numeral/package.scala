@@ -16,7 +16,18 @@
 
 package com.xiaomi.duckling.dimension
 
+import com.xiaomi.duckling.Types.{Options, Production, Token}
+
 package object numeral {
   val CNDigit = "(零|幺|一|二|两|三|四|五|六|七|八|九)"
   val CapitalCNDigit = "(〇|壹|贰|叁|肆|伍|陆|柒|捌|玖)"
+
+
+  type NumeralProd = PartialFunction[(NumeralOptions, List[Token]), Option[Token]]
+
+  def opt(nopt: NumeralProd): Production = {
+    case (options: Options, tokens: List[Token]) if nopt.isDefinedAt((options.numeralOptions, tokens)) =>
+      nopt(options.numeralOptions, tokens)
+    case _ => None
+  }
 }

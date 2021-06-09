@@ -19,7 +19,7 @@ package com.xiaomi.duckling.engine
 import scala.util.matching.Regex
 
 import com.xiaomi.duckling.Document
-import com.xiaomi.duckling.Types.{Range, Token}
+import com.xiaomi.duckling.Types.{Options, Range, Token}
 import com.xiaomi.duckling.dimension.matcher.{Varchar, VarcharMatch}
 import com.xiaomi.duckling.types.Node
 
@@ -71,25 +71,25 @@ object VarcharLookup {
     }
   }
 
-  def endsVarcharExpansion(doc: Document, node: Node): Node = {
+  def endsVarcharExpansion(doc: Document, node: Node, options: Options): Node = {
     if (node.children.isEmpty) node
     else {
-      val (updateLeft, leftNeedUpdate) = leftVarcharExpansion(doc, node)
-      val (updated, rightNeedUpdate) = rightVarcharExpansion(doc, updateLeft)
-      if (leftNeedUpdate || rightNeedUpdate) updateNode(updated)
+      val (updateLeft, leftNeedUpdate) = leftVarcharExpansion(doc, node, options)
+      val (updated, rightNeedUpdate) = rightVarcharExpansion(doc, updateLeft, options)
+      if (leftNeedUpdate || rightNeedUpdate) updateNode(updated, options)
       else updated
     }
   }
 
-  def updateNode(node: Node): Node = {
-    val prod = node.production(node.children.map(_.token))
+  def updateNode(node: Node, options: Options): Node = {
+    val prod = node.production(options, node.children.map(_.token))
     node.copy(
       token = prod.get,
       range = Range(node.children.head.range.start, node.children.last.range.end)
     )
   }
 
-  def leftVarcharExpansion(doc: Document, node: Node): (Node, Boolean) = {
+  def leftVarcharExpansion(doc: Document, node: Node, options: Options): (Node, Boolean) = {
     if (node.children.isEmpty || node.range.start == 0) (node, false)
     else {
       val head @ Node(Range(s, t), token, children, _, _, _) = node.children.head
@@ -104,8 +104,8 @@ object VarcharLookup {
             (u, true)
           case _ =>
             if (children.nonEmpty) {
-              val (n, update) = leftVarcharExpansion(doc, head)
-              if (update) (updateNode(n), true) else (head, false)
+              val (n, update) = leftVarcharExpansion(doc, head, options)
+              if (update) (updateNode(n, options), true) else (head, false)
             } else (head, false)
         }
       if (updated) {
@@ -116,7 +116,7 @@ object VarcharLookup {
     }
   }
 
-  def rightVarcharExpansion(doc: Document, node: Node): (Node, Boolean) = {
+  def rightVarcharExpansion(doc: Document, node: Node, options: Options): (Node, Boolean) = {
     if (node.children.isEmpty || node.range.end == doc.length) (node, false)
     else {
       val last @ Node(Range(s, t), token, children, _, _, _) = node.children.last
@@ -134,8 +134,8 @@ object VarcharLookup {
             (u, true)
           case _ =>
             if (children.nonEmpty) {
-              val (n, update) = rightVarcharExpansion(doc, last)
-              if (update) { (updateNode(n), true) } else (n, false)
+              val (n, update) = rightVarcharExpansion(doc, last, options: Options)
+              if (update) { (updateNode(n, options), true) } else (n, false)
             } else (last, false)
         }
       if (updated) {

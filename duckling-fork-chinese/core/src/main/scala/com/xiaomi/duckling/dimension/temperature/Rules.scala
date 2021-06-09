@@ -37,7 +37,7 @@ trait Rules extends DimRules {
       isDimension(Numeral).predicate,
       unitPattern.regex
     ),
-    prod = {
+    prod = tokens {
       case Token(RegexMatch, GroupMatch(prefix :: _)) :: Token(
       Numeral,
       NumeralData(value, _, _, _, _, _)
@@ -55,7 +55,7 @@ trait Rules extends DimRules {
   val ruleTemperature = Rule(
     name = "<number> unit like [30华氏度]",
     pattern = List(isDimension(Numeral).predicate, unitPattern.regex),
-    prod = {
+    prod = tokens {
       case Token(Numeral, NumeralData(value, _, _, _, _, _)) :: Token(
       RegexMatch,
       GroupMatch(unitStr :: _)

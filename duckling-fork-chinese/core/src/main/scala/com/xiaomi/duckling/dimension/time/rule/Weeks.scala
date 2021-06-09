@@ -32,7 +32,7 @@ object Weeks {
   val ruleThisDayOfWeek = Rule(
     name = "this <day-of-week>",
     pattern = List("(这|今|本)个?".regex, isADayOfWeek.predicate),
-    prod = {
+    prod = tokens {
       case _ :: Token(Time, td: TimeData) :: _ =>
         (predNth(0, false) >>> reset(Week) >>> tt) (td)
     }
@@ -64,13 +64,13 @@ object Weeks {
   val ruleNextDayOfWeek = Rule(
     name = "next <day-of-week>",
     pattern = List("(明|下)个?".regex, isADayOfWeek.predicate),
-    prod = {
+    prod = tokens {
       case _ :: Token(Time, td: TimeData) :: _ =>
         (predNth(1, false) >>> reset(Week) >>> tt) (td)
     }
   )
 
-  val ruleWeekend = Rule(name = "week-end", pattern = List("周末".regex), prod = {
+  val ruleWeekend = Rule(name = "week-end", pattern = List("周末".regex), prod = tokens {
     case _ => tt(weekend)
   })
 

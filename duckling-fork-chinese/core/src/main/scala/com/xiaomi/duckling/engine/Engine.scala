@@ -47,7 +47,7 @@ object Engine extends LazyLogging {
             options: Options): List[Node] = {
     val input = lang.sentence
     val doc = Document.fromLang(lang)
-    val stash = parseString(rules, doc, options.full)
+    val stash = parseString(rules, doc, options)
     val orderedList = stash.toPosOrderedList()
     val full =
       if (options.full) orderedList.filter(r => r.range.rangeEq(0, input.length)) else orderedList
@@ -59,7 +59,7 @@ object Engine extends LazyLogging {
                       context: Context,
                       options: Options): List[ResolvedToken] = {
     val input = doc.rawInput
-    val stash = parseString(rules, doc, options.full)
+    val stash = parseString(rules, doc, options)
     val orderedList = stash.toPosOrderedList()
     val rs = orderedList.flatMap(resolveNode(doc, context, options))
     val full =
@@ -67,18 +67,10 @@ object Engine extends LazyLogging {
     full.distinct
   }
 
-  /**
-    * full可以提前剪枝，避免生成太多选项
-    *
-    * @param rules
-    * @param sentence
-    * @param full
-    * @return
-    */
-  def parseString(rules: List[Rule], sentence: Document, full: Boolean): Stash = {
+  def parseString(rules: List[Rule], doc: Document, options: Options): Stash = {
     // One the first pass we try all the rules
     val (new_, partialMatches) =
-      parseString1(rules, sentence, Stash.empty(), Stash.empty(), Nil)
+      parseString1(rules, doc, Stash.empty(), Stash.empty(), Nil, options)
     // For subsequent passes, we only try rules starting with a predicate.
     if (new_.isEmpty) Stash.empty()
     else {
@@ -86,7 +78,7 @@ object Engine extends LazyLogging {
         case Rule(_, ItemPredicate(_) :: _, _, _) => true
         case _                                    => false
       }
-      saturateParseString(headPredicateRules, sentence, new_, new_, partialMatches)
+      saturateParseString(headPredicateRules, doc, new_, new_, partialMatches, options)
     }
   }
 
@@ -95,26 +87,27 @@ object Engine extends LazyLogging {
     * Produces new tokens from full matches.
     *
     * @param rules
-    * @param sentence
+    * @param doc
     * @param stash
     * @param new_
     * @param matches
     * @return
     */
   def parseString1(rules: List[Rule],
-                   sentence: Document,
+                   doc: Document,
                    stash: Stash,
                    new_ : Stash,
-                   matches: List[Match]): (Stash, List[Match]) = {
+                   matches: List[Match],
+                   options: Options): (Stash, List[Match]) = {
     // Recursively match patterns.
     // Find which `matches` can advance because of `new`.
-    val newPartial = matches.flatMap(matchFirst(sentence, new_))
+    val newPartial = matches.flatMap(matchFirst(doc, new_))
 
     // Find new matches resulting from newly added tokens (`new`)
-    val newMatches = rules.flatMap(matchFirstAnywhere(sentence, new_))
+    val newMatches = rules.flatMap(matchFirstAnywhere(doc, new_))
 
     val (full, partial) =
-      matchAll(sentence, stash, newPartial ++ newMatches).partition {
+      matchAll(doc, stash, newPartial ++ newMatches).partition {
         case (Rule(_, pattern, _, _), _, _) => pattern.isEmpty
       }
     if (verboseParse) {
@@ -133,7 +126,7 @@ object Engine extends LazyLogging {
       }
     }
     // 观察到在极端case下 .toSet.toList 比 .distinct 更快
-    (Stash.fromList(full.flatMap(produce).toSet.toList), partial ++ matches)
+    (Stash.fromList(full.flatMap(produce(options)).toSet.toList), partial ++ matches)
   }
 
   /**
@@ -148,18 +141,19 @@ object Engine extends LazyLogging {
                           sentence: Document,
                           stash: Stash,
                           new_ : Stash,
-                          matches: List[Match]): Stash = {
-    val (new__, matches_) = parseString1(rules, sentence, stash, new_, matches)
+                          matches: List[Match],
+                          options: Options): Stash = {
+    val (new__, matches_) = parseString1(rules, sentence, stash, new_, matches, options)
     val stash_ = stash.union(new__)
     if (new__.isEmpty) stash
-    else saturateParseString(rules, sentence, stash_, new__, matches_)
+    else saturateParseString(rules, sentence, stash_, new__, matches_, options)
   }
 
   def resolveNode(doc: Document, context: Context, options: Options)(
     node: Node
   ): Option[ResolvedToken] = {
     val unode @ Node(r, Token(dim, data), _, _, _, _) =
-      if (options.varcharExpand) endsVarcharExpansion(doc, node) else node
+      if (options.varcharExpand) endsVarcharExpansion(doc, node, options) else node
     if (unode.isValid(doc)) {
       data.resolve(context, options).map {
         case (value, latent) =>
@@ -219,7 +213,7 @@ object Engine extends LazyLogging {
     }
   }
 
-  def produce(`match`: Match): Option[Node] = `match` match {
+  def produce(options: Options)(`match`: Match): Option[Node] = `match` match {
     case (Rule(name, _, _, _), _, Nil) =>
       if (verboseProduce) logger.info(s"rule: $name, reverse route: []")
       None
@@ -229,7 +223,7 @@ object Engine extends LazyLogging {
         etuor @ Node(Range(_, e), _, _, _, _, _) :: _
         ) =>
       val route = etuor.reverse
-      val maybeToken = production.orElse(emptyProduction)(route.map(_.token))
+      val maybeToken = production.orElse(emptyProduction).apply((options, route.map(_.token)))
 
       if (verboseProduce) {
         logger.info(s"rule: $name, nodes: \n${route.map(n => s"  -- $n").mkString("\n")}")

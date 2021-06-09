@@ -30,7 +30,7 @@ trait Rules extends DimRules {
   val numberKm = Rule(
     name = "<number> km",
     pattern = List(isDimension(Numeral).predicate, "(?i)千米|米|公里|km".regex),
-    prod = {
+    prod = tokens {
       case Token(_, NumeralData(value, _, _, _, _, _)) :: Token(_, GroupMatch(s :: _)) :: _ =>
         val v = if (s == "米") value else 1000 * value
         Token(Distance, QuantityData(v, "米", dim))
