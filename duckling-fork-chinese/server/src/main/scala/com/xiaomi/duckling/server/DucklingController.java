@@ -23,6 +23,7 @@ import com.xiaomi.duckling.Types.Answer;
 import com.xiaomi.duckling.Types.Context;
 import com.xiaomi.duckling.Types.Options;
 import com.xiaomi.duckling.dimension.EnumeratedDimension;
+import com.xiaomi.duckling.dimension.numeral.NumeralOptions;
 
 @Slf4j
 @RestController
@@ -40,10 +41,12 @@ public class DucklingController {
         Options options;
         if (StringUtils.isNotBlank(dims)) {
             Set<String> set = Arrays.stream(dims.split(",")).map(String::toLowerCase).collect(Collectors.toSet());
-            options = new Options(set, false).withTimeout(-1);
+            options = new Options(set, false);
         } else {
-            options = new Options(DEFAULT_DIMENSION_LIST, false).withTimeout(-1);
+            options = new Options(DEFAULT_DIMENSION_LIST, false);
         }
+        options = options.withNumeralOptions(new NumeralOptions(false, false, true, true))
+            .withTimeout(-1);
         return Api.analyzeJ(text, new Context(ZonedDateTime.now(), Locale.CHINA), options);
     }
 

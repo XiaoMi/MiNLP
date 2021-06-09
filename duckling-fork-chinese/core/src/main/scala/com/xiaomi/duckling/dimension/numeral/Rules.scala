@@ -45,10 +45,14 @@ trait Rules extends DimRules {
 
   val ruleInteger = Rule(
     name = "integer (0..10)",
-    pattern = List("(〇|零|幺|一|二|两|兩|三|四|五|六|七|八|九|十|壹|贰|叁|肆|伍|陆|柒|捌|玖|拾)".regex),
-    prod = tokens {
-      case Token(RegexMatch, GroupMatch(m :: _)) :: _ =>
-        integerMap.get(m).flatMap(i => long(i))
+    pattern = List("(〇|零|幺|一|二|两|兩|俩|三|仨|四|五|六|七|八|九|十|壹|贰|叁|肆|伍|陆|柒|捌|玖|拾)".regex),
+    prod = opt {
+      case (nopt: NumeralOptions, Token(RegexMatch, GroupMatch(m :: _)) :: _) if integerMap.contains(m) =>
+        val v = integerMap(m)
+        if (m == "俩" || m == "仨") {
+          if (!nopt.dialectSupport) None
+          else token(NumeralData(v, composable = false))
+        } else integerMap.get(m).flatMap(i => long(i))
     }
   )
   val ruleNumeralsPrefixWithNegativeOrMinus = Rule(
@@ -158,12 +162,13 @@ trait Rules extends DimRules {
     name = "compose by multiplication of [十百千万亿]",
     pattern =
       List(and(isNumeralDimension, not(isCnSequence)).predicate, numeralSuffixListPattern.regex),
-    prod = tokens {
-      case (t1@Token(_, NumeralData(value, _, _, _, _, _))) :: Token(_, GroupMatch(unit :: _)) :: _ =>
+    prod = opt {
+      case (opts, (t1@Token(_, NumeralData(value, _, _, _, _, _))) :: Token(_, GroupMatch(unit :: _)) :: _) =>
         // 不支持 3.5千/百/十
         if (!isInteger(value) && unit.matches("[十百千]")) None
         // 不支持30百，30千
         else if (isInteger(value) && value > 9.9 && unit.matches("[十百千]")) None
+        else if (!opts.KMG_Support && Set("k", "m", "g").contains(unit.toLowerCase)) None
         else {
           for (nd <- multiply(t1, numeralSuffixList(unit.toLowerCase()))) yield {
             token(nd)

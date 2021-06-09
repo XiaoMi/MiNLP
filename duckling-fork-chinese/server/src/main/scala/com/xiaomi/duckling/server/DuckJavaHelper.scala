@@ -2,9 +2,8 @@ package com.xiaomi.duckling.server
 
 import org.json4s.jackson.Serialization.write
 
-import com.xiaomi.duckling.Api
 import com.xiaomi.duckling.JsonSerde._
-import com.xiaomi.duckling.Types.{Answer, Context, Options}
+import com.xiaomi.duckling.Types.Answer
 
 /**
  * 简化Java操作Scala对象
