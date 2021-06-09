@@ -56,7 +56,7 @@ case class NumeralData(value: Double,
  *
  * @param allowZeroLeadingDigits 允许000318解析为318
  * @param cnSequenceAsNumber     允许一二三四解析出1234
- * @param dialectSupport         允许识别方言中的"俩仨伵"
+ * @param dialectSupport         允许识别方言中的"俩仨"
  * @param KMG_Support            允许识别类似"10k"为"10,000"
  */
 case class NumeralOptions(allowZeroLeadingDigits: Boolean = false,

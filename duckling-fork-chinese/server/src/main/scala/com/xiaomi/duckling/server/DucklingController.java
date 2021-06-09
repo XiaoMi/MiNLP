@@ -45,7 +45,8 @@ public class DucklingController {
         } else {
             options = new Options(DEFAULT_DIMENSION_LIST, false);
         }
-        options = options.withNumeralOptions(new NumeralOptions(false, false, true, true));
+        options = options.withNumeralOptions(new NumeralOptions(false, false, true, true))
+            .withTimeout(-1);
         return Api.analyzeJ(text, new Context(ZonedDateTime.now(), Locale.CHINA), options);
     }
 

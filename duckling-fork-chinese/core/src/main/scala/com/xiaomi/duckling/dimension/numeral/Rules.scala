@@ -46,11 +46,11 @@ trait Rules extends DimRules {
   val ruleInteger = Rule(
     name = "integer (0..10)",
     pattern = List("(〇|零|幺|一|二|两|兩|俩|三|仨|四|五|六|七|八|九|十|壹|贰|叁|肆|伍|陆|柒|捌|玖|拾)".regex),
-    prod = {
-      case (options: Options, Token(RegexMatch, GroupMatch(m :: _)) :: _) if integerMap.contains(m) =>
+    prod = opt {
+      case (nopt: NumeralOptions, Token(RegexMatch, GroupMatch(m :: _)) :: _) if integerMap.contains(m) =>
         val v = integerMap(m)
         if (m == "俩" || m == "仨") {
-          if (!options.numeralOptions.dialectSupport) None
+          if (!nopt.dialectSupport) None
           else token(NumeralData(v, composable = false))
         } else integerMap.get(m).flatMap(i => long(i))
     }
