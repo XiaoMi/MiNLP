@@ -162,12 +162,13 @@ trait Rules extends DimRules {
     name = "compose by multiplication of [十百千万亿]",
     pattern =
       List(and(isNumeralDimension, not(isCnSequence)).predicate, numeralSuffixListPattern.regex),
-    prod = tokens {
-      case (t1@Token(_, NumeralData(value, _, _, _, _, _))) :: Token(_, GroupMatch(unit :: _)) :: _ =>
+    prod = opt {
+      case (opts, (t1@Token(_, NumeralData(value, _, _, _, _, _))) :: Token(_, GroupMatch(unit :: _)) :: _) =>
         // 不支持 3.5千/百/十
         if (!isInteger(value) && unit.matches("[十百千]")) None
         // 不支持30百，30千
         else if (isInteger(value) && value > 9.9 && unit.matches("[十百千]")) None
+        else if (!opts.KMG_Support && Set("k", "m", "g").contains(unit.toLowerCase)) None
         else {
           for (nd <- multiply(t1, numeralSuffixList(unit.toLowerCase()))) yield {
             token(nd)

@@ -62,7 +62,7 @@ case class NumeralData(value: Double,
 case class NumeralOptions(allowZeroLeadingDigits: Boolean = false,
                           cnSequenceAsNumber: Boolean = false,
                           dialectSupport: Boolean = false,
-                          KMG_Support: Boolean = false)
+                          KMG_Support: Boolean = true)
 
 trait IntervalValue extends ResolvedValue
 
