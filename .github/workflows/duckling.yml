@@ -1,4 +1,4 @@
-name: duckling-fork-chinese
+name: duckling-fork-chinese build
 
 on: 
   pull_request:

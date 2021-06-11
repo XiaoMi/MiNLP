@@ -25,12 +25,15 @@ lazy val sharedSettings = Seq(
     .runMainTask(Compile / fullClasspath, Compile / run / runner)
     .evaluated,
 
+  scmInfo := Some(ScmInfo(url("https://github.com/XiaoMi/MiNLP"), "scm:git@github.com:XiaoMi/MiNLP.git")),
   homepage := Some(url("https://github.com/XiaoMi/MiNLP/tree/main/duckling-fork-chinese")),
   licenses := List("Apache-2.0" -> url("http://www.apache.org/licenses/LICENSE-2.0")),
   developers := List(
     Developer("du00cs", "Ninglin Du", "duninglin@xiaomi.com", url("https://github.com/du00cs")),
     Developer("zhangsonglei", "Songlei Zhang", "zhangsonglei@xiaomi.com", url("https://github.com/zhangsonglei"))
   ),
+  pomIncludeRepository := { _ => false },
+  sonatypeProfileName := "com.xiaomi",
   Test / publishArtifact := false
 )
 

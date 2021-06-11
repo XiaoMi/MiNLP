@@ -19,11 +19,20 @@
 
 ## 1.1 Scala
 
-> 发布到开放仓库，还在sonatype的申请流程中
+目前只发布了scala_2.11版本的包，有需要2.12/2.13的，可以在Issue区留言。
+```
+maven
 
+<dependency>
+  <groupId>com.xiaomi.duckling</groupId>
+  <artifactId>duckling-core_2.11</artifactId>
+  <version>1.2D</version>
+</dependency>
+
+sbt
+"com.xiaomi.duckling" % "duckling-core" %% "1.2D"
 ```
-sbt - "duckling" % "duckling-core_2.11" %% VERSION
-```
+
 
 ```scala
 import duckling.Api
@@ -130,17 +139,10 @@ Intellij IDEA的设置中打开`Editor -> Code Style -> Scala`，点击Scheme右
 
 ## 3. 发布
 
-参照[olafurpg/sbt-ci-release](https://github.com/olafurpg/sbt-ci-release)，需要配置好环境变量后执行`ci-release`命令，就能发布到sonatype了。
+参照[olafurpg/sbt-ci-release](https://github.com/olafurpg/sbt-ci-release)，main分支上的代码会自动更新至sonatype的snapshot，推送名字为"*D"的分支则会触发github actions中的duckling的部署。
 
 ```
-PGP_PASSPHRASE=
-PGP_SECRET=
-SONATYPE_USERNAME=
-SONATYPE_PASSWORD=
-```
-
-```scala
-sbt ci-release
+git tag -a "v1.xD" -m "duckling 1.x"
 ```
 
 ## 4. 如何新增一个Dimension
@@ -157,7 +159,12 @@ duckling-fork-chinese 对每一类模式词的抽取，创建了一类Dimension�
 
 参考[How to Contribute](./doc/CONTRIBUTING.md)
 
-## 6. License
+## 6. 致谢
+
+我们在做时间解析的农历部分时，大量使用了[LunarCalendar](https://github.com/heqiao2010/LunarCalendar)，并得到了[heqiao2010](https://github.com/heqiao2010)的支持，在此表示非常感谢。
+
+
+## 7. License
 
 duckling-fork-chinese Apache 2.0
 
