@@ -1,8 +1,8 @@
-name: Release
+name: duckling-fork-chinese Release
 on:
   push:
-    branches: ["*"]
-    tags: ["*"]
+    branches: ["main", "master"]
+    tags: ["*D"]
 jobs:
   publish:
     runs-on: ubuntu-20.04
