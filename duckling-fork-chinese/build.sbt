@@ -33,7 +33,7 @@ lazy val sharedSettings = Seq(
     Developer("zhangsonglei", "Songlei Zhang", "zhangsonglei@xiaomi.com", url("https://github.com/zhangsonglei"))
   ),
   pomIncludeRepository := { _ => false },
-  sonatypeProfileName := "com.xiaomi.duckling",
+  sonatypeProfileName := "com.xiaomi",
   Test / publishArtifact := false
 )
 
