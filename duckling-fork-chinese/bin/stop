@@ -1,0 +1,6 @@
+#!/bin/bash
+
+for pid in `jps -ml | grep com.xiaomi.duckling.server.DucklingApplication | awk '{print $1}'`; 
+do 
+    kill -9 $pid
+done

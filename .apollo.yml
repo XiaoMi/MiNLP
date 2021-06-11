@@ -1,0 +1,10 @@
+---
+duckling-server:
+  build:
+    target: release
+    command: 'bash duckling-fork-chinese/bin/package'
+    env:
+      jdk: 1.8
+  runtime:
+    start: "cd /home/work/app/duckling-server; bash bin/stop; bash bin/duckling-server"
+    stop: "cd /home/work/app/duckling-server; bash bin/stop"
