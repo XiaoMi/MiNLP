@@ -133,7 +133,7 @@ Intellij IDEA的设置中打开`Editor -> Code Style -> Scala`，点击Scheme右
 只会发布core项目，其它的会跳过：
 
 ```scala
-sbt release
+sbt ci-release
 ```
 
 ## 4. 如何新增一个Dimension
