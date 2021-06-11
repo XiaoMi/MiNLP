@@ -1,0 +1,34 @@
+variables:
+  PROJECT_SSH_URL: "git@git.n.xiaomi.com:knowledge-base/minlp.git"
+  HOSTS: $DEPLOY_HOSTS
+
+before_script:
+  # - export LC_ALL="zh_CN.UTF-8" # 编码问题可能导致测试出错
+  - fusion-cli config --access-key $ACCESS_KEY --secret-key $SECRET_KEY
+
+stages:
+  - 测试
+  - 系统编译
+  - 系统部署
+
+build:
+  stage: 测试
+  script:
+    - cd duckling-fork-chinese
+    - sbt clean coverage test
+    - sbt coverageAggregate
+
+build_branch:
+  stage: 系统编译
+  script:
+    - fusion-cli release build --branch $CI_COMMIT_REF_NAME --version $CI_COMMIT_SHORT_SHA --code $PROJECT_SSH_URL --service $RELEASE_SERVICE --wait
+  only:
+    - main
+
+deploy_branch:
+  stage: 系统部署
+  script:
+    - fusion-cli release deploy --branch $CI_COMMIT_REF_NAME --version $CI_COMMIT_SHORT_SHA --pdl $RELEASE_PDL --job $RELEASE_JOB_NAME --service $RELEASE_SERVICE --hosts $HOSTS --wait
+  only:
+    - main
+  when: on_success

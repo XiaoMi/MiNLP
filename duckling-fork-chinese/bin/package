@@ -1,0 +1,9 @@
+#!/bin/bash
+
+cd duckling-fork-chinese
+sbt "project server; runMain com.xiaomi.duckling.ranking.NaiveBayesRank naive_bayes.json"
+cp server/naive_bayes.json server/src/main/resources/
+sbt server/stage
+mkdir ../release
+cp -r server/target/universal/stage/* ../release
+cp bin/stop ../release/bin/
