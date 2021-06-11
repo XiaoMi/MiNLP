@@ -130,7 +130,14 @@ Intellij IDEA的设置中打开`Editor -> Code Style -> Scala`，点击Scheme右
 
 ## 3. 发布
 
-只会发布core项目，其它的会跳过：
+参照[olafurpg/sbt-ci-release](https://github.com/olafurpg/sbt-ci-release)，需要配置好环境变量后执行`ci-release`命令，就能发布到sonatype了。
+
+```
+PGP_PASSPHRASE=
+PGP_SECRET=
+SONATYPE_USERNAME=
+SONATYPE_PASSWORD=
+```
 
 ```scala
 sbt ci-release
