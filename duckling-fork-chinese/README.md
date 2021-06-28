@@ -1,7 +1,7 @@
 # duckling-fork-chinese
 ![workflow](https://github.com/XiaoMi/MiNLP/actions/workflows/duckling.yml/badge.svg)[![codecov](https://codecov.io/gh/du00cs/MiNLP/branch/main/graph/badge.svg?token=5CFWSYJHG7)](https://codecov.io/gh/du00cs/MiNLP)
 
-[facebook/duckling](https://github.com/facebook/duckling)项目的scala复刻版，本项目录目前只服务于中文解析，暂时只提供中文文档。
+[facebook/duckling](https://github.com/facebook/duckling)项目的scala复刻版，本项目目前只服务于中文解析，暂时只提供中文文档。
 
 > 每一种支持的解析类型，比如时间、数字等，被称为一个dimension。
 
@@ -26,11 +26,11 @@ maven
 <dependency>
   <groupId>com.xiaomi.duckling</groupId>
   <artifactId>duckling-core_2.11</artifactId>
-  <version>1.2D</version>
+  <version>1.2.2D</version>
 </dependency>
 
 sbt
-"com.xiaomi.duckling" % "duckling-core" %% "1.2D"
+"com.xiaomi.duckling" % "duckling-core" %% "1.2.2D"
 ```
 
 
@@ -142,7 +142,8 @@ Intellij IDEA的设置中打开`Editor -> Code Style -> Scala`，点击Scheme右
 参照[olafurpg/sbt-ci-release](https://github.com/olafurpg/sbt-ci-release)，main分支上的代码会自动更新至sonatype的snapshot，推送名字为"*D"的分支则会触发github actions中的duckling的部署。
 
 ```
-git tag -a "v1.xD" -m "duckling 1.x"
+发布确保version.sbt中的版本与待发布版本一致：ThisBuild / version := "x.x.xD"
+git tag -a "vx.x.xD" -m "duckling x.x.xD"
 ```
 
 ## 4. 如何新增一个Dimension
