@@ -26,11 +26,11 @@ maven
 <dependency>
   <groupId>com.xiaomi.duckling</groupId>
   <artifactId>duckling-core_2.11</artifactId>
-  <version>1.2D</version>
+  <version>1.2.2D</version>
 </dependency>
 
 sbt
-"com.xiaomi.duckling" % "duckling-core" %% "1.2D"
+"com.xiaomi.duckling" % "duckling-core" %% "1.2.2D"
 ```
 
 
@@ -142,7 +142,8 @@ Intellij IDEA的设置中打开`Editor -> Code Style -> Scala`，点击Scheme右
 参照[olafurpg/sbt-ci-release](https://github.com/olafurpg/sbt-ci-release)，main分支上的代码会自动更新至sonatype的snapshot，推送名字为"*D"的分支则会触发github actions中的duckling的部署。
 
 ```
-git tag -a "v1.xD" -m "duckling 1.x"
+更新version.sbt中的版本为待发布版本ThisBuild / version := "x.x.xD"
+git tag -a "vx.x.xD" -m "duckling x.x.xD"
 ```
 
 ## 4. 如何新增一个Dimension
