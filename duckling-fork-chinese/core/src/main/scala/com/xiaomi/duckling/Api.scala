@@ -104,9 +104,9 @@ object Api extends LazyLogging {
   }
 
   def analyze(lang: LanguageInfo, context: Context, options: Options): List[Answer] = {
-    if (query_cnt <= queryCntThreshold) query_cnt += 1
+    if (enableTimeoutCache && query_cnt <= queryCntThreshold) query_cnt += 1
 
-    if (options.timeout.exists(_ > 0) && query_cnt > queryCntThreshold) {
+    if (enableTimeoutCache && options.timeout.exists(_ > 0) && query_cnt > queryCntThreshold) {
       analyzeWithTimeout(lang, context, options)
     } else {
       analyzeWithoutTimeout(lang, context, options)
