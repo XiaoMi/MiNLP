@@ -27,6 +27,7 @@ import com.xiaomi.duckling.dimension.time.form.{DayOfWeek, Form, Month => _, _}
 import com.xiaomi.duckling.dimension.time.helper.TimePredicateHelpers._
 import com.xiaomi.duckling.dimension.time.predicates.{EmptyTimePredicate, TimeDatePredicate}
 import com.xiaomi.duckling.dimension.time.{TimeData, _}
+import com.xiaomi.duckling.dimension.time.date.{dateSchema, offsetSchema}
 
 object TimeDataHelpers {
 
@@ -48,7 +49,7 @@ object TimeDataHelpers {
   /**
     * 第n个grain粒度的时间点
     */
-  def cycleNth(grain: Grain, n: Int): TimeData = cycleNth(grain, n, grain)
+  def cycleNth(grain: Grain, n: Int): TimeData = cycleNth(grain, n, grain).copy(schema = offsetSchema(grain, n))
 
   def cycleNth(grain: Grain, n: Int, roundGrain: Grain): TimeData = {
     val pred =
@@ -64,8 +65,8 @@ object TimeDataHelpers {
    * @return
    */
   def cycleNthThis(n: Int, g: Grain, grains: Grain*): Option[TimeData] = {
-    if (grains.isEmpty) cycleNth(g, n)
-    else grains.find(_ == g).map(_ => cycleNth(g, n))
+    if (grains.isEmpty) cycleNth(g, n).copy(schema = offsetSchema(g, n))
+    else grains.find(_ == g).map(_ => cycleNth(g, n).copy(schema = offsetSchema(g, n)))
   }
 
   /**
@@ -119,18 +120,20 @@ object TimeDataHelpers {
   // 构造 TimeDatePredicate
 
   val year = (y: Int) => {
-    TimeData(timePred = timeYear(y), timeGrain = Year)
+    val year = y
+    TimeData(timePred = timeYear(y), timeGrain = Year, schema = dateSchema(year = Some(year)))
   }
 
   val month = (m: Int) => {
-    TimeData(timePred = timeMonth(m), timeGrain = Month).at(Hint.MonthOnly)
+    val month = m
+    TimeData(timePred = timeMonth(m), timeGrain = Month, schema = dateSchema(month = Some(month))).at(Hint.MonthOnly)
   }
 
   def dayOfMonth(d: Int): TimeData =
-    TimeData(timeDayOfMonth(d), timeGrain = Day).at(Hint.DayOnly)
+    TimeData(timeDayOfMonth(d), timeGrain = Day, schema = dateSchema(day = d)).at(Hint.DayOnly)
 
   def hour(is12H: Boolean, n: Int): TimeData = {
-    val td = TimeData(timePred = timeHour(is12H, n), timeGrain = Hour)
+    val td = TimeData(timePred = timeHour(is12H, n), timeGrain = Hour, schema = timeSchema(hour = Some(n)))
     timeOfDay(Some(n), is12H, td)
   }
 
@@ -140,7 +143,7 @@ object TimeDataHelpers {
 
   def hourMinute(is12H: Boolean, h: Int, m: Int): TimeData = {
     val td = intersect1(hour(is12H, h), minute(m))
-    timeOfDay(Some(h), is12H, td)
+    timeOfDay(Some(h), is12H, td).copy(schema = timeSchema(hour = Some(h), minute = Some(m)))
   }
 
   def yearMonth(y: Int, m: Int): TimeData = intersect1(year(y), month(m))

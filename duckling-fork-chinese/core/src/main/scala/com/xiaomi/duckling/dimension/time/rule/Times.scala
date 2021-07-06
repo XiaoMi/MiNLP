@@ -30,12 +30,12 @@ import com.xiaomi.duckling.dimension.time.enums.Hint
 import com.xiaomi.duckling.dimension.time.form.TimeOfDay
 import com.xiaomi.duckling.dimension.time.helper.TimeDataHelpers._
 import com.xiaomi.duckling.dimension.time.predicates._
-import com.xiaomi.duckling.dimension.time.{Time, TimeData}
+import com.xiaomi.duckling.dimension.time.{Time, TimeData, intersectSchema}
 
 object Times {
 
   val ruleNow = Rule(name = "now", pattern = List("(现在|此时(此刻)?|此刻|当前|这会儿?)".regex), prod = tokens {
-    case _ => tt(now)
+    case _ => tt(now.copy(schema = Some("[EXT][DATE]NOW")))
   })
 
   val ruleHhmmTimeOfDay = Rule(
@@ -85,7 +85,7 @@ object Times {
     prod = tokens {
       case Token(Time, td1: TimeData) :: Token(Time, td2: TimeData) :: _ =>
         for (td <- intersect(td1, td2)) yield {
-          tt(td.copy(form = td2.form, hint = Hint.PartOfDayAtLast))
+          tt(td.copy(form = td2.form, hint = Hint.PartOfDayAtLast, schema = intersectSchema(td1, td2)))
         }
     }
   )
@@ -103,7 +103,7 @@ object Times {
     name = "<integer> o'clock (hour-of-day): 八点",
     pattern = List(isAnHourOfDay.predicate, "点钟?".regex),
     prod = tokens {
-      case Token(Time, TimeData(_, _, _, _, Some(TimeOfDay(Some(h), _)), _, _, _, _, _, _)) :: _ :: _ =>
+      case Token(Time, TimeData(_, _, _, _, Some(TimeOfDay(Some(h), _)), _, _, _, _, _, _, _)) :: _ :: _ =>
         for {
           t <- tt(hour(is12H = true, h))
         } yield t
@@ -114,7 +114,7 @@ object Times {
     name = "<HH:mm>: 八点五十",
     pattern = List(isAnHourOfDay.predicate, "点".regex, isIntegerBetween(10, 59).predicate),
     prod = tokens {
-      case Token(Time, TimeData(_, _, _, _, Some(TimeOfDay(Some(hour), _)), _, _, _, _, _, _)) :: _ :: token :: _ =>
+      case Token(Time, TimeData(_, _, _, _, Some(TimeOfDay(Some(hour), _)), _, _, _, _, _, _, _)) :: _ :: token :: _ =>
         for {
           n <- getIntValue(token)
           t <- tt(hourMinute(is12H = true, hour, n.toInt))
@@ -126,7 +126,7 @@ object Times {
     name = "half (hour-of-day):一点半/一十/二十五",
     pattern = List(isAnHourOfDay.predicate, "点(半|零[一二三四五六七八九]|一十)".regex),
     prod = tokens {
-      case Token(Time, TimeData(_, _, _, _, Some(TimeOfDay(Some(hour), _)), _, _, _, _, _, _)) ::
+      case Token(Time, TimeData(_, _, _, _, Some(TimeOfDay(Some(hour), _)), _, _, _, _, _, _, _)) ::
             Token(RegexMatch, GroupMatch(_ :: g1 :: _)) :: _ =>
         val m =
           if (g1 == "半") 30
@@ -145,7 +145,7 @@ object Times {
       "(分(?!贝)钟?|刻)".regex
     ),
     prod = tokens {
-      case Token(Time, TimeData(_, _, _, _, Some(TimeOfDay(Some(h), is12H)), _, _, _, _, _, _)) :: _ :: t1
+      case Token(Time, TimeData(_, _, _, _, Some(TimeOfDay(Some(h), is12H)), _, _, _, _, _, _, _)) :: _ :: t1
             :: Token(RegexMatch, GroupMatch(u :: _)) :: _ =>
         val mOpt = getIntValue(t1).map(_.toInt)
         if (mOpt.isEmpty) None

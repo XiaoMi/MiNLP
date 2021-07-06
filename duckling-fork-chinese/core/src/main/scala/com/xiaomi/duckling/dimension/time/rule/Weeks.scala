@@ -27,6 +27,7 @@ import com.xiaomi.duckling.dimension.time.enums.Grain.Week
 import com.xiaomi.duckling.dimension.time.helper.TimeDataHelpers._
 import com.xiaomi.duckling.dimension.time.predicates._
 import com.xiaomi.duckling.dimension.time.{Time, TimeData}
+import com.xiaomi.duckling.dimension.time.date.weekOffsetSchema
 
 object Weeks {
   val ruleThisDayOfWeek = Rule(
@@ -57,7 +58,7 @@ object Weeks {
       }
       val weekday = dayOfWeek(d).copy(okForThisNext = true, notImmediate = false)
       val week = cycleNthThis(n, Week, Week)
-      for(w <- week; td <- intersect(w, weekday)) yield tt(td)
+      for(w <- week; td <- intersect(w, weekday)) yield tt(td.copy(schema = weekOffsetSchema(n, d)))
     }
   )
 
@@ -80,7 +81,7 @@ object Weeks {
         mkSingleRegexRule(
           name,
           pattern,
-          tt(dayOfWeek(i + 1).copy(okForThisNext = true, notImmediate = false))
+          tt(dayOfWeek(i + 1).copy(okForThisNext = true, notImmediate = false, schema = weekOffsetSchema(0, i + 1)))
         )
     }
   }

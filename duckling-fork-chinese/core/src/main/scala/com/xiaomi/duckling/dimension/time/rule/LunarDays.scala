@@ -53,7 +53,7 @@ object LunarDays {
 	def mkRuleLunarDays(list: List[(TimeData, String, String)]): List[(Token, String, String)] = {
 		list.map {
 			case (td, name, ptn) =>
-				val token = tt(td.copy(okForThisNext = true, holiday = name))
+				val token = tt(td.copy(okForThisNext = true, holiday = name, schema = Some(s"[EXT][FEST]FEST_$name")))
 				(token, name, ptn)
 		}
 	}
@@ -68,7 +68,7 @@ object LunarDays {
       val cal = Some(Lunar(false))
       val td1 = TimeData(EndOfGrainPredicate, timeGrain = Day, calendar = cal)
       val td = TimeData(SequencePredicate(List(lunar(month(12)), td1)), timeGrain = Day, calendar = cal)
-      Some(tt(td.copy(okForThisNext = true, holiday = "除夕")))
+      Some(tt(td.copy(okForThisNext = true, holiday = "除夕", schema = Some("[EXT][FEST]FEST_除夕"))))
     }
   )
 }

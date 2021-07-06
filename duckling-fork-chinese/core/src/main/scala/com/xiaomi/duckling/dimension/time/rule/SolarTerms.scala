@@ -51,7 +51,8 @@ object SolarTerms {
           timePred = solarTermPredicate(t),
           timeGrain = Day,
           okForThisNext = true,
-          holiday = t
+          holiday = t,
+          schema = Some(s"[EXT][FEST]FEST_$t")
         )
         tt(td)
     }

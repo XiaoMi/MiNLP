@@ -34,7 +34,7 @@ case object Duration extends Dimension with Rules with Examples {
   override val nonOverlapDims: List[Dimension] = List(Ordinal)
 }
 
-case class DurationData(value: Int, grain: Grain, latent: Boolean = false)
+case class DurationData(value: Int, grain: Grain, latent: Boolean = false, override val schema: Option[String] = None)
     extends ResolvedValue
     with Resolvable {
 
@@ -46,7 +46,7 @@ case class DurationData(value: Int, grain: Grain, latent: Boolean = false)
     val g = if (grain < o.grain) grain else o.grain
     val d1 = withGrain(g, this)
     val d2 = withGrain(g, o)
-    DurationData(d1.value + d2.value, g)
+    DurationData(d1.value + d2.value, g, schema = durationSchema(d1, d2))
   }
 
   override def toString: String = value.toString

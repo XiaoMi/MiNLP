@@ -1,1 +1,1 @@
-ThisBuild / version := "1.2-SNAPSHOT"
+ThisBuild / version := "schema-1.0D"

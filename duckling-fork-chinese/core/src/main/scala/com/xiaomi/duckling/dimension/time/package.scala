@@ -17,7 +17,6 @@
 package com.xiaomi.duckling.dimension
 
 import com.github.heqiao2010.lunar.{LunarCalendar, LunarData}
-
 import java.time.LocalTime
 
 import com.xiaomi.duckling.Types.{ZoneCN, conf}
@@ -27,11 +26,16 @@ import com.xiaomi.duckling.dimension.time.enums.Grain._
 import com.xiaomi.duckling.dimension.time.enums._
 import com.xiaomi.duckling.dimension.time.helper.TimeObjectHelpers._
 import com.xiaomi.duckling.dimension.time.predicates._
+import org.apache.commons.lang3.StringUtils
+
+import scala.collection.mutable
+import scala.util.matching.Regex
 
 package object time {
   type PastFutureTime = (Stream[TimeObject], Stream[TimeObject])
 
   private val MaxIter = conf.getInt("dimension.time.max.iter")
+  private val prefix_pattern = new Regex("\\[.*?\\]")
 
   /**
     * Return a tuple of (past, future) elements
@@ -397,5 +401,115 @@ package object time {
   def isEmptyPredicate(p: TimePredicate): Boolean = p match {
     case EmptyTimePredicate => true
     case _                  => false
+  }
+
+  /**
+    * 时间schema，时分秒, hh:mm:ss
+    * @param hour   时
+    * @param minute 分
+    * @param second 秒
+    * @return
+    */
+  def timeSchema(hour: Option[Int] = None,
+                 minute: Option[Int] = None,
+                 second: Option[Int] = None): Option[String] = {
+    var schema: String = "T"
+    if (hour.isDefined) {
+      schema = if (hour.get > 9) schema + hour.get.toString else schema + "0" + hour.get.toString
+    }
+
+    if (minute.isDefined) {
+      val mm = if(minute.get > 9) minute.get.toString else "0" + minute.get.toString
+      schema = if (schema.length > 1) schema + ':' + mm else schema + "00:" + mm
+    } else {
+      schema = schema + ":00"
+    }
+
+    if (second.isDefined) {
+      val ss = if(second.get > 9) second.get.toString else "0" + second.get.toString
+      schema = if (schema.length > 1) schema + ':' + ss else schema + "00:00:" + ss
+    } else {
+      schema = schema + ":00"
+    }
+
+    Some(schema)
+  }
+
+  /**
+    * 时间区间 schema
+    * @param td1  开始时间
+    * @param td2  结束时间
+    * @return     start/end
+    */
+  def intervalSchema(td1: TimeData, td2: TimeData): Option[String] = {
+    if (td1.schema.isDefined && td2.schema.isDefined)
+      Some(td1.schema.get + "/" + td2.schema.get)
+    else None
+  }
+
+  /**
+    * 相对时间
+    * 前三天     ../duration
+    * 后五个小时 duration/..
+    * @param schema     durationSchema
+    * @param direction  direction
+    * @return           relative schema
+    */
+  def relativeSchema(schema: Option[String], direction: IntervalDirection): Option[String] = {
+    if (schema.isDefined && schema.nonEmpty) {
+      if (IntervalDirection.After.equals(direction)) {
+        Some(s"../${schema.get}")
+      } else if (IntervalDirection.Before.equals(direction)){
+        Some(s"${schema.get}/..")
+      } else None
+    } else None
+  }
+
+  /**
+    * 最近一段时间["RECENT"]duration
+    * @param schema     durationSchema
+    * @return           recent schema
+    */
+  def recentSchema(schema: Option[String]): Option[String] = {
+    if (schema.isDefined && schema.nonEmpty) {
+      Some(s"${TimeConstant.RECENT}${schema.get}")
+    } else None
+  }
+
+  def intersectSchema(td1: TimeData, td2: TimeData): Option[String] = {
+    if (td1.schema.isDefined && td2.schema.isDefined) { //td1.grain > td2.grain
+      val prefixSet = mutable.Set[String]()
+      var prefix: String = ""
+
+      var schema1 = td1.schema.get
+      val prefix_list_1 = (prefix_pattern findAllIn schema1).toList
+      for (p1 <- prefix_list_1) {
+        if (!prefixSet.contains(p1)) {
+          prefix += p1
+          prefixSet.add(p1)
+        }
+        schema1 = schema1.replace(p1, "")
+      }
+
+      var schema2 = td2.schema.get
+      val prefix_list_2 = (prefix_pattern findAllIn schema2).toList
+      for (p2 <- prefix_list_2) {
+        if (!prefixSet.contains(p2)) {
+          if (StringUtils.equalsIgnoreCase(p2, "[EXT]")) {
+            prefix = "[EXT]" + prefix
+          } else {
+            prefix += p2
+          }
+          prefixSet.add(p2)
+        }
+        schema2 = schema2.replace(p2, "")
+      }
+
+      Some(prefix + schema1 + schema2)
+    } else if (td1.schema.isDefined) {
+      td1.schema
+    } else if (td2.schema.isDefined) {
+      td2.schema
+    } else None
   }
 }

@@ -19,14 +19,14 @@ package com.xiaomi.duckling.ranking
 import com.typesafe.scalalogging.LazyLogging
 import org.json4s.FieldSerializer
 import org.json4s.jackson.Serialization.write
-
 import java.time.{LocalDateTime, ZonedDateTime}
 import java.util.Locale
 
 import com.xiaomi.duckling.Types._
 import com.xiaomi.duckling.dimension.place.PlaceData
 import com.xiaomi.duckling.dimension.quantity.QuantityData
-import com.xiaomi.duckling.dimension.time.TimeValue
+import com.xiaomi.duckling.dimension.time.{TimeData, TimeValue}
+import com.xiaomi.duckling.dimension.time.duration.DurationData
 import com.xiaomi.duckling.{Document, JsonSerde}
 
 object Testing extends LazyLogging {
@@ -41,6 +41,7 @@ object Testing extends LazyLogging {
   val sTimeValue = FieldSerializer[TimeValue]({
     case ("values", _) => None
     case ("simple", _) => None
+    case ("schema", _) => None
   })
 
   val sNumeralValue = FieldSerializer[NumeralValue]({
@@ -56,7 +57,15 @@ object Testing extends LazyLogging {
     case ("isLatent", _) => None
   })
 
-  implicit val formats = JsonSerde.formats + sTimeValue + sNumeralValue + sPlaceData + sQuantityValue
+  val sDurationData = FieldSerializer[DurationData]({
+    case ("schema", _) => None
+  })
+
+  val sTimeData = FieldSerializer[TimeData]({
+    case ("schema", _) => None
+  })
+
+  implicit val formats = JsonSerde.formats + sTimeValue + sNumeralValue + sPlaceData + sQuantityValue + sDurationData + sTimeData
 
   val testContext: Context =
     Context(

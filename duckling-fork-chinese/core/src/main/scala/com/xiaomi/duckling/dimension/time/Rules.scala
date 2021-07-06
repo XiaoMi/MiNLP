@@ -17,7 +17,6 @@
 package com.xiaomi.duckling.dimension.time
 
 import scalaz.Scalaz._
-
 import com.xiaomi.duckling.Types._
 import com.xiaomi.duckling.dimension.DimRules
 import com.xiaomi.duckling.dimension.implicits._
@@ -29,7 +28,7 @@ import com.xiaomi.duckling.dimension.time.duration.{Duration, DurationData}
 import com.xiaomi.duckling.dimension.time.enums.Grain._
 import com.xiaomi.duckling.dimension.time.enums.Hint._
 import com.xiaomi.duckling.dimension.time.enums.IntervalType.{Closed, Open}
-import com.xiaomi.duckling.dimension.time.enums.{Grain, Hint}
+import com.xiaomi.duckling.dimension.time.enums.{Grain, Hint, IntervalDirection}
 import com.xiaomi.duckling.dimension.time.form.{PartOfDay, TimeOfDay}
 import com.xiaomi.duckling.dimension.time.grain.{GrainData, TimeGrain}
 import com.xiaomi.duckling.dimension.time.helper.TimeDataHelpers._
@@ -139,7 +138,7 @@ trait Rules extends DimRules {
             val hint =
               if (td1.timeGrain == Year && td2.hint == MonthOnly) YearMonth
               else Intersect
-            val td = intersect(td1, td2).map(_.copy(hint = hint))
+            val td = intersect(td1, td2).map(_.copy(hint = hint, schema = intersectSchema(td1, td2)))
             tt(td)
           }
       }
@@ -157,7 +156,7 @@ trait Rules extends DimRules {
           val hint =
             if (td1.timeGrain == Year && td2.hint == MonthOnly) YearMonth
             else NoHint
-          val td = intersect(td1, td2).map(_.copy(hint = hint))
+          val td = intersect(td1, td2).map(_.copy(hint = hint, schema = intersectSchema(td1, td2)))
           tt(td)
         }
     }
@@ -210,23 +209,23 @@ trait Rules extends DimRules {
     name = "recent/last/next <duration>",
     pattern = List(RecentPattern.regex, isDimension(Duration).predicate),
     prod = tokens {
-      case Token(_, GroupMatch(s :: _)) :: Token(Duration, DurationData(v, g, _)) :: _ =>
+      case Token(_, GroupMatch(s :: _)) :: Token(Duration, DurationData(v, g, _, durationSchema)) :: _ =>
         // 月必须是x个月
         s match {
           case "下" | "后" | "接下来" | "未来" | "今后" | "之后" =>
             val td: Option[TimeData] =
               // 未来一周=未来七天
               if (s == "未来" && v == 1 && g == Week) {
-                cycleN(notImmediate = false, Day, 7)
+                cycleN(notImmediate = false, Day, 7).copy(schema = relativeSchema(durationSchema, IntervalDirection.After))
               }
               // 未来一个月等于未来30天
               else if (s == "未来" && v == 1 && g == Month) {
-                cycleN(notImmediate = false, Day, 30)
+                cycleN(notImmediate = false, Day, 30).copy(schema = relativeSchema(durationSchema, IntervalDirection.After))
               }
               // = 1 已经在 this <cycle> 中定义过了
               else if (s == "下" && g == Day || v == 1) None
               else {
-                val td1 = cycleN(notImmediate = false, g, v)
+                val td1 = cycleN(notImmediate = false, g, v).copy(schema = relativeSchema(durationSchema, IntervalDirection.After))
                 g match {
                   case Week => reset(Week)(td1)
                   case _    => td1
@@ -235,7 +234,7 @@ trait Rules extends DimRules {
             td.map(t => tt(t.at(Hint.Recent)))
           case "这" | "最近" | "近" =>
             if (v > 1) {
-              val td: TimeData = cycleN(notImmediate = false, g, v).at(Hint.UncertainRecent)
+              val td: TimeData = cycleN(notImmediate = false, g, v).at(Hint.UncertainRecent).copy(schema = recentSchema(durationSchema))
               g match {
                 case Week => (reset(Week) _ >>> tt)(td)
                 case _    => tt(td)
@@ -243,8 +242,8 @@ trait Rules extends DimRules {
             } else tt(cycleNth(g, 0))
           case "上" | "前" | "之前" | "过去" =>
             if (s == "上" && g == Day) None
-            else if (v > 1) tt(cycleN(notImmediate = true, g, -v).at(Hint.Recent))
-            else tt(cycleNth(g, -1).at(Hint.Recent))
+            else if (v > 1) tt(cycleN(notImmediate = true, g, -v).at(Hint.Recent).copy(schema = relativeSchema(durationSchema, IntervalDirection.Before)))
+            else tt(cycleNth(g, -1).at(Hint.Recent).copy(schema = relativeSchema(durationSchema, IntervalDirection.Before)))
           case _ => throw new NotImplementedError(s"matched item $s missing handler")
         }
     }
@@ -257,9 +256,9 @@ trait Rules extends DimRules {
     name = "n <cycle> next/last 1: <duration> 之后",
     pattern = List(isDimension(Duration).predicate, "((之|以)?(后|前))|过后".regex),
     prod = tokens {
-      case Token(Duration, DurationData(v, grain, _)) :: Token(_, GroupMatch(s :: _)) :: _ =>
+      case Token(Duration, DurationData(v, grain, _, schema)) :: Token(_, GroupMatch(s :: _)) :: _ =>
         val offset = if (s.endsWith("后")) v else -v
-        tt(cycleNth(grain, offset, NoGrain))
+        tt(cycleNth(grain, offset, NoGrain).copy(schema = Some("\\" + schema.get)))
     }
   )
 
@@ -270,7 +269,7 @@ trait Rules extends DimRules {
     name = "n <cycle> next/last: 过 <duration>",
     pattern = List("过".regex, isDimension(Duration).predicate),
     prod = tokens {
-      case _ :: Token(Duration, DurationData(v, grain, _)) :: _ =>
+      case _ :: Token(Duration, DurationData(v, grain, _, _)) :: _ =>
         tt(cycleNth(grain, v, NoGrain))
     }
   )
@@ -282,7 +281,7 @@ trait Rules extends DimRules {
     name = "n <cycle> next/last 3:过 <duration> 之后",
     pattern = List("过".regex, isDimension(Duration).predicate, "之?(后|前)".regex),
     prod = tokens {
-      case _ :: Token(Duration, DurationData(v, grain, _)) :: _ =>
+      case _ :: Token(Duration, DurationData(v, grain, _, _)) :: _ =>
         tt(cycleNth(grain, v, NoGrain))
     }
   )
@@ -294,7 +293,7 @@ trait Rules extends DimRules {
     name = "<duration> before/after <time>",
     pattern = List(isDimension(Duration).predicate, "之?(前|后)的?".regex, isNotLatent.predicate),
     prod = tokens {
-      case Token(Duration, DurationData(v, g, _)) :: Token(_, GroupMatch(_ :: s :: _)) :: Token(
+      case Token(Duration, DurationData(v, g, _, _)) :: Token(_, GroupMatch(_ :: s :: _)) :: Token(
             Time,
             td: TimeData
           ) :: _ =>
@@ -322,8 +321,8 @@ trait Rules extends DimRules {
     name = "<from> 到 <to>",
     pattern = List(isNotLatent.predicate, "(至|到)".regex, isNotLatent.predicate),
     prod = tokens {
-      case Token(Time, td1 @ TimeData(pred1, _, g1, _, _, _, _, _, _, _, _)) :: _ ::
-            Token(Time, td2 @ TimeData(pred2, _, g2, _, _, _, _, _, _, _, _)) :: _ =>
+      case Token(Time, td1 @ TimeData(pred1, _, g1, _, _, _, _, _, _, _, _, _)) :: _ ::
+            Token(Time, td2 @ TimeData(pred2, _, g2, _, _, _, _, _, _, _, _, _)) :: _ =>
         val grainCompare = for {
           pg1 <- maxPredicateGrain(pred1)
           pg2 <- maxPredicateGrain(pred2)
@@ -340,7 +339,7 @@ trait Rules extends DimRules {
               case _                  => Open
             }
           } else Open
-          tt(interval(intervalType, td1, td2).map(_.copy(hint = FinalRule)))
+          tt(interval(intervalType, td1, td2).map(_.copy(hint = FinalRule, schema = intervalSchema(td1, td2))))
         } else None
     }
   )
@@ -352,7 +351,7 @@ trait Rules extends DimRules {
     name = "in a <duration>",
     pattern = List(isDimension(Duration).predicate, "内".regex),
     prod = tokens {
-      case Token(Duration, DurationData(value, grain, _)) :: _ =>
+      case Token(Duration, DurationData(value, grain, _, _)) :: _ =>
         tt(cycleN(notImmediate = false, grain, value, NoGrain))
     }
   )
@@ -436,7 +435,7 @@ trait Rules extends DimRules {
     prod = tokens {
       case Token(_, td1: TimeData) :: Token(_, GroupMatch(_ :: s :: _)) :: Token(
             _,
-            DurationData(value, grain, latent)
+            DurationData(value, grain, latent, _)
           ) :: _ if td1.timeGrain == grain =>
         val sign = if (s == "前") -1 else 1
         val td2 = cycleN(notImmediate = false, grain, sign * value)

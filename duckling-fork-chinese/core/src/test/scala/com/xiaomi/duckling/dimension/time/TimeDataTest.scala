@@ -35,7 +35,7 @@ class TimeDataTest extends FunSpec with Matchers with LazyLogging {
     it("should resolve") {
       val td = TimeData(TimeDatePredicate(year = 2018, month = 5), timeGrain = Grain.Month)
       td.resolve(testContext, testOptions.copy(targets = Set(Time))).get._1 match {
-        case TimeValue(SimpleValue(InstantValue(dt, grain)), _, _, Some(simple), _) =>
+        case TimeValue(SimpleValue(InstantValue(dt, grain)), _, _, Some(simple), _, _) =>
           dt.year shouldBe 2018
           dt.month shouldBe 5
           grain shouldBe Grain.Month
@@ -64,7 +64,7 @@ class TimeDataTest extends FunSpec with Matchers with LazyLogging {
           answers.headOption match {
             case Some(answer) =>
               answer.token.value match {
-                case TimeValue(SimpleValue(InstantValue(dt, _)), _, _, _, _) =>
+                case TimeValue(SimpleValue(InstantValue(dt, _)), _, _, _, _, _) =>
                   (dt.year, dt.month, dt.dayOfMonth) shouldBe(yyyy, mm, dd)
                 case v =>
                   logger.warn(s"unexpected value: $query => $v")

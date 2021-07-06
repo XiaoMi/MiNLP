@@ -17,15 +17,15 @@
 package com.xiaomi.duckling.dimension.time.date
 
 import scalaz.std.string.parseInt
-
 import java.time.LocalDate
-import scala.util.Try
 
+import scala.util.Try
 import com.xiaomi.duckling.Types._
 import com.xiaomi.duckling.dimension.DimRules
 import com.xiaomi.duckling.dimension.implicits._
 import com.xiaomi.duckling.dimension.matcher.GroupMatch
 import com.xiaomi.duckling.dimension.matcher.Prods.{regexMatch, singleRegexMatch}
+import com.xiaomi.duckling.dimension.numeral.NumeralData
 import com.xiaomi.duckling.dimension.numeral.Predicates.{getIntValue, isIntegerBetween}
 import com.xiaomi.duckling.dimension.numeral.seq.{DigitSequence, DigitSequenceData}
 import com.xiaomi.duckling.dimension.time.Prods.intersectDOM
@@ -61,7 +61,7 @@ trait Rules extends DimRules {
             d <- parseInt(dd).toOption
           } yield {
             val tp = TimeDatePredicate(year = y, month = m, dayOfMonth = d)
-            Token(Date, TimeData(tp, timeGrain = Day))
+            Token(Date, TimeData(tp, timeGrain = Day, schema = dateSchema(year = y, month = m, day = d)))
           }
       }
     )
@@ -96,7 +96,7 @@ trait Rules extends DimRules {
         } yield {
           Token(
             Date,
-            TimeData(TimeDatePredicate(year = y, month = m, dayOfMonth = d), timeGrain = Day)
+            TimeData(TimeDatePredicate(year = y, month = m, dayOfMonth = d), timeGrain = Day, schema = dateSchema(year = y, month = Some(m), day = Some(d)))
           )
         }
     }
@@ -120,7 +120,7 @@ trait Rules extends DimRules {
             m <- parseInt(mm).toOption if m > 0 && m <= 12
             d <- parseInt(dd).toOption if d > 0 && d <= 31
           } yield {
-            Token(Date, TimeData(TimeDatePredicate(month = m, dayOfMonth = d), timeGrain = Day))
+            Token(Date, TimeData(TimeDatePredicate(month = m, dayOfMonth = d), timeGrain = Day, schema = dateSchema(month = Some(m), day = Some(d))))
           }
       }
     )
@@ -231,8 +231,13 @@ trait Rules extends DimRules {
       List(and(isAMonth, isHint(Hint.MonthOnly)).predicate, isIntegerBetween(1, 31).predicate),
     prod = tokens {
       case Token(Date, td: TimeData) :: token :: _ =>
+        val mm = td.schema
+        val dd = token.data match {
+          case data: NumeralData => data.value.toInt
+          case _ => throw new IllegalArgumentException("error day number")
+        }
         for (td <- intersectDOM(td, token)) yield {
-          Token(Date, td.at(Hint.MonthDay))
+          Token(Date, td.at(Hint.MonthDay).copy(schema = dateSchema(month = Some(mm.get.toInt), day = Some(dd))))
         }
     }
   )
@@ -250,7 +255,7 @@ trait Rules extends DimRules {
             case "昨" => -1
             //            case "前" => -2
           }
-        Token(Date, cycleNth(Day, offset).copy(hint = RecentNominal))
+        Token(Date, cycleNth(Day, offset).copy(hint = RecentNominal, schema = offsetSchema(Day, offset)))
     }
   )
 
@@ -263,7 +268,7 @@ trait Rules extends DimRules {
         val adjustY = if (y > 20) 1900 + y else y + 2000
         val from = year(adjustY)
         val to = year(adjustY + 10)
-        for (td <- interval(Open, from, to)) yield Token(Date, td)
+        for (td <- interval(Open, from, to)) yield Token(Date, td.copy(schema = decadeSchema(adjustY)))
     }
   )
 
@@ -271,7 +276,7 @@ trait Rules extends DimRules {
     name = "date - <ordinal> <quarter>",
     pattern = List("第".regex, isAQuarterOfYear.predicate),
     prod = tokens {
-      case _ :: Token(Duration, DurationData(value, _, _)) :: _ =>
+      case _ :: Token(Duration, DurationData(value, _, _, _)) :: _ =>
         for (td <- interval(Closed, month(3 * value - 2), month(3 * value))) yield {
           Token(Date, td.copy(reset = (Grain.resetTo(Quarter), 0)))
         }
@@ -297,7 +302,7 @@ trait Rules extends DimRules {
         val from = cycleNth(Day, 0, Day)
         val to = cycleNth(Day, 2, Day)
         for (td <- interval(Open, from, to)) yield {
-          Token(Date, td.copy(hint = Hint.UncertainRecent))
+          Token(Date, td.copy(hint = Hint.UncertainRecent, schema = recentSchema()))
         }
     }
   )
@@ -351,7 +356,7 @@ trait Rules extends DimRules {
                 if (td1.timeGrain == Year && td2.hint == Hint.MonthOnly) YearMonth
                 else NoHint
               for (td <- intersect(td1, td2)) yield {
-                Token(Date, td.copy(hint = hint))
+                Token(Date, td.copy(hint = hint).copy(schema = Some(td1.schema.get + "-" + td2.schema.get)))
               }
             }
           }
@@ -375,7 +380,7 @@ trait Rules extends DimRules {
             if (td1.timeGrain == Year && td2.hint == Hint.MonthOnly) YearMonth
             else NoHint
           for (td <- intersect(td1, td2)) yield {
-            Token(Date, td.copy(hint = hint))
+            Token(Date, td.copy(hint = hint).copy(schema = Some(td1.schema.get + "-" + td2.schema.get)))
           }
         }
     }

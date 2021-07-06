@@ -70,13 +70,13 @@ object TokenVisualization {
     val value = answer.token.value.toString
 
     val grain = answer.token.value match {
-      case TimeValue(timeValue, _, _, _, _) =>
+      case TimeValue(timeValue, _, _, _, _, _) =>
         timeValue match {
           case IntervalValue(start, _) => start.grain.name()
           case SimpleValue(instant) => instant.grain.name()
           case _ => ""
         }
-      case DurationData(_, grain, _) => grain.name()
+      case DurationData(_, grain, _, _) => grain.name()
       case _ => ""
     }
     val node = answer.token.node

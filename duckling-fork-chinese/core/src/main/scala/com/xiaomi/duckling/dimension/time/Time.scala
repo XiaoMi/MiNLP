@@ -81,7 +81,8 @@ case class TimeData(timePred: TimePredicate,
                     holiday: Option[String] = None,
                     reset: Option[(Grain, Int)] = None, // 本周一，这个月三号，之类需要重置参考时间
                     calendar: Option[Calendar] = None, // 阳历农历标识
-                    hint: Hint = Hint.NoHint // 一些提示信息，比如不能够再组合，已经进行过时间组合（去年的今天）之类的
+                    hint: Hint = Hint.NoHint, // 一些提示信息，比如不能够再组合，已经进行过时间组合（去年的今天）之类的
+                    schema: Option[String] = None
 ) extends Resolvable
     with LazyLogging {
   override def resolve(context: Context, options: Options): Option[(TimeValue, Boolean)] = {
@@ -116,7 +117,8 @@ case class TimeData(timePred: TimePredicate,
             timeValue(valueOpt.get),
             simple = generateSimple(timePred, holiday).scheme(),
             holiday = holiday,
-            partOfDay = partOfDay
+            partOfDay = partOfDay,
+            schema = schema
           )
         Some(tv, latent)
       } catch {
@@ -252,7 +254,8 @@ case class TimeValue(timeValue: SingleTimeValue,
                      tzSeries: List[SingleTimeValue] = Nil,
                      holiday: Option[String] = None,
                      simple: Option[(String, Boolean)] = None,
-                     partOfDay: Option[String] = None)
+                     partOfDay: Option[String] = None,
+                     override val schema: Option[String] = None)
     extends ResolvedValue {
   override def toString: String = {
     timeValue match {

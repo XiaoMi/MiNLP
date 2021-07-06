@@ -19,6 +19,7 @@ package com.xiaomi.duckling.dimension.time.rule
 import com.xiaomi.duckling.Types._
 import com.xiaomi.duckling.dimension.implicits._
 import com.xiaomi.duckling.dimension.matcher.Prods._
+import com.xiaomi.duckling.dimension.time.{Time, TimeConstant, TimeData, intersectSchema}
 import com.xiaomi.duckling.dimension.time.Prods._
 import com.xiaomi.duckling.dimension.time.enums.Grain._
 import com.xiaomi.duckling.dimension.time.enums.Hint
@@ -33,28 +34,28 @@ object FuzzyDayIntervals {
 
   val pattern = "(早上|早晨|晨间|下午|晚上|中午|午间|上午|傍晚|黄昏|凌晨|半夜|夜间|夜晚|夜里)"
 
-  def between(s: String): (String, (Int, Int)) = {
+  def between(s: String): (String, (Int, Int), String) = {
     s match {
-      case "早上" | "早晨" | "晨间"               => ("早上", (4, 12))
-      case "上午"                             => ("上午", (8, 12))
-      case "中午" | "午间"                      => ("中午", (12, 14))
-      case "下午"                             => ("下午", (12, 18))
-      case "晚上" | "晚间" | "夜里" | "夜间" | "夜晚" => ("晚上", (18, 0))
-      case "午夜" | "凌晨" | "半夜"               => ("凌晨", (0, 6))
-      case "傍晚" | "黄昏"                      => ("傍晚", (17, 19))
+      case "早上" | "早晨" | "晨间"               => ("早上", (4, 12), TimeConstant.EM)
+      case "上午"                             => ("上午", (8, 12), TimeConstant.FN)
+      case "中午" | "午间"                      => ("中午", (12, 14), TimeConstant.NO)
+      case "下午"                             => ("下午", (12, 18), TimeConstant.AN)
+      case "晚上" | "晚间" | "夜里" | "夜间" | "夜晚" => ("晚上", (18, 0), TimeConstant.NI)
+      case "午夜" | "凌晨" | "半夜"               => ("凌晨", (0, 6), TimeConstant.MN)
+      case "傍晚" | "黄昏"                      => ("傍晚", (17, 19), TimeConstant.EV)
     }
   }
 
-  def ofInterval(s: String): Option[(String, TimeData)] = {
-    val (name, (from, to)) = between(s)
-    interval(Open, hour(is12H = false, from), hour(is12H = false, to)).map((name, _))
+  def ofInterval(s: String): Option[(String, TimeData, String)] = {
+    val (name, (from, to), schema) = between(s)
+    interval(Open, hour(is12H = false, from), hour(is12H = false, to)).map((name, _, schema))
   }
 
   val ruleFuzzyDayIntervals =
     Rule(name = "fuzzy day intervals", pattern = List(pattern.regex), prod = singleRegexMatch {
       case s =>
-        for ((name, td) <- ofInterval(s)) yield {
-          tt(partOfDay(name, td))
+        for ((name, td, schema) <- ofInterval(s)) yield {
+          tt(partOfDay(name, td).copy(schema = schema))
         }
     })
 
@@ -75,17 +76,18 @@ object FuzzyDayIntervals {
         }
         val tdInterval = ofInterval(part)
         for {
-          (_, td) <- tdInterval
+          (_, td, schema) <- tdInterval
           td1 <- intersect(cycleNth(Day, offset), td)
         } yield {
-          tt(partOfDay(part, td1))
+          tt(partOfDay(part, td1).copy(schema =schema))
         }
     }
   )
 
   private def fuzzyIntervalTimeOfDay(td0: TimeData, td: TimeData): Option[Token] = {
-    val TimeData(pred, _, _, _, Some(form), _, _, _, _, _, _) = td
+    val TimeData(pred, _, _, _, Some(form), _, _, _, _, _, _, _) = td
     val part = td0.form.get.asInstanceOf[PartOfDay].part
+    val schema = intersectSchema(td0, td)
     (pred, form) match {
       case (p: TimeDatePredicate, TimeOfDay(Some(h), is12H)) =>
         for {
@@ -94,7 +96,7 @@ object FuzzyDayIntervals {
         } yield {
           val tdAdjust =
             timeOfDay(hAdjust, is12H = false, td).copy(timePred = hAdjustP, hint = Hint.NoHint)
-          tt(tdAdjust)
+          tt(tdAdjust.copy(schema = schema))
         }
       case (
           TimeIntervalsPredicate(t, p1: TimeDatePredicate, p2: TimeDatePredicate),
@@ -103,7 +105,7 @@ object FuzzyDayIntervals {
         for {
           from <- updatePredicateByFuzzyInterval(part, p1)
           to <- updatePredicateByFuzzyInterval(part, p2)
-        } yield tt(td.copy(timePred = TimeIntervalsPredicate(t, from, to)))
+        } yield tt(td.copy(timePred = TimeIntervalsPredicate(t, from, to), schema = schema))
       case _ => None
     }
   }
@@ -143,7 +145,7 @@ object FuzzyDayIntervals {
         else if (h == 12 && s == "凌晨") 0
         else if (h == 12 && s == "晚上" || s == "晚间") 24
         else {
-          val (_, (from, _)) = between(s)
+          val (_, (from, _), _) = between(s)
           if (from >= 12 && h < 12) h + 12 else h
         }
       p.copy(hour = Some(false, hAdjust))

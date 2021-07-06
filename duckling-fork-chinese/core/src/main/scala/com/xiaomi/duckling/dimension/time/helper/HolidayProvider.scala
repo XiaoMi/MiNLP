@@ -258,7 +258,7 @@ class LocalHolidayProvider extends HolidayProvider {
   def mkRuleHolidays(list: List[(TimeData, String, String)]): List[(Token, String, String)] = {
     list.map {
       case (td, name, ptn) =>
-        val token = tt(td.copy(okForThisNext = true, holiday = name, hint = Hint.Holiday))
+        val token = tt(td.copy(okForThisNext = true, holiday = name, hint = Hint.Holiday, schema = Some(s"[EXT][FEST]FEST_$name")))
         (token, name, ptn)
     }
   }
