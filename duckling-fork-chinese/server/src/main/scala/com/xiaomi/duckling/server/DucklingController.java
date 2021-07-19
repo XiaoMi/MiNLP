@@ -2,6 +2,7 @@ package com.xiaomi.duckling.server;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.text.StringEscapeUtils;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -33,6 +34,7 @@ public class DucklingController {
     @PostMapping("/duckling/extract")
     public Mono<Response> demo(@RequestParam("sentence") String sentence, @RequestParam("dims") String dims) {
         log.info("demo - {}: {}", dims, sentence);
+        sentence = StringEscapeUtils.escapeHtml4(sentence); //对输入进行转义处理，防止xss攻击
         String res = TokenVisualization.toHtml(sentence, parse(sentence, dims));
         return Mono.just(new Response(0, res));
     }
