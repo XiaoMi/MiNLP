@@ -316,6 +316,21 @@ trait Rules extends DimRules {
       Token(Date, td)
   })
 
+  val ruleEndOfYear = Rule(name = "date - 年底", pattern = List("年(底|尾|末)".regex), prod = tokens {
+    case _ =>
+      for (td <- interval(Open, monthDay(11, 1), monthDay(12, 31))) yield Token(Date, td)
+  })
+
+  val ruleStartOfYear = Rule(name = "date - 年初", pattern = List("(月|年)?初(?!(夏|伏|几|见))".regex), prod = tokens {
+    case _ =>
+      for (td <- interval(Open, monthDay(1, 1), monthDay(3, 31))) yield Token(Date, td)
+  })
+
+  val ruleMidOfYear = Rule(name = "date - 年中", pattern = List("(年|月)中(?!(国|央|共|秋))".regex), prod = tokens {
+    case _ =>
+      for (td <- interval(Open, monthDay(5, 1), monthDay(7, 31))) yield Token(Date, td)
+  })
+
   val ruleIntersect =
     Rule(
       name = "dates: intersect",

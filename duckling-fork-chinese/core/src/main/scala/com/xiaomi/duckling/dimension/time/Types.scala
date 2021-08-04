@@ -351,7 +351,7 @@ object Types {
       * 公历始终是 12月31日，但是腊月不是，既有可能闰月也有可能除夕是29号
       */
     def lastDayOfYear: DuckDateTime = {
-      withMonth(1).withDayOfMonth(1).minusDays(1)
+      withMonth(1).withDayOfMonth(1).minusDays(1).plusYears(1)
     }
 
     def withYear(y: Int): DuckDateTime = this.copy(date = date.withYear(y))
