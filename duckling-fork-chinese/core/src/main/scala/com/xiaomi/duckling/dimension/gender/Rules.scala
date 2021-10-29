@@ -30,8 +30,12 @@ trait Rules extends DimRules {
     val builder = ImmutableListMultimap.builder[String, String]()
     builder.put("女", "女")
     builder.put("女性", "女")
+    builder.put("女生", "女")
+    builder.put("女孩", "女")
     builder.put("男", "男")
     builder.put("男性", "男")
+    builder.put("男生", "男")
+    builder.put("男孩", "男")
 
     Dict(vocab = builder.build())
   }
