@@ -21,6 +21,6 @@ import com.xiaomi.duckling.dimension.DimExamples
 
 trait Examples extends DimExamples {
   override def pairs: List[(ResolvedValue, List[String])] = List(
-    (GenderData("男"), List("男", "男性"))
+    (GenderData("男"), List("男", "男性", "男生"))
   )
 }
