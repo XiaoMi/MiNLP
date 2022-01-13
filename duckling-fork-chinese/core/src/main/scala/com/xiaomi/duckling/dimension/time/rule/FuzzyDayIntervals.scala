@@ -18,6 +18,7 @@ package com.xiaomi.duckling.dimension.time.rule
 
 import com.xiaomi.duckling.Types._
 import com.xiaomi.duckling.dimension.implicits._
+import com.xiaomi.duckling.dimension.matcher.GroupMatch
 import com.xiaomi.duckling.dimension.matcher.Prods._
 import com.xiaomi.duckling.dimension.time.Prods._
 import com.xiaomi.duckling.dimension.time.enums.Grain._
@@ -27,7 +28,7 @@ import com.xiaomi.duckling.dimension.time.enums.IntervalType.Open
 import com.xiaomi.duckling.dimension.time.form.{IntervalOfDay, PartOfDay, TimeOfDay}
 import com.xiaomi.duckling.dimension.time.helper.TimeDataHelpers._
 import com.xiaomi.duckling.dimension.time.predicates.{SequencePredicate, TimeDatePredicate, TimeIntervalsPredicate, _}
-import com.xiaomi.duckling.dimension.time.{Time, TimeData}
+import com.xiaomi.duckling.dimension.time.{timeSeqMap, Time, TimeData}
 
 object FuzzyDayIntervals {
 
@@ -86,16 +87,13 @@ object FuzzyDayIntervals {
   private def fuzzyIntervalTimeOfDay(td0: TimeData, td: TimeData): Option[Token] = {
     val TimeData(pred, _, _, _, Some(form), _, _, _, _, _, _) = td
     val part = td0.form.get.asInstanceOf[PartOfDay].part
-    (pred, form) match {
+    // 利用左侧的区间将右侧的时间从12AMPM转换到24H制
+    val partOfDay = (pred, form) match {
       case (p: TimeDatePredicate, TimeOfDay(Some(h), is12H)) =>
         for {
           hAdjustP <- updatePredicateByFuzzyInterval(part, p)
           (is12H, hAdjust) <- hAdjustP.hour
-        } yield {
-          val tdAdjust =
-            timeOfDay(hAdjust, is12H = false, td).copy(timePred = hAdjustP, hint = Hint.NoHint)
-          tt(tdAdjust)
-        }
+        } yield timeOfDay(hAdjust, is12H = false, td).copy(timePred = hAdjustP, hint = Hint.NoHint)
       case (
           TimeIntervalsPredicate(t, p1: TimeDatePredicate, p2: TimeDatePredicate),
           IntervalOfDay
@@ -103,8 +101,15 @@ object FuzzyDayIntervals {
         for {
           from <- updatePredicateByFuzzyInterval(part, p1)
           to <- updatePredicateByFuzzyInterval(part, p2)
-        } yield tt(td.copy(timePred = TimeIntervalsPredicate(t, from, to)))
+        } yield td.copy(timePred = TimeIntervalsPredicate(t, from, to))
       case _ => None
+    }
+    // 组装，上午8点，以及[昨晚]8点
+    (td0.timePred, partOfDay) match {
+      case (_, None) => None
+      case (IntersectTimePredicate(_: TimeIntervalsPredicate, series: SeriesPredicate), Some(time)) =>
+        tt(td.copy(timePred = IntersectTimePredicate(time.timePred, series)))
+      case (_: TimeIntervalsPredicate, Some(time)) => tt(time)
     }
   }
 

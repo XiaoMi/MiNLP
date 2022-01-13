@@ -41,8 +41,8 @@ object LunarDays {
 			(lunarMonthDay(9, 9), "重阳节", "重阳节|重阳"),
 			(lunarMonthDay(12, 8), "腊八节", "腊八节|腊八"),
 			(lunarMonthDay(12, 23), "小年", "北方小年|小年"),
-			(lunarMonthDay(12, 24), "南方小年", "南方小年"),
-			(lunarMonthDay(12, 30), "除夕", "大年三十")
+			(lunarMonthDay(12, 24), "南方小年", "南方小年|小年"),
+			(lunarMonthDay(12, 30), "除夕", "大年三十|年三十")
 		)
 	)
 

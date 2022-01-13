@@ -18,11 +18,10 @@ package com.xiaomi.duckling.dimension
 
 import org.scalatest.{FunSpec, Matchers}
 import org.scalatest.prop.TableDrivenPropertyChecks
-
 import com.typesafe.scalalogging.LazyLogging
-
 import com.xiaomi.duckling.Api.analyze
 import com.xiaomi.duckling.ranking.Testing.{testContext, testOptions}
+import com.xiaomi.duckling.task.NaiveBayesDebug
 
 class GeneralCaseTest
     extends FunSpec
@@ -49,21 +48,22 @@ class GeneralCaseTest
       val options = testOptions.copy(targets = Set(dim), debug = true)
 
       it(s"${dim.name} - cases") {
-        forEvery(corpusTable) {
+        forAll(corpusTable) {
           case (doc, predicate, _) =>
             val candidates = analyze(doc.rawInput, testContext, options)
-            val rs =
-              candidates.zipWithIndex.find {
-                case (c, id) =>
-                  predicate(doc, testContext)(c.token)
-              } match {
-                case Some((_, 0)) => logger.info(s"✅ ${doc.rawInput}"); true
-                case Some((_, i)) =>
-                  logger.error(s"️❌ ${doc.rawInput} - expected answer is at [$i], be care"); false
-                case None =>
-                  logger.error(s"❌ ${doc.rawInput} - build error, composing failure"); false
-              }
-            rs shouldBe true
+            val found = candidates.zipWithIndex.find {
+              case (c, _) => predicate(doc, testContext)(c.token)
+            }
+            val matches = found match {
+              case Some((_, 0)) => logger.info(s"✅ ${doc.rawInput}"); true
+              case Some((a, i)) =>
+                NaiveBayesDebug.show(a)
+                logger.error(s"️❌ ${doc.rawInput} - expected answer is at [$i], be care"); false
+              case None =>
+                candidates.foreach(NaiveBayesDebug.show)
+                logger.error(s"❌ ${doc.rawInput} - build error, composing failure"); false
+            }
+            matches shouldBe true
         }
       }
     }

@@ -294,10 +294,8 @@ trait Rules extends DimRules {
     name = "<duration> before/after <time>",
     pattern = List(isDimension(Duration).predicate, "之?(前|后)的?".regex, isNotLatent.predicate),
     prod = tokens {
-      case Token(Duration, DurationData(v, g, _)) :: Token(_, GroupMatch(_ :: s :: _)) :: Token(
-            Time,
-            td: TimeData
-          ) :: _ =>
+      case Token(Duration, DurationData(v, g, _)) :: Token(_, GroupMatch(_ :: s :: _)) ::
+        Token(Time, td: TimeData) :: _ =>
         if (g > td.timeGrain) {
           val sign = if (s == "前") -1 else 1
           val roundGrain =
