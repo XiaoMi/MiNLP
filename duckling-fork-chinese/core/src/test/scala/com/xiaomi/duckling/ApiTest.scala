@@ -46,7 +46,7 @@ class ApiTest extends FunSpec with Matchers {
 
     it("should date") {
       val options = testOptions.copy(targets = Set(Numeral, Time, Duration, Date), full = false)
-      println(Api.analyze("今天第一十一节课是什么", testContext, options))
+      println(Api.analyze("去年的今天", testContext, options))
     }
 
     it("should age") {
