@@ -32,6 +32,8 @@ import com.xiaomi.duckling.dimension.time.predicates._
 import com.xiaomi.duckling.dimension.time.unitNumber.UnitNumber
 
 trait Rules extends DimRules {
+  val fuzzyOn: Boolean = conf.getBoolean("dimension.time.fuzzy.on")
+  val fuzzyValue: Int = conf.getInt("dimension.time.fuzzy.value")
 
   def compatibleWithUnitNumber(g: Grain): Boolean = {
     g match {
@@ -80,7 +82,8 @@ trait Rules extends DimRules {
     pattern = List("几个?".regex, isDimension(TimeGrain).predicate),
     prod = tokens {
       case _ :: Token(TimeGrain, GrainData(g, _)) :: _ =>
-        Token(Duration, DurationData(3, g, latent = true, fuzzy = true))
+        if (fuzzyOn) Token(Duration, DurationData(fuzzyValue, g, latent = true, fuzzy = true))
+        else None
     }
   )
 
