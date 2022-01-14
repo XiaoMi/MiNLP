@@ -17,13 +17,12 @@
 package com.xiaomi.duckling.dimension.time.duration
 
 import scalaz.std.string.parseInt
-
 import com.xiaomi.duckling.Types._
 import com.xiaomi.duckling.dimension.DimRules
 import com.xiaomi.duckling.dimension.implicits._
 import com.xiaomi.duckling.dimension.matcher.Prods.regexMatch
 import com.xiaomi.duckling.dimension.numeral.Predicates._
-import com.xiaomi.duckling.dimension.numeral.seq.isDigitLengthGt
+import com.xiaomi.duckling.dimension.numeral.seq.{DigitSequence, DigitSequenceData, isDigitLeading0, isDigitLengthGt, isDigitOfWidth}
 import com.xiaomi.duckling.dimension.numeral.{Numeral, NumeralData}
 import com.xiaomi.duckling.dimension.time.GrainWrapper
 import com.xiaomi.duckling.dimension.time.enums.Grain
@@ -168,6 +167,27 @@ trait Rules extends DimRules {
       case t1 :: Token(TimeGrain, GrainData(g, _)) :: _ :: Token(_, dd@DurationData(_, dg, _)) :: _
         if g > dg && g != Month =>
         for (i <- getIntValue(t1)) yield Token(Duration, DurationData(i.toInt, g) + dd)
+    }
+  )
+
+  /**
+    * 1分09秒/1小时09分
+    */
+  val ruleCompositeDuration3 = Rule(
+    name = "composite <duration> 0 <duration>",
+    pattern = List(
+      isNatural.predicate,
+      isDimension(TimeGrain).predicate,
+      and(
+        isDigitOfWidth(2),
+        isDigitLeading0
+      ).predicate,
+      isDimension(TimeGrain).predicate
+    ),
+    prod = tokens {
+      case t1 :: Token(TimeGrain, GrainData(g0, _)) :: Token(DigitSequence, DigitSequenceData(s, _, _)) :: Token(TimeGrain, GrainData(g1, _)) :: _
+        if g0 > g1 =>
+        for (i <- getIntValue(t1)) yield Token(Duration, DurationData(i.toInt, g0) + DurationData(s.toInt, g1))
     }
   )
 }

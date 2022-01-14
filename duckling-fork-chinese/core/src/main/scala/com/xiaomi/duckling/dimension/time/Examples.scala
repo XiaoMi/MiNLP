@@ -51,7 +51,7 @@ trait Examples extends DimExamples {
     (y(2012), List("去年", "上一年")),
     (y(2013), List("今年", "这一年")),
     (y(2014), List("明年", "下一年")),
-    (ymd(2013, 12, 30, calendar = Lunar(false)).copy(holiday = "除夕"), List("今年除夕")),
+    (ymd(2013, 12, 30, calendar = Lunar(false)).copy(holiday = "除夕"), List("今年除夕", "大年三十", "年三十")),
     (ymd(2021, 12, 29, calendar = Lunar(false), holiday = "除夕"), List("2021年除夕")), // 2021年没有大年三十
     (
       localDateTimeInterval(
@@ -126,6 +126,9 @@ trait Examples extends DimExamples {
     (hm(6, 10), List("六点十分", "六点一十")),
     (hms(4, 33, 0), List("过三分钟")),
     (datetime(LocalDateTime.of(2013, 2, 14, 0, 0, 0), Hour), List("明天晚上12点", "13号晚上12点")),
+    (datetime(LocalDateTime.of(2013, 2, 13, 18, 0, 0), Hour), List("明晚6点", "明天晚上6点", "13号晚上6点")),
+    (datetime(LocalDateTime.of(2013, 2, 12, 6, 0, 0), Hour), List("今早6点", "今天早上6点", "12号早上6点")),
+    (datetime(LocalDateTime.of(2013, 2, 11, 20, 0, 0), Hour), List("昨晚8点", "昨天晚上8点", "这个月11号晚上8点")),
     (
       localDateTimeInterval(
         LocalDateTime.of(2013, 2, 12, 4, 29, 58),

@@ -24,6 +24,8 @@ trait Examples extends DimExamples {
 
   override def pairs: List[(ResolvedValue, List[String])] = List(
     (DurationData(1, Second), List("1秒钟", "1秒")),
+    (DurationData(69, Second), List("1分09秒", "一分零九秒")),
+    (DurationData(185, Minute), List("3小时05分", "三小时零五分钟")),
     (DurationData(90, Second), List("1分半", "1分半钟")),
     (DurationData(2, Minute), List("2分钟", "两分钟", "二分钟")),
     (DurationData(30, Day), List("30天")),

@@ -35,6 +35,12 @@ object NaiveBayesDebug {
   // 方便设置跳过训练的条件断点
   var debug = false
 
+  def show(answer: Answer) = {
+    val entity = formatToken(answer.sentence, withNode = true)(answer.token)
+    println("%.5f => %s".format(answer.score, write(answer.token.value)))
+    NaiveBayesConsole.ptree(answer.sentence)(entity)
+  }
+
   def main(args: Array[String]): Unit = {
     val Array(dim, sentence) = args
     val targets = dim.split(",").map(s => CorpusSets.namedDimensions(s.toLowerCase())).toSet
@@ -61,10 +67,6 @@ object NaiveBayesDebug {
     if (answers.isEmpty) println("empty results")
     else println(s"found ${answers.size} results")
 
-    answers.foreach { answer: Answer =>
-      val entity = formatToken(sentence, withNode = true)(answer.token)
-      println("%.5f => %s".format(answer.score, write(answer.token.value)))
-      NaiveBayesConsole.ptree(sentence)(entity)
-    }
+    answers.foreach(show)
   }
 }
