@@ -32,6 +32,8 @@ import com.xiaomi.duckling.dimension.time.predicates._
 import com.xiaomi.duckling.dimension.time.unitNumber.UnitNumber
 
 trait Rules extends DimRules {
+  val fuzzyOn: Boolean = conf.getBoolean("dimension.time.fuzzy.on")
+  val fuzzyValue: Int = conf.getInt("dimension.time.fuzzy.value")
 
   def compatibleWithUnitNumber(g: Grain): Boolean = {
     g match {
@@ -80,7 +82,8 @@ trait Rules extends DimRules {
     pattern = List("几个?".regex, isDimension(TimeGrain).predicate),
     prod = tokens {
       case _ :: Token(TimeGrain, GrainData(g, _)) :: _ =>
-        Token(Duration, DurationData(3, g, latent = true))
+        if (fuzzyOn) Token(Duration, DurationData(fuzzyValue, g, latent = true, fuzzy = true))
+        else None
     }
   )
 
@@ -146,7 +149,7 @@ trait Rules extends DimRules {
     pattern =
       List(isNatural.predicate, isDimension(TimeGrain).predicate, isDimension(Duration).predicate),
     prod = tokens {
-      case t1 :: Token(TimeGrain, GrainData(g, _)) :: Token(_, dd@DurationData(_, dg, _)) :: _
+      case t1 :: Token(TimeGrain, GrainData(g, _)) :: Token(_, dd@DurationData(_, dg, _, _)) :: _
         if g > dg && g != Month =>
         for (i <- getIntValue(t1)) yield Token(Duration, DurationData(i.toInt, g) + dd)
     }
@@ -164,7 +167,7 @@ trait Rules extends DimRules {
       isDimension(Duration).predicate
     ),
     prod = tokens {
-      case t1 :: Token(TimeGrain, GrainData(g, _)) :: _ :: Token(_, dd@DurationData(_, dg, _)) :: _
+      case t1 :: Token(TimeGrain, GrainData(g, _)) :: _ :: Token(_, dd@DurationData(_, dg, _, _)) :: _
         if g > dg && g != Month =>
         for (i <- getIntValue(t1)) yield Token(Duration, DurationData(i.toInt, g) + dd)
     }

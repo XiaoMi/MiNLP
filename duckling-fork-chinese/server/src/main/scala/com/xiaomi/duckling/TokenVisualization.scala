@@ -76,7 +76,7 @@ object TokenVisualization {
           case SimpleValue(instant) => instant.grain.name()
           case _ => ""
         }
-      case DurationData(_, grain, _) => grain.name()
+      case DurationData(_, grain, _, _) => grain.name()
       case _ => ""
     }
     val node = answer.token.node

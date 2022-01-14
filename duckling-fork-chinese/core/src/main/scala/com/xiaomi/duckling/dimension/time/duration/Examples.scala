@@ -31,7 +31,7 @@ trait Examples extends DimExamples {
     (DurationData(30, Day), List("30天")),
     (DurationData(7, Week), List("七周")),
     (DurationData(1, Month), List("一个月")),
-    (DurationData(3, Month, true), List("几个月")),
+    (DurationData(3, Month, latent = true, fuzzy = true), List("几个月")),
     (DurationData(3, Quarter), List("3个季度")),
     (DurationData(2, Year), List("两年", "2年")),
     (DurationData(2000, Year), List("两千年")),
