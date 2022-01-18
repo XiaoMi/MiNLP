@@ -197,7 +197,7 @@ trait Rules extends DimRules {
     }
   )
 
-  private val RecentPattern = "(上|下|前|后|过去|未来|接下来|之前|今后|之后|最近|近|这)"
+  private val RecentPattern = "(上|下|前|后|过去|未来|接下来|之前|往前|向前|今后|之后|往后|向后|最近|近|这)"
 
   /**
     * 时间区间:
@@ -213,7 +213,7 @@ trait Rules extends DimRules {
       case Token(_, GroupMatch(s :: _)) :: Token(Duration, DurationData(v, g, _, fuzzy)) :: _ =>
         // 月必须是x个月
         s match {
-          case "下" | "后" | "接下来" | "未来" | "今后" | "之后" =>
+          case "下" | "后" | "接下来" | "未来" | "今后" | "之后" | "向后" | "往后" =>
             val td: Option[TimeData] =
               // 未来一周=未来七天
               if (s == "未来" && v == 1 && g == Week) {
@@ -241,7 +241,7 @@ trait Rules extends DimRules {
                 case _    => tt(td)
               }
             } else tt(cycleNth(g, 0))
-          case "上" | "前" | "之前" | "过去" =>
+          case "上" | "前" | "之前" | "往前"  | "向前" | "过去" | "过去" =>
             if (s == "上" && g == Day) None
             else if (s == "过去" && fuzzy) None
             else if (v > 1) tt(cycleN(notImmediate = true, g, -v).at(Hint.Recent))
@@ -431,7 +431,7 @@ trait Rules extends DimRules {
   val ruleSequence3 = Rule(
     name = "sequence3: <recent nominal> <duration>",
     pattern =
-      List(isHint(RecentNominal).predicate, "之?(前|后)的?".regex, isDimension(Duration).predicate),
+      List(isHint(RecentNominal).predicate, "(往|向|之)?(前|后)的?".regex, isDimension(Duration).predicate),
     prod = tokens {
       case Token(_, td1: TimeData) :: Token(_, GroupMatch(_ :: s :: _)) :: Token(
             _,
