@@ -83,7 +83,7 @@ trait Examples extends DimExamples {
         LocalDateTime.of(2013, 2, 1, 0, 0, 0),
         Month
       ),
-      List("上两个月", "上二个月", "前两个月", "前两个月", "前二个月")
+      List("上两个月", "上二个月", "前两个月", "前两个月", "前二个月", "之前二个月", "往前二个月", "向前二个月")
     ),
     (
       localDateTimeInterval(
@@ -115,7 +115,7 @@ trait Examples extends DimExamples {
         LocalDateTime.of(2013, 2, 16, 0, 0, 0),
         Day
       ),
-      List("明天的之后三天")
+      List("明天的之后三天", "明天的往后三天", "明天的向后三天")
     )
   )
 
@@ -186,7 +186,7 @@ trait Examples extends DimExamples {
         LocalDateTime.of(2013, 2, 12, 4, 45, 0),
         Minute
       ),
-      List("未来一刻钟", "之后一刻钟")
+      List("未来一刻钟", "之后一刻钟", "向后一刻钟", "往后一刻钟")
     )
   )
 
