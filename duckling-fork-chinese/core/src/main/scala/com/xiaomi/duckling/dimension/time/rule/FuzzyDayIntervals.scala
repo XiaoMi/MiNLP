@@ -110,6 +110,7 @@ object FuzzyDayIntervals {
       case (IntersectTimePredicate(_: TimeIntervalsPredicate, series: SeriesPredicate), Some(time)) =>
         tt(td.copy(timePred = IntersectTimePredicate(time.timePred, series)))
       case (_: TimeIntervalsPredicate, Some(time)) => tt(time)
+      case _ => None
     }
   }
 

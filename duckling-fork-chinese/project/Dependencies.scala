@@ -52,12 +52,10 @@ object Dependencies {
   lazy val junitInterface = "com.novocode" % "junit-interface" % "0.11"
   lazy val scalatic = "org.scalactic" %% "scalactic" % "3.0.5"
   lazy val scalaTest = "org.scalatest" %% "scalatest" % "3.0.5"
-  lazy val scalaMeter = "com.storm-enroute" %% "scalameter" % "0.18"
   lazy val jmhAnn = "org.openjdk.jmh" % "jmh-generator-annprocess" % "1.21"
   lazy val jmhCore = "org.openjdk.jmh" % "jmh-core" % "1.21"
 
-  lazy val json4sJackson = "org.json4s" %% "json4s-jackson" % "3.6.5"
-  lazy val jackson = "com.fasterxml.jackson.core" % "jackson-databind" % "2.11.4"
+  lazy val json4sJackson = "org.json4s" %% "json4s-jackson" % "3.6.12"
   // logger
   lazy val slf4jApi = "org.slf4j" % "slf4j-api" % "1.7.26"
   lazy val slf4jnop = "org.slf4j" % "slf4j-nop" % "1.7.26"
@@ -67,12 +65,12 @@ object Dependencies {
   // utils
   lazy val scalaz = "org.scalaz" %% "scalaz-core" % "7.2.27"
   lazy val arm = "com.jsuereth" %% "scala-arm" % "2.0"
-  lazy val commonslang = "org.apache.commons" % "commons-lang3" % "3.7"
+  lazy val commonslang = "org.apache.commons" % "commons-lang3" % "3.12.0"
   lazy val commonsText = "org.apache.commons" % "commons-text" % "1.9"
   lazy val commonsIO = "commons-io" % "commons-io" % "2.6"
   lazy val jline = "org.jline" % "jline" % "3.11.0"
   lazy val config = "com.typesafe" % "config" % "1.3.4"
-  lazy val guava = "com.google.guava" % "guava" % "28.2-jre"
+  lazy val guava = "com.google.guava" % "guava" % "30.1.1-jre"
   lazy val lombok = "org.projectlombok" % "lombok" % "1.18.8" % Provided
   lazy val httpclient = "org.apache.httpcomponents" % "httpclient" % "4.5.6"
   lazy val java8 = "org.scala-lang.modules" %% "scala-java8-compat" % "0.9.0"
