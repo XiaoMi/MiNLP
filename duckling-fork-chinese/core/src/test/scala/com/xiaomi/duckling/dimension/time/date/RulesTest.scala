@@ -18,9 +18,9 @@ package com.xiaomi.duckling.dimension.time.date
 
 import scala.util.matching.Regex
 
-import org.scalatest.{FunSpec, Matchers}
+import com.xiaomi.duckling.UnitSpec
 
-class RulesTest extends FunSpec with Matchers {
+class RulesTest extends UnitSpec{
 
   object NoopRule extends Rules {}
 

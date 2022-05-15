@@ -32,7 +32,7 @@ trait Rules extends DimRules {
     prod = tokens {
       case t1 :: Token(_, GroupMatch(s :: _)) :: _ =>
         for (i <- getIntValue(t1)) yield {
-          val n = if (s.endsWith("半")) i + 0.5 else i
+          val n: Double = if (s.endsWith("半")) i + 0.5 else i
           token(NumeralValue(n))
         }
     }

@@ -16,14 +16,12 @@
 
 package com.xiaomi.duckling.dimension.episode
 
-import org.scalatest.{FunSpec, Matchers}
-import org.scalatest.prop.TableDrivenPropertyChecks
-
 import com.xiaomi.duckling.Api.analyze
 import com.xiaomi.duckling.dimension.quantity.QuantityValue
 import com.xiaomi.duckling.ranking.Testing.{testContext, testOptions}
+import com.xiaomi.duckling.UnitSpec
 
-class EpisodeTest extends FunSpec with Matchers with TableDrivenPropertyChecks {
+class EpisodeTest extends UnitSpec {
 
 	val options = testOptions.copy(targets = Set(Episode), full = false)
 

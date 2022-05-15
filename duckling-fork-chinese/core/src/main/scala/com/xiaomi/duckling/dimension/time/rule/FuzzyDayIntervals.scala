@@ -18,8 +18,8 @@ package com.xiaomi.duckling.dimension.time.rule
 
 import com.xiaomi.duckling.Types._
 import com.xiaomi.duckling.dimension.implicits._
-import com.xiaomi.duckling.dimension.matcher.GroupMatch
 import com.xiaomi.duckling.dimension.matcher.Prods._
+import com.xiaomi.duckling.dimension.time.{Time, TimeData}
 import com.xiaomi.duckling.dimension.time.Prods._
 import com.xiaomi.duckling.dimension.time.enums.Grain._
 import com.xiaomi.duckling.dimension.time.enums.Hint
@@ -27,8 +27,7 @@ import com.xiaomi.duckling.dimension.time.enums.Hint._
 import com.xiaomi.duckling.dimension.time.enums.IntervalType.Open
 import com.xiaomi.duckling.dimension.time.form.{IntervalOfDay, PartOfDay, TimeOfDay}
 import com.xiaomi.duckling.dimension.time.helper.TimeDataHelpers._
-import com.xiaomi.duckling.dimension.time.predicates.{SequencePredicate, TimeDatePredicate, TimeIntervalsPredicate, _}
-import com.xiaomi.duckling.dimension.time.{timeSeqMap, Time, TimeData}
+import com.xiaomi.duckling.dimension.time.predicates._
 
 object FuzzyDayIntervals {
 
@@ -110,6 +109,7 @@ object FuzzyDayIntervals {
       case (IntersectTimePredicate(_: TimeIntervalsPredicate, series: SeriesPredicate), Some(time)) =>
         tt(td.copy(timePred = IntersectTimePredicate(time.timePred, series)))
       case (_: TimeIntervalsPredicate, Some(time)) => tt(time)
+      case _ => None
     }
   }
 

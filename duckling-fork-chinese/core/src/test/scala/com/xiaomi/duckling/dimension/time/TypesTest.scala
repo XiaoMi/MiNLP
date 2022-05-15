@@ -18,17 +18,18 @@ package com.xiaomi.duckling.dimension.time
 
 import java.time.{LocalDate, LocalTime, ZonedDateTime}
 
-import org.scalatest.{FunSpec, Matchers}
 import com.github.heqiao2010.lunar.LunarCalendar
+
 import com.xiaomi.duckling.dimension.time.enums.Grain.Day
 import com.xiaomi.duckling.dimension.time.helper.TimeDataHelpers._
 import com.xiaomi.duckling.dimension.time.helper.TimeObjectHelpers.{timeIntersect, timePlus}
-import com.xiaomi.duckling.dimension.time.Types.{DuckDateTime, LunarDate, SolarDate, TimeContext, TimeObject}
+import com.xiaomi.duckling.dimension.time.Types._
 import com.xiaomi.duckling.dimension.time.enums.Grain
 import com.xiaomi.duckling.ranking.Testing
 import com.xiaomi.duckling.Types.ZoneCN
+import com.xiaomi.duckling.UnitSpec
 
-class TypesTest extends FunSpec with Matchers {
+class TypesTest extends UnitSpec {
 
   describe("TypesTest") {
 

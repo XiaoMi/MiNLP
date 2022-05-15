@@ -16,19 +16,17 @@
 
 package com.xiaomi.duckling.dimension.time
 
-import org.scalatest.{FunSpec, Matchers}
-
 import com.typesafe.scalalogging.LazyLogging
 
 import com.xiaomi.duckling.Api.analyze
-import com.xiaomi.duckling.dimension.time.Types._
-import com.xiaomi.duckling.Types._
 import com.xiaomi.duckling.dimension.implicits._
+import com.xiaomi.duckling.dimension.time.Types._
 import com.xiaomi.duckling.dimension.time.enums.Grain
 import com.xiaomi.duckling.dimension.time.predicates.TimeDatePredicate
 import com.xiaomi.duckling.ranking.Testing.{testContext, testOptions}
+import com.xiaomi.duckling.UnitSpec
 
-class TimeDataTest extends FunSpec with Matchers with LazyLogging {
+class TimeDataTest extends UnitSpec with LazyLogging {
 
   describe("TimeDataTest") {
 

@@ -16,12 +16,12 @@
 
 package com.xiaomi.duckling.engine
 
-import org.scalatest.{FunSpec, Matchers}
 
-import com.xiaomi.duckling.Document
+
+import com.xiaomi.duckling.{Document, UnitSpec}
 import com.xiaomi.duckling.Types.DefaultExcludes
 
-class VarcharLookupTest extends FunSpec with Matchers {
+class VarcharLookupTest extends UnitSpec {
 
   describe("VarcharLookupTest") {
 

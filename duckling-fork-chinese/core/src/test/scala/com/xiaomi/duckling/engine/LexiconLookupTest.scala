@@ -1,10 +1,10 @@
 package com.xiaomi.duckling.engine
 
-import com.xiaomi.duckling.Document
+import com.xiaomi.duckling.{Document, UnitSpec}
 import com.xiaomi.duckling.dimension.gender.Gender
-import org.scalatest.{FunSpec, Matchers}
 
-class LexiconLookupTest extends FunSpec with Matchers {
+
+class LexiconLookupTest extends UnitSpec {
 
   describe("LexiconLookupTest") {
     it("should lookupLexiconAnywhere") {

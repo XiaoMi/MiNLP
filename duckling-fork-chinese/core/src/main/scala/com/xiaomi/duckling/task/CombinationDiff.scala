@@ -42,7 +42,7 @@ object CombinationDiff {
   def main(args: Array[String]): Unit = {
     val lines = Files.readAllLines(Paths.get("factoid_query.txt"), StandardCharsets.UTF_8).asScala
     val writer = Files.newBufferedWriter(Paths.get("time.diff"), StandardCharsets.UTF_8)
-    lines.par.foreach { line =>
+    lines.foreach { line =>
       val s0 = Api.analyze(line, Testing.testContext, options0).map(_.text).mkString("/")
       val s1 = Api.analyze(line, Testing.testContext, options1).map(_.text).mkString("/")
       if (s0 != s1) {

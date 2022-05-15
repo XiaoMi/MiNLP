@@ -16,10 +16,9 @@
 
 package com.xiaomi.duckling.dimension.music
 
-import org.scalatest.{FunSpec, Matchers}
-import org.scalatest.prop.TableDrivenPropertyChecks
+import com.xiaomi.duckling.UnitSpec
 
-class LyricTest extends FunSpec with Matchers with TableDrivenPropertyChecks {
+class LyricTest extends UnitSpec {
 
   describe("LyricTest") {
 

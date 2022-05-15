@@ -16,16 +16,17 @@
 
 package com.xiaomi.duckling.dimension
 
-import org.scalatest.{FunSpec, Matchers}
 import org.scalatest.prop.TableDrivenPropertyChecks
+
 import com.typesafe.scalalogging.LazyLogging
+
 import com.xiaomi.duckling.Api.analyze
 import com.xiaomi.duckling.ranking.Testing.{testContext, testOptions}
 import com.xiaomi.duckling.task.NaiveBayesDebug
+import com.xiaomi.duckling.UnitSpec
 
 class GeneralCaseTest
-    extends FunSpec
-    with Matchers
+    extends UnitSpec
     with TableDrivenPropertyChecks
     with LazyLogging {
 

@@ -16,13 +16,13 @@
 
 package com.xiaomi.duckling.dimension.time.grain
 
-import com.xiaomi.duckling.Api
+import com.xiaomi.duckling.{Api, UnitSpec}
 import com.xiaomi.duckling.dimension.time.Time
 import com.xiaomi.duckling.dimension.time.duration.Duration
 import com.xiaomi.duckling.ranking.Testing
-import org.scalatest.{FunSpec, Matchers}
 
-class TimeGrainTest extends FunSpec with Matchers {
+
+class TimeGrainTest extends UnitSpec {
   describe("TimeGrain") {
     it("正则匹配周") {
       val r = WeekPattern.r

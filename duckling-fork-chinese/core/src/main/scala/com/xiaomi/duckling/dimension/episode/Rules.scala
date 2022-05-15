@@ -32,7 +32,7 @@ trait Rules extends DimRules {
     pattern = List(notEndsWithGe.predicate, episodePattern),
     prod = tokens {
       case t1 :: _ =>
-        for (i <- getIntValue(t1)) yield Token(Episode, QuantityData(i, "集", "集"))
+        for (i <- getIntValue(t1)) yield Token(Episode, QuantityData(i.toDouble, "集", "集"))
     }
   )
 
@@ -41,7 +41,7 @@ trait Rules extends DimRules {
     pattern = List(isNatural.predicate, episodePattern),
     prod = tokens {
       case t1 :: _ =>
-        for (i <- getIntValue(t1)) yield Token(Episode, QuantityData(i, "集", "集", true))
+        for (i <- getIntValue(t1)) yield Token(Episode, QuantityData(i.toDouble, "集", "集", true))
     }
   )
 
@@ -50,7 +50,7 @@ trait Rules extends DimRules {
     pattern = List(reversePattern, isNatural.predicate, episodePattern),
     prod = tokens {
       case _ :: t1 :: _ =>
-        for (i <- getIntValue(t1)) yield Token(Episode, QuantityData(-i, "集", "集"))
+        for (i <- getIntValue(t1)) yield Token(Episode, QuantityData(-i.toDouble, "集", "集"))
     }
   )
 }

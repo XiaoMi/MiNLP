@@ -148,7 +148,7 @@ object AnswersSelection extends LazyLogging {
       .flatMap(a => a.dim.combinationFeatures(a.token.node))
       .map(f => f.name())
       .groupBy(s => s)
-      .mapValues(_.size)
+      .fmap(_.size)
   }
 
   def parse(sentence: String, dim: Dimension) = {

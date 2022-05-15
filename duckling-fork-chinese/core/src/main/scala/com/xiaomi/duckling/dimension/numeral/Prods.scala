@@ -98,7 +98,7 @@ object Prods {
       "Ⅸ" -> 9
     )
 
-  def long(x: Long): Option[Token] = double(x)
+  def long(x: Long): Option[Token] = double(x.toDouble)
 
   def parseDecimal(`match`: String, precision: Int): Option[Token] = {
     parseDouble(`match`).toOption.flatMap(x => double(x, precision))

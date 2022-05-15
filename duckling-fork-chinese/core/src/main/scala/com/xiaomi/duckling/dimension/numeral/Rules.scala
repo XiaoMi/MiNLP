@@ -37,8 +37,9 @@ trait Rules extends DimRules {
     name = "integer (numeric)",
     pattern = List("(0|[1-9]\\d{0,17})".regex),
     prod = singleRegexMatch { case t =>
-      parseLong(t).toOption.flatMap(long).map{ case Token(dim, nd: NumeralData) =>
-        Token(dim, nd.copy(sequence = t))
+      parseLong(t).toOption.flatMap(long).map {
+        case Token(dim, nd: NumeralData) => Token(dim, nd.copy(sequence = t))
+        case t => t // suppress warning
       }
     }
   )
