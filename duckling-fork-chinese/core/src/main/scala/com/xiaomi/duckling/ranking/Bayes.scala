@@ -17,6 +17,7 @@
 package com.xiaomi.duckling.ranking
 
 import com.xiaomi.duckling.ranking.Types.{BagOfFeatures, Class, Datum}
+import scalaz.Scalaz._
 
 object Bayes {
 
@@ -37,7 +38,7 @@ object Bayes {
     val prior = math.log(1.0 * (classTotal + 1e-9) / total)
     val denum = vocSize + feats.values.sum
     val unseen = math.log(1.0 / (denum + 1.0))
-    val likelihoods = feats.mapValues(x => math.log((x + 1.0) / denum))
+    val likelihoods = feats.fmap(x => math.log((x + 1.0) / denum))
 
     ClassData(prior, unseen, likelihoods, classTotal)
   }

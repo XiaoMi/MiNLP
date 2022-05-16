@@ -22,7 +22,7 @@ import com.xiaomi.duckling.engine
 import com.xiaomi.duckling.types.Node
 
 case class Stash(getSet: SortedMap[Int, Set[Node]]) {
-  def filter(p: Node => Boolean): Stash = engine.Stash(getSet.mapValues(_ filter p))
+  def filter(p: Node => Boolean): Stash = engine.Stash(getSet.map { case (k, v) => (k, v filter p) })
 
   def isEmpty: Boolean = getSet.isEmpty
 

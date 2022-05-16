@@ -16,9 +16,10 @@
 
 package com.xiaomi.duckling.task
 
-import org.scalatest.{FunSpec, Matchers}
+import com.xiaomi.duckling.UnitSpec
 
-class PlaceExtractorTest extends FunSpec with Matchers {
+
+class PlaceExtractorTest extends UnitSpec {
 
   describe("PlaceExtractorTest") {
     it("testExtract") {

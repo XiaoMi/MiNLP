@@ -16,9 +16,10 @@
 
 package com.xiaomi.duckling
 
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 
-class PlaceQueryTest extends FunSpec with Matchers {
+class PlaceQueryTest extends AnyFunSpec with Matchers {
   describe("PlaceQuery") {
     it("levels") {
       PlaceQuery.extract("山东") shouldBe Some("中华人民共和国/山东省")

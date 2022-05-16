@@ -34,9 +34,9 @@ trait Rules extends DimRules {
       case t1 :: Token(_, GroupMatch(s0 :: s :: _)) :: _ =>
         for (v <- getIntValue(t1)) yield {
           val scalar = s match {
-            case "元" | "块" => 1
-            case "角" | "毛" =>.1
-            case "分" =>.01
+            case "元" | "块" => 1.0
+            case "角" | "毛" => 0.1
+            case "分" => 0.01
           }
           token(CurrencyData(v, scalar, s, end = s0.endsWith("钱"), code = RMB))
         }

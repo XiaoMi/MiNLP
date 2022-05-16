@@ -27,7 +27,7 @@ trait Rules extends DimRules {
     name = "<ordinal> level",
     pattern = List(notEndsWithGe.predicate, "(级(?!别)|档)".regex),
     prod = tokens {
-      case Token(_, OrdinalData(value, _)) :: _ => Token(Level, NumeralData(value))
+      case Token(_, OrdinalData(value, _)) :: _ => Token(Level, NumeralData(value.toDouble))
     }
   )
 

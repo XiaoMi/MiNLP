@@ -16,11 +16,9 @@
 
 package com.xiaomi.duckling
 
-import org.scalatest.{FunSpec, Matchers}
-
 import com.xiaomi.duckling.analyzer.HanlpAnalyzer
 
-class DocumentTest extends FunSpec with Matchers {
+class DocumentTest extends UnitSpec {
 
   describe("DocumentTest") {
 

@@ -19,10 +19,9 @@ package com.xiaomi.duckling.dimension.currency
 import com.xiaomi.duckling.Api.analyze
 import com.xiaomi.duckling.dimension.quantity.QuantityValue
 import com.xiaomi.duckling.ranking.Testing.{testContext, testOptions}
-import org.scalatest.prop.TableDrivenPropertyChecks
-import org.scalatest.{FunSpec, Matchers}
+import com.xiaomi.duckling.UnitSpec
 
-class CurrencyTest extends FunSpec with Matchers with TableDrivenPropertyChecks {
+class CurrencyTest extends UnitSpec{
 
 	val options = testOptions.copy(targets = Set(Currency), full = false)
 

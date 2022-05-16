@@ -16,19 +16,16 @@
 
 package com.xiaomi.duckling.dimension.time.rule
 
-import org.scalatest.FunSpec
-
+import com.xiaomi.duckling.dimension.implicits._
 import com.xiaomi.duckling.dimension.time.enums.Grain.Hour
 import com.xiaomi.duckling.dimension.time.TimeData
-import com.xiaomi.duckling.dimension.time.Types._
-import com.xiaomi.duckling.Types._
-import com.xiaomi.duckling.dimension.implicits._
 import com.xiaomi.duckling.dimension.time.form.TimeOfDay
 import com.xiaomi.duckling.dimension.time.helper.TimeDataHelpers._
 import com.xiaomi.duckling.dimension.time.predicates.{SequencePredicate, TimeDatePredicate}
 import com.xiaomi.duckling.ranking.Testing
+import com.xiaomi.duckling.UnitSpec
 
-class FuzzyDayIntervalsTest extends FunSpec {
+class FuzzyDayIntervalsTest extends UnitSpec {
 
   describe("FuzzyDayIntervalsTest") {
 

@@ -17,14 +17,13 @@
 package com.xiaomi.duckling.ranking.example
 
 import org.json4s.jackson.Serialization.write
-import org.scalatest.{FunSpec, Matchers}
 
-import com.xiaomi.duckling.{Api, Types}
+import com.xiaomi.duckling.{Api, Types, UnitSpec}
 import com.xiaomi.duckling.JsonSerde._
 import com.xiaomi.duckling.dimension.numeral.Numeral
 import com.xiaomi.duckling.ranking.Testing
 
-class JsonSerdeTest extends FunSpec with Matchers {
+class JsonSerdeTest extends UnitSpec {
 
   describe("JsonSerdeTest") {
     it("should serialize entity") {

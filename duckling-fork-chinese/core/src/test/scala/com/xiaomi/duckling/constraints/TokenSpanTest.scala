@@ -16,15 +16,13 @@
 
 package com.xiaomi.duckling.constraints
 
-import org.scalatest.{FunSpec, Matchers}
-
-import com.xiaomi.duckling.{Api, Types}
+import com.xiaomi.duckling.{Api, Types, UnitSpec}
 import com.xiaomi.duckling.Types.{Context, Options}
 import com.xiaomi.duckling.dimension.place.Place
 import com.xiaomi.duckling.dimension.time.Time
 import com.xiaomi.duckling.types.{LanguageInfo, TokenLabel}
 
-class TokenSpanTest extends FunSpec with Matchers {
+class TokenSpanTest extends UnitSpec {
 
   describe("TokenSpan") {
     it("testIsValid") {

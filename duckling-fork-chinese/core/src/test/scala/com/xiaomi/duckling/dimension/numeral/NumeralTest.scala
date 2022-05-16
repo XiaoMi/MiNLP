@@ -22,10 +22,9 @@ import com.xiaomi.duckling.dimension.numeral.Predicates._
 import com.xiaomi.duckling.dimension.numeral.fraction.{Fraction, FractionData}
 import com.xiaomi.duckling.dimension.ordinal.{Ordinal, OrdinalData}
 import com.xiaomi.duckling.ranking.Testing._
-import org.scalatest.prop.TableDrivenPropertyChecks
-import org.scalatest.{FunSpec, Matchers}
+import com.xiaomi.duckling.UnitSpec
 
-class NumeralTest extends FunSpec with Matchers with TableDrivenPropertyChecks {
+class NumeralTest extends UnitSpec {
 
   val options = testOptions.copy(
     targets = Set(Numeral),

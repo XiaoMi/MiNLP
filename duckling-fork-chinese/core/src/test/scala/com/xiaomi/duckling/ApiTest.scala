@@ -21,7 +21,6 @@ import com.xiaomi.duckling.dimension.currency.Currency
 import com.xiaomi.duckling.dimension.episode.Episode
 import com.xiaomi.duckling.dimension.level.Level
 import com.xiaomi.duckling.dimension.numeral.fraction.{Fraction, FractionData}
-import org.scalatest.{FunSpec, Matchers}
 import com.xiaomi.duckling.dimension.numeral.{DoubleSideIntervalValue, Numeral, NumeralValue, OpenIntervalValue}
 import com.xiaomi.duckling.dimension.ordinal.{Ordinal, OrdinalData}
 import com.xiaomi.duckling.dimension.quantity.QuantityValue
@@ -33,7 +32,7 @@ import com.xiaomi.duckling.dimension.time.duration.Duration
 import com.xiaomi.duckling.dimension.time.date.Date
 
 
-class ApiTest extends FunSpec with Matchers {
+class ApiTest extends UnitSpec {
 
   import com.xiaomi.duckling.ranking.Testing.{testContext, testOptions}
 
@@ -57,9 +56,9 @@ class ApiTest extends FunSpec with Matchers {
           Api.analyze(query, testContext, options).foreach{
             answer =>
               answer.token.value match {
-                case data: DoubleSideIntervalValue  => println(data.schema())
-                case data: NumeralValue  => println(data.schema())
-                case data: OpenIntervalValue  => println(data.schema())
+                case data: DoubleSideIntervalValue  => println(data.schema)
+                case data: NumeralValue  => println(data.schema)
+                case data: OpenIntervalValue  => println(data.schema)
                 case _ => println("error")
               }
           }

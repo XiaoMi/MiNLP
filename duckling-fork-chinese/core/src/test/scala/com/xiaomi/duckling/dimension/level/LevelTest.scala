@@ -19,10 +19,9 @@ package com.xiaomi.duckling.dimension.level
 import com.xiaomi.duckling.Api.analyze
 import com.xiaomi.duckling.dimension.numeral.NumeralValue
 import com.xiaomi.duckling.ranking.Testing.{testContext, testOptions}
-import org.scalatest.prop.TableDrivenPropertyChecks
-import org.scalatest.{FunSpec, Matchers}
+import com.xiaomi.duckling.UnitSpec
 
-class LevelTest extends FunSpec with Matchers with TableDrivenPropertyChecks {
+class LevelTest extends UnitSpec{
 
 	val options = testOptions.copy(targets = Set(Level), full = false)
 

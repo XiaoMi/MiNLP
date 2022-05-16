@@ -262,11 +262,11 @@ object Types {
   }
 
   case class DuckDateTime(date: DuckDate, time: LocalTime, zone: ZoneId) {
-    def this(dt: ZonedDateTime) {
+    def this(dt: ZonedDateTime) = {
       this(SolarDate(dt.toLocalDate), dt.toLocalTime, dt.getZone)
     }
 
-    def this(dt: LocalDateTime, zone: ZoneId = ZoneCN) {
+    def this(dt: LocalDateTime, zone: ZoneId = ZoneCN) = {
       this(dt.atZone(zone))
     }
 
@@ -389,7 +389,7 @@ object Types {
       extends SingleTimeValue
 
   case class TimeObject(start: DuckDateTime, grain: Grain, end: Option[DuckDateTime] = None) {
-    def this(ref: ZonedDateTime, grain: Grain) {
+    def this(ref: ZonedDateTime, grain: Grain) = {
       this(new DuckDateTime(ref), grain)
     }
 

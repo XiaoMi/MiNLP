@@ -19,10 +19,9 @@ package com.xiaomi.duckling.dimension.age
 import com.xiaomi.duckling.Api.analyze
 import com.xiaomi.duckling.dimension.numeral.{DoubleSideIntervalValue, NumeralValue, OpenIntervalValue}
 import com.xiaomi.duckling.ranking.Testing.{testContext, testOptions}
-import org.scalatest.{FunSpec, Matchers}
-import org.scalatest.prop.TableDrivenPropertyChecks
+import com.xiaomi.duckling.UnitSpec
 
-class AgeTest extends FunSpec with Matchers with TableDrivenPropertyChecks {
+class AgeTest extends UnitSpec {
 
 	val options = testOptions.copy(targets = Set(Age), full = false)
 

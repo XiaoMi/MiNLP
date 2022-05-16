@@ -18,9 +18,6 @@ package com.xiaomi.duckling.dimension.time
 
 import java.time.{LocalDateTime, ZonedDateTime}
 
-import org.scalatest.{FunSpec, Matchers}
-import org.scalatest.prop.TableDrivenPropertyChecks
-
 import com.xiaomi.duckling.Api.analyze
 import com.xiaomi.duckling.Types._
 import com.xiaomi.duckling.dimension.time.Types.{InstantValue, SimpleValue}
@@ -29,8 +26,9 @@ import com.xiaomi.duckling.dimension.time.helper.TimeDataHelpers._
 import com.xiaomi.duckling.dimension.time.predicates.ReplacePartPredicate
 import com.xiaomi.duckling.ranking.Testing
 import com.xiaomi.duckling.ranking.Testing._
+import com.xiaomi.duckling.UnitSpec
 
-class TimeTest extends FunSpec with Matchers with TableDrivenPropertyChecks {
+class TimeTest extends UnitSpec {
 
   private val options = testOptions.copy(targets = Set(Time))
   private val combinationOptions =

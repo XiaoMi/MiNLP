@@ -16,15 +16,12 @@
 
 package com.xiaomi.duckling
 
-import com.xiaomi.duckling.dimension.matcher.RegexMatch
-import org.scalatest.{FunSpec, Matchers}
 import com.xiaomi.duckling.Types._
-import com.xiaomi.duckling.dimension.implicits._
 import com.xiaomi.duckling.dimension.matcher.{GroupMatch, RegexMatch}
 import com.xiaomi.duckling.engine.RegexLookup._
 import com.xiaomi.duckling.types.Node
 
-class EngineTest extends FunSpec with Matchers {
+class EngineTest extends UnitSpec {
 
   describe("EngineTest") {
 
