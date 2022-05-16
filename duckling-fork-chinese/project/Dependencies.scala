@@ -67,12 +67,12 @@ object Dependencies {
   // utils
   lazy val scalaz = "org.scalaz" %% "scalaz-core" % "7.2.27"
   lazy val arm = "com.michaelpollmeier" %% "scala-arm" % "2.1"
-  lazy val commonslang = "org.apache.commons" % "commons-lang3" % "3.7"
+  lazy val commonslang = "org.apache.commons" % "commons-lang3" % "3.12.0"
   lazy val commonsText = "org.apache.commons" % "commons-text" % "1.9"
   lazy val commonsIO = "commons-io" % "commons-io" % "2.6"
   lazy val jline = "org.jline" % "jline" % "3.11.0"
   lazy val config = "com.typesafe" % "config" % "1.3.4"
-  lazy val guava = "com.google.guava" % "guava" % "28.2-jre"
+  lazy val guava = "com.google.guava" % "guava" % "30.1.1-jre"
   lazy val lombok = "org.projectlombok" % "lombok" % "1.18.8" % Provided
   lazy val httpclient = "org.apache.httpcomponents" % "httpclient" % "4.5.6"
   lazy val java8 = "org.scala-lang.modules" %% "scala-java8-compat" % "0.9.0"
