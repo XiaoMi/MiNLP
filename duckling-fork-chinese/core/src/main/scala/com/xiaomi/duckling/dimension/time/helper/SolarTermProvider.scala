@@ -16,8 +16,7 @@
 
 package com.xiaomi.duckling.dimension.time.helper
 
-import com.google.common.collect.{ImmutableListMultimap, ImmutableTable, Table}
-
+import com.google.common.collect.{ImmutableListMultimap, ImmutableTable, Maps, Table}
 import java.time.LocalDate
 
 import com.xiaomi.duckling.Resources
@@ -71,34 +70,35 @@ class LocalSolarTermProvider extends SolarTermProvider {
     */
   override def solarTermTable: Table[Int, String, LocalDate] = table
 
-  private val mmap = ImmutableListMultimap
-    .builder()
-    .put("立春", "立春")
-    .put("雨水", "雨水")
-    .put("惊蛰", "惊蛰")
-    .put("春分", "春分")
-    .put("清明节", "清明")
-    .put("清明", "清明")
-    .put("谷雨", "谷雨")
-    .put("立夏", "立夏")
-    .put("小满", "小满")
-    .put("芒种", "芒种")
-    .put("夏至", "夏至")
-    .put("小暑", "小暑")
-    .put("大暑", "大暑")
-    .put("立秋", "立秋")
-    .put("处暑", "处暑")
-    .put("白露", "白露")
-    .put("秋分", "秋分")
-    .put("寒露", "寒露")
-    .put("霜降", "霜降")
-    .put("立冬", "立冬")
-    .put("小雪", "小雪")
-    .put("大雪", "大雪")
-    .put("冬至", "冬至")
-    .put("小寒", "小寒")
-    .put("大寒", "大寒")
-    .build()
+  private val mmap = {
+    val builder = Maps.newTreeMap[String, String]()
+    builder.put("立春", "立春")
+    builder.put("雨水", "雨水")
+    builder.put("惊蛰", "惊蛰")
+    builder.put("春分", "春分")
+    builder.put("清明节", "清明")
+    builder.put("清明", "清明")
+    builder.put("谷雨", "谷雨")
+    builder.put("立夏", "立夏")
+    builder.put("小满", "小满")
+    builder.put("芒种", "芒种")
+    builder.put("夏至", "夏至")
+    builder.put("小暑", "小暑")
+    builder.put("大暑", "大暑")
+    builder.put("立秋", "立秋")
+    builder.put("处暑", "处暑")
+    builder.put("白露", "白露")
+    builder.put("秋分", "秋分")
+    builder.put("寒露", "寒露")
+    builder.put("霜降", "霜降")
+    builder.put("立冬", "立冬")
+    builder.put("小雪", "小雪")
+    builder.put("大雪", "大雪")
+    builder.put("冬至", "冬至")
+    builder.put("小寒", "小寒")
+    builder.put("大寒", "大寒")
+    builder
+  }
 
-  override def dict = Dict(mmap)
+  override def dict = new Dict(mmap, false)
 }

@@ -78,6 +78,7 @@ object Dependencies {
   lazy val java8 = "org.scala-lang.modules" %% "scala-java8-compat" % "0.9.0"
   lazy val lunar = "com.github.heqiao2010" % "lunar" % "1.5"
   lazy val emoji = "com.vdurmont" % "emoji-java" % "5.1.1"
+  lazy val trie = "com.hankcs" % "aho-corasick-double-array-trie" % "1.2.2"
 
   //web
   lazy val spThymeleaf = "org.springframework.boot" % "spring-boot-starter-thymeleaf" % "2.4.5"

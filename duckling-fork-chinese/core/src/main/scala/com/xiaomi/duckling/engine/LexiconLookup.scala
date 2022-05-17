@@ -16,12 +16,13 @@
 
 package com.xiaomi.duckling.engine
 
-import com.google.common.collect.Multimap
-import com.typesafe.scalalogging.LazyLogging
+import java.util
 
-import scala.annotation.tailrec
 import scala.collection.JavaConverters._
 import scala.collection.mutable
+
+import com.hankcs.hanlp.collection.AhoCorasick.AhoCorasickDoubleArrayTrie
+import com.typesafe.scalalogging.LazyLogging
 
 import com.xiaomi.duckling.Document
 import com.xiaomi.duckling.Types.{Range, Token}
@@ -33,7 +34,15 @@ import com.xiaomi.duckling.types.Node
   */
 object LexiconLookup extends LazyLogging {
 
-  case class Dict(var vocab: Multimap[String, String])
+  case class Dict(var vocab: AhoCorasickDoubleArrayTrie[String], maximumOnly: Boolean = false) {
+    def this(tree: util.TreeMap[String, String], maximumOnly: Boolean) = {
+      this({
+        val _vocab = new AhoCorasickDoubleArrayTrie[String]()
+        _vocab.build(tree)
+        _vocab
+      }, maximumOnly)
+    }
+  }
 
   def lookupLexiconAnywhere(doc: Document, position: Int, dict: Dict): List[Node] = {
     lookupLexicon(doc, position = position, dict, anywhere = true)
@@ -55,42 +64,32 @@ object LexiconLookup extends LazyLogging {
         )
       }
 
-      // 这里的key中可能有重复，用于命中更多选项
-      val positions = dict.vocab
-        .keySet()
-        .asScala
-        .flatMap { w =>
-          val indices =
-            if (anywhere) all(doc.rawInput, w).toList
-            else if (doc.rawInput.indexOf(w, position) == position) List(position)
-            else Nil
-          if (indices.isEmpty) Nil
-          else {
-            dict.vocab.get(w).asScala.flatMap(t => indices.map((_, w, t)))
-          }
+      val positions =
+        if (anywhere) dict.vocab.parseText(doc.rawInput).asScala
+        else {
+          val part = doc.rawInput.substring(position)
+          dict.vocab.parseText(part).asScala.filter(_.begin == position)
         }
-        .toList
-      positions.map(f.tupled)
+      val filtered =
+        if (dict.maximumOnly) {
+          remainMaximumOnly(positions)
+        } else positions
+      filtered.map(hit => (hit.begin, doc.rawInput.substring(hit.begin, hit.end), hit.value)).map(f.tupled).toList
     }
   }
 
-  /**
-    * 在字符串中寻找所有的匹配位置
-    *
-    * @param text    待查询文本
-    * @param w       目标
-    * @param start   起始位置
-    * @param indices 目标所在的坐标
-    * @return
-    */
-  @tailrec
-  def all(text: String, w: String, start: Int = 0, indices: mutable.Buffer[Int] = mutable.Buffer[Int]()): mutable.Buffer[Int] = {
-    val i = text.indexOf(w, start)
-    if (i != -1) {
-      indices.append(i)
-      all(text, w, i + w.length, indices)
-    } else {
-      indices
+  def remainMaximumOnly(hits: mutable.Buffer[AhoCorasickDoubleArrayTrie[String]#Hit[String]]): mutable.Buffer[AhoCorasickDoubleArrayTrie[String]#Hit[String]] = {
+    if (hits.isEmpty) hits
+    else {
+      val sorted = hits.sortWith((a, b) => !(a.begin < b.begin || a.begin == b.begin && a.end <= b.begin))
+      val buffer = mutable.Buffer[AhoCorasickDoubleArrayTrie[String]#Hit[String]](sorted.head)
+      sorted.tail.foldLeft(buffer) { (b, hit) =>
+        val last = b.last
+        if (!(last.begin == hit.begin && last.end >= hit.end)) {
+          b.append(hit)
+        }
+        b
+      }
     }
   }
 }
