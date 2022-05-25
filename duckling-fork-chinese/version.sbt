@@ -1,1 +1,1 @@
-ThisBuild / version := "1.2-SNAPSHOT"
+ThisBuild / version := "v1.2.4-RC4D"
