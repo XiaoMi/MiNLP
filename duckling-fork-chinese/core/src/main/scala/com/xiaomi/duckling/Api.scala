@@ -37,20 +37,6 @@ import com.xiaomi.duckling.ranking.{NaiveBayesRank, Ranker}
 import com.xiaomi.duckling.types.{LanguageInfo, Node}
 
 object Api extends LazyLogging {
-  lazy private val enableTimeoutCache = conf.getBoolean("timeout.cache.enable") // 开启缓存的开关
-  lazy private val queryCntThreshold = conf.getInt("timeout.cache.start.cnt") // 开启缓存的query计数阈值
-  lazy private val timeoutCacheDuration = conf.getLong("timeout.cache.duration") // 缓存的时长timeout.cache.cnt
-  lazy private val timeoutCacheMaxcnt = conf.getLong("timeout.cache.maxcnt") // 缓存的最大数量
-  private var query_cnt = 0 // 当前query计数
-
-  // 缓存超时query
-  lazy private val timeoutCache = CacheBuilder
-    .newBuilder()
-    .maximumSize(timeoutCacheMaxcnt)
-    .expireAfterWrite(timeoutCacheDuration, TimeUnit.MINUTES)
-    .weakKeys()
-    .build[String, String]()
-
 
   /**
     * Parses `input` and returns a curated list of entities found.
@@ -64,31 +50,7 @@ object Api extends LazyLogging {
     val resolvedTokens = analyze(input, context, options).map(_.token)
     resolvedTokens.map(formatToken(input, options.entityWithNode))
   }
-
-  /**
-    * parse with timeout
-    * reture empty list when timeout
-    * @param lang    text/tokens/dep
-    * @param context  context
-    * @param options  options
-    * @return
-    */
-  private def analyzeWithTimeout(lang: LanguageInfo,
-                                 context: Context,
-                                 options: Options): List[Answer] = {
-    val input = lang.sentence
-    try {
-      if (null == timeoutCache.getIfPresent(input)) {
-        val future = Future { analyzeWithoutTimeout(lang, context, options) }
-        Await.result(future, options.timeout.get milliseconds)
-      } else List.empty[Answer]
-    } catch {
-      case e: TimeoutException =>
-        logger.error(s"error when parse query=$input, message:$e")
-        if (query_cnt > queryCntThreshold && enableTimeoutCache) timeoutCache.put(input, "timeout")
-        List.empty[Answer]
-    }
-  }
+  
 
   /**
     * Returns a curated list of resolved tokens found
@@ -104,16 +66,6 @@ object Api extends LazyLogging {
   }
 
   def analyze(lang: LanguageInfo, context: Context, options: Options): List[Answer] = {
-    if (enableTimeoutCache && query_cnt <= queryCntThreshold) query_cnt += 1
-
-    if (enableTimeoutCache && options.timeout.exists(_ > 0) && query_cnt > queryCntThreshold) {
-      analyzeWithTimeout(lang, context, options)
-    } else {
-      analyzeWithoutTimeout(lang, context, options)
-    }
-  }
-
-  def analyzeWithoutTimeout(lang: LanguageInfo, context: Context, options: Options): List[Answer] = {
     val input = lang.sentence
 
     val targets = options.targets ++ options.targets.flatMap(_.nonOverlapDims)
