@@ -16,15 +16,10 @@
 
 package com.xiaomi.duckling
 
-import com.google.common.cache.CacheBuilder
 import com.typesafe.scalalogging.LazyLogging
 
 import java.util
-import java.util.concurrent.TimeUnit
 import scala.collection.JavaConverters._
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.duration._
-import scala.concurrent.{Await, Future, TimeoutException}
 import scala.language.postfixOps
 
 import com.xiaomi.duckling.Types.{Answer, Context, Entity, Options, ResolvedToken, _}
@@ -41,9 +36,9 @@ object Api extends LazyLogging {
   /**
     * Parses `input` and returns a curated list of entities found.
     *
-    * @param input
-    * @param context
-    * @param options
+    * @param input    text
+    * @param context  context
+    * @param options  options
     * @return
     */
   def parseEntities(input: String, context: Context, options: Options): List[Entity] = {
@@ -56,9 +51,9 @@ object Api extends LazyLogging {
     * Returns a curated list of resolved tokens found
     * When `targets` is non-empty, returns only tokens of such dimensions.
     *
-    * @param input
-    * @param context
-    * @param options
+    * @param input    text
+    * @param context  context
+    * @param options  options
     * @return
     */
   def analyze(input: String, context: Context, options: Options): List[Answer] = {
@@ -123,6 +118,9 @@ object Api extends LazyLogging {
     */
   def analyzeJ(input: String, context: Context, options: Options): util.List[Answer] = {
     analyze(input, context, options).asJava
+  }
+  def analyzeJ(lang: LanguageInfo, context: Context, options: Options): util.List[Answer] = {
+    analyze(lang, context, options).asJava
   }
 
   def formatToken(sentence: String, withNode: Boolean)(resolved: ResolvedToken): Entity = {

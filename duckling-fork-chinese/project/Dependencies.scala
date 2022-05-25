@@ -36,17 +36,13 @@ object Dependencies {
     config,
     logback % Provided,
     emoji,
-    trie,
-    hanlp
+    trie
   ) ++ testDependencies
 
   lazy val serverDependencies = Seq(logback, spStarterWeb, spThymeleaf, reactor, lombok) ++ testDependencies
 
   lazy val benchmarkDependencies = Seq(scalaTest % Test, jmhAnn, jmhCore, slf4jnop)
-
-  // nlp
-  lazy val hanlp = "com.hankcs" % "hanlp" % "portable-1.7.8"
-
+  
   // test
   lazy val junit = "junit" % "junit" % "4.12"
   lazy val hamcrest = "org.hamcrest" % "hamcrest" % "2.2"

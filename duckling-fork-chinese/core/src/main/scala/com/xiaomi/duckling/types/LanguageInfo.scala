@@ -16,8 +16,6 @@
 
 package com.xiaomi.duckling.types
 
-import com.xiaomi.duckling.analyzer.Analyzer
-
 case class LanguageInfo(sentence: String,
                         tokens: Array[TokenLabel] = Array(),
                         dependencyChildren: Map[Int, List[DependencyEdge]] = Map()) {
@@ -44,8 +42,8 @@ case class LanguageInfo(sentence: String,
 }
 
 object LanguageInfo {
-  def fromText(s: String, enableAnalyzer: Boolean = false): LanguageInfo = {
-    if (enableAnalyzer) Analyzer.analyze(s)
+  def fromText(s: String, enableAnalyzer: Boolean = false, segItems: Option[Array[TokenLabel]]=None): LanguageInfo = {
+    if (enableAnalyzer && segItems.nonEmpty) LanguageInfo(s, segItems.get, Map())
     else LanguageInfo(s)
   }
 }
