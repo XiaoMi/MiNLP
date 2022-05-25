@@ -22,7 +22,7 @@ import com.xiaomi.duckling.Types._
 import com.xiaomi.duckling.dimension.DimRules
 import com.xiaomi.duckling.dimension.implicits._
 import com.xiaomi.duckling.dimension.matcher.Prods._
-import com.xiaomi.duckling.dimension.matcher.{Phrase, PhraseMatch}
+import com.xiaomi.duckling.dimension.matcher.{LexiconMatch, LexiconMatches, Phrase, PhraseMatch}
 import com.xiaomi.duckling.dimension.place.Types._
 import com.xiaomi.duckling.engine.PhraseLookup.PhraseMatcherFn
 
@@ -30,25 +30,22 @@ trait Rules extends DimRules {
 
   private val levels = Sets.newHashSet("省", "市", "州", "区", "县")
 
-  val faultTolerantPlaceRecognize: PhraseMatcherFn = (w: String) => {
-    if (placeNames.contains(w)) true
-    else if (w.length > 2) {
-      // 兼容当阳县/当阳市 & 南阳人
-      (levels.contains(w.substring(w.length - 1)) || w.endsWith("人")) &&
-        placeNames.contains(w.substring(0, w.length - 1))
-    } else false
-  }
-
   val rulePlace = Rule(
     name = "place: any",
-    pattern = List(faultTolerantPlaceRecognize.phrase(1, 2)),
+    pattern = List(placeDict.lexicon),
     prod = tokens {
-      case Token(PhraseMatch, Phrase(w)) :: _ =>
-        val c1 = getPlaceByName(w)
-        val (candidates, isBirth) =
-          if (c1.nonEmpty) (c1, false)
-          else (getPlaceByName(w.substring(0, w.length - 1)), w.endsWith("人"))
-        Token(Place, PlaceData(candidates, isBirth, texts = toTexts(candidates)))
+      case Token(LexiconMatch, LexiconMatches(s, t)) :: _ =>
+        val candidates = getPlaceByName(s)
+        Token(Place, PlaceData(candidates, texts = toTexts(candidates)))
+    }
+  )
+
+  val rulePlaceBirth = Rule(
+    name = "place: any",
+    pattern = List(isPlace.predicate, "人".regex),
+    prod = tokens {
+      case Token(Place, pd: PlaceData) :: _ =>
+        Token(Place, pd.copy(isBirthPlace = true))
     }
   )
 
@@ -57,23 +54,19 @@ trait Rules extends DimRules {
       name = "place: place + 省/市/州",
       pattern = List(isPlaceLevel1.predicate, levels.dict),
       prod = tokens {
-        case Token(Place, PlaceData(candidates, isBirthPlace, _, _)) ::
+        case Token(Place, PlaceData(candidates, false, _, _)) ::
           Token(PhraseMatch, Phrase(level)) :: _ =>
-          if (isBirthPlace) None
-          else {
             val left = candidates.filter { one =>
               if (one.name.endsWith(level)) true
-              else
-                one.category match {
+              else one.category match {
                   case "省/州" => level == "省"
-                  case "城市" => level == "市"
+                  case "城市" => level == "市" || level == "县" // 市县错误时，模糊一下
                   case "区县" => level == "区" || level == "县"
                   case _ => false
                 }
             }
             if (left.nonEmpty) Token(Place, PlaceData(left, texts = toTexts(candidates)))
             else None
-          }
       }
     )
 
@@ -82,12 +75,10 @@ trait Rules extends DimRules {
       name = "place: merge",
       pattern = List(isPlace.predicate, isPlace.predicate),
       prod = tokens {
-        case Token(_, PlaceData(c1, i1, l1, _)) :: Token(_, PlaceData(c2, i2, l2, _)) :: _ if l1 >= l2 =>
-          if (!i1) {
-            val list = merge(c1, c2)
-            if (list.isEmpty) None
-            else Token(Place, PlaceData(list, i2, l1 + l2, texts = toTexts(list)))
-          } else None
+        case Token(_, PlaceData(c1, false, l1, _)) :: Token(_, PlaceData(c2, i2, l2, _)) :: _ if l1 >= l2 =>
+          val list = merge(c1, c2)
+          if (list.isEmpty) None
+          else Token(Place, PlaceData(list, i2, l1 + l2, texts = toTexts(list)))
       }
     )
 }

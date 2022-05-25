@@ -30,7 +30,8 @@ trait Examples extends DimExamples {
     ((List(one("市南区")), false), List("山东省青岛市市南区")),
     ((List(one("台南市")), false), List("台湾台南县")),
     ((List(one("诸城市")), true), List("山东诸城人")),
-    ((List(one("无极县")), false), List("河北省无极县"))
+    ((List(one("无极县")), false), List("河北省无极县")),
+    ((List(one("张家口市")), false), List("张家口"))
   )
 
   override def pairs: List[(ResolvedValue, List[String])] = list.map {

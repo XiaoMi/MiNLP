@@ -16,20 +16,21 @@
 
 package com.xiaomi.duckling.dimension.place
 
-import com.google.common.collect.ImmutableListMultimap
+import com.google.common.collect.{ImmutableListMultimap, Maps}
 import com.typesafe.scalalogging.LazyLogging
 import org.json4s.jackson.Serialization.{read, writePretty}
-
 import java.io.Reader
 import java.nio.charset.StandardCharsets
 import java.nio.file.{Files, Paths}
 import java.util
 import java.util.{Set => JSet}
+
 import scala.collection.JavaConverters._
 
 import com.xiaomi.duckling.JsonSerde._
 import com.xiaomi.duckling.Resources
 import com.xiaomi.duckling.Types._
+import com.xiaomi.duckling.engine.LexiconLookup.Dict
 
 object Types extends LazyLogging {
 
@@ -60,6 +61,8 @@ object Types extends LazyLogging {
       read[Seq[PlaceOne]](in).map(p => (p.id, p)).toMap
   }
 
+  val levelExcludes = Set("县", "市辖区", "省直辖县级行政区划")
+
   private val placeByName: ImmutableListMultimap[String, PlaceOne] = {
     val builder = ImmutableListMultimap.builder[String, PlaceOne]()
     placeById.values.foreach { o =>
@@ -71,9 +74,11 @@ object Types extends LazyLogging {
 
   val placeNames: JSet[String] = placeByName.keySet()
 
-  // 不用增加切词，增加了反而对效果会有影响
-  // logger.info(s"add place names to segmenter")
-  // Dictionary.addWords(placeNames, true)
+  val placeDict = {
+    val tm = Maps.newTreeMap[String, String]()
+    placeByName.keySet().asScala.diff(levelExcludes).foreach(k => tm.put(k, k))
+    new Dict(tm, maximumOnly = true)
+  }
 
   def getPlaceByName(w: String): List[PlaceOne] = {
     placeByName.get(w).asScala.toList
