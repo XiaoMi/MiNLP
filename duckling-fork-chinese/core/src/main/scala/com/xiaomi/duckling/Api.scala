@@ -16,17 +16,10 @@
 
 package com.xiaomi.duckling
 
-import com.google.common.cache.CacheBuilder
 import com.typesafe.scalalogging.LazyLogging
-
 import java.util
-import java.util.concurrent.TimeUnit
 import scala.collection.JavaConverters._
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.duration._
-import scala.concurrent.{Await, Future, TimeoutException}
 import scala.language.postfixOps
-
 import com.xiaomi.duckling.Types.{Answer, Context, Entity, Options, ResolvedToken, _}
 import com.xiaomi.duckling.constraints.TokenSpan
 import com.xiaomi.duckling.dimension.Dimension
@@ -34,86 +27,39 @@ import com.xiaomi.duckling.dimension.implicits._
 import com.xiaomi.duckling.engine.Engine._
 import com.xiaomi.duckling.ranking.Rank.{rank, resolveAheadByRange}
 import com.xiaomi.duckling.ranking.{NaiveBayesRank, Ranker}
-import com.xiaomi.duckling.types.{LanguageInfo, Node}
+import com.xiaomi.duckling.types.{LanguageInfo, Node, TokenLabel}
 
 object Api extends LazyLogging {
-  lazy private val enableTimeoutCache = conf.getBoolean("timeout.cache.enable") // 开启缓存的开关
-  lazy private val queryCntThreshold = conf.getInt("timeout.cache.start.cnt") // 开启缓存的query计数阈值
-  lazy private val timeoutCacheDuration = conf.getLong("timeout.cache.duration") // 缓存的时长timeout.cache.cnt
-  lazy private val timeoutCacheMaxcnt = conf.getLong("timeout.cache.maxcnt") // 缓存的最大数量
-  private var query_cnt = 0 // 当前query计数
-
-  // 缓存超时query
-  lazy private val timeoutCache = CacheBuilder
-    .newBuilder()
-    .maximumSize(timeoutCacheMaxcnt)
-    .expireAfterWrite(timeoutCacheDuration, TimeUnit.MINUTES)
-    .weakKeys()
-    .build[String, String]()
-
 
   /**
     * Parses `input` and returns a curated list of entities found.
     *
-    * @param input
-    * @param context
-    * @param options
+    * @param input      sentence
+    * @param context    context
+    * @param options    options
+    * @param segTokens  segments of sentence
     * @return
     */
-  def parseEntities(input: String, context: Context, options: Options): List[Entity] = {
-    val resolvedTokens = analyze(input, context, options).map(_.token)
+  def parseEntities(input: String, context: Context, options: Options, segTokens: Option[Array[TokenLabel]]=None): List[Entity] = {
+    val resolvedTokens = analyze(input, context, options, segTokens).map(_.token)
     resolvedTokens.map(formatToken(input, options.entityWithNode))
-  }
-
-  /**
-    * parse with timeout
-    * reture empty list when timeout
-    * @param lang    text/tokens/dep
-    * @param context  context
-    * @param options  options
-    * @return
-    */
-  private def analyzeWithTimeout(lang: LanguageInfo,
-                                 context: Context,
-                                 options: Options): List[Answer] = {
-    val input = lang.sentence
-    try {
-      if (null == timeoutCache.getIfPresent(input)) {
-        val future = Future { analyzeWithoutTimeout(lang, context, options) }
-        Await.result(future, options.timeout.get milliseconds)
-      } else List.empty[Answer]
-    } catch {
-      case e: TimeoutException =>
-        logger.error(s"error when parse query=$input, message:$e")
-        if (query_cnt > queryCntThreshold && enableTimeoutCache) timeoutCache.put(input, "timeout")
-        List.empty[Answer]
-    }
   }
 
   /**
     * Returns a curated list of resolved tokens found
     * When `targets` is non-empty, returns only tokens of such dimensions.
     *
-    * @param input
-    * @param context
-    * @param options
+    * @param input      sentence
+    * @param context    context
+    * @param options    options
+    * @param segTokens  segments of sentence
     * @return
     */
-  def analyze(input: String, context: Context, options: Options): List[Answer] = {
-    analyze(LanguageInfo.fromText(input, options.enableAnalyzer), context, options)
+  def analyze(input: String, context: Context, options: Options, segTokens: Option[Array[TokenLabel]]=None): List[Answer] = {
+    analyze(LanguageInfo.fromText(input, options.enableAnalyzer, segTokens), context, options)
   }
 
   def analyze(lang: LanguageInfo, context: Context, options: Options): List[Answer] = {
-    if (enableTimeoutCache && query_cnt <= queryCntThreshold) query_cnt += 1
-
-    if (enableTimeoutCache && options.timeout.exists(_ > 0) && query_cnt > queryCntThreshold) {
-      analyzeWithTimeout(lang, context, options)
-    } else {
-      analyzeWithoutTimeout(lang, context, options)
-    }
-  }
-
-  def analyzeWithoutTimeout(lang: LanguageInfo, context: Context, options: Options): List[Answer] = {
     val input = lang.sentence
 
     val targets = options.targets ++ options.targets.flatMap(_.nonOverlapDims)
@@ -170,7 +116,11 @@ object Api extends LazyLogging {
     * for java
     */
   def analyzeJ(input: String, context: Context, options: Options): util.List[Answer] = {
-    analyze(input, context, options).asJava
+    analyze(input, context, options, None).asJava
+  }
+  
+  def analyzeJ(input: String, context: Context, options: Options, segTokens: Array[TokenLabel]): util.List[Answer] = {
+    analyze(input, context, options, Some(segTokens)).asJava
   }
 
   def formatToken(sentence: String, withNode: Boolean)(resolved: ResolvedToken): Entity = {

@@ -16,8 +16,6 @@
 
 package com.xiaomi.duckling
 
-import com.xiaomi.duckling.analyzer.HanlpAnalyzer
-
 class DocumentTest extends UnitSpec {
 
   describe("DocumentTest") {
@@ -28,12 +26,5 @@ class DocumentTest extends UnitSpec {
         .fromText(" a document ")
         .firstNonAdjacent should contain theSameElementsInOrderAs result
     }
-
-    it("should phrase") {
-      val analyzer = new HanlpAnalyzer()
-      val doc = Document.fromLang(analyzer.analyze("湖南长沙"))
-      doc.phrase(1, 2) shouldBe "长沙"
-    }
-
   }
 }

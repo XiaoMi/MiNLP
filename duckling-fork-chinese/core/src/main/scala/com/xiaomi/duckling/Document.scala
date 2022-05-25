@@ -19,7 +19,6 @@ package com.xiaomi.duckling
 import com.typesafe.scalalogging.LazyLogging
 
 import com.xiaomi.duckling.Types._
-import com.xiaomi.duckling.analyzer.Analyzer
 import com.xiaomi.duckling.dimension.implicits._
 import com.xiaomi.duckling.types._
 
@@ -154,9 +153,9 @@ case class Document(rawInput: String,
 
 object Document extends LazyLogging {
 
-  def fromText(rawInput: String, enableAnalyzer: Boolean = false): Document = {
+  def fromText(rawInput: String, enableAnalyzer: Boolean = false, segItems: Option[Array[TokenLabel]]=None): Document = {
     val lang =
-      if (enableAnalyzer) Analyzer.analyze(rawInput)
+      if (enableAnalyzer && segItems.nonEmpty) LanguageInfo(rawInput, segItems.get, Map())
       else LanguageInfo(rawInput)
     fromLang(lang)
   }

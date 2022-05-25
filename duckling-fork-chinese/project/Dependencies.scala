@@ -36,8 +36,7 @@ object Dependencies {
     config,
     logback % Provided,
     emoji,
-    trie,
-    hanlp
+    trie
   ) ++ testDependencies
 
   lazy val serverDependencies = Seq(logback, spStarterWeb, spThymeleaf, reactor, lombok) ++ testDependencies

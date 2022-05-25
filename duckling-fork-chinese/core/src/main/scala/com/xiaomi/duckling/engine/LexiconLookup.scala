@@ -77,7 +77,7 @@ object LexiconLookup extends LazyLogging {
       filtered.map(hit => (hit.begin, doc.rawInput.substring(hit.begin, hit.end), hit.value)).map(f.tupled).toList
     }
   }
-
+  
   def remainMaximumOnly(hits: mutable.Buffer[AhoCorasickDoubleArrayTrie.Hit[String]]): mutable.Buffer[AhoCorasickDoubleArrayTrie.Hit[String]] = {
     if (hits.isEmpty) hits
     else {

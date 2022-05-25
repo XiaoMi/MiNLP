@@ -189,8 +189,7 @@ object Types {
                      entityWithNode: Boolean = false,
                      rankOptions: RankOptions = RankOptions(),
                      timeOptions: TimeOptions = TimeOptions(),
-                     numeralOptions: NumeralOptions = NumeralOptions(),
-                     timeout: Option[Int] = Some(50)) {
+                     numeralOptions: NumeralOptions = NumeralOptions()) {
 
     def enableAnalyzer: Boolean = {
       targets.flatMap(Dimension.dimDependents).exists(_.enableAnalyzer)
@@ -234,10 +233,6 @@ object Types {
 
     def withRankOptions(rankOptions: RankOptions): Options = {
       copy(rankOptions = rankOptions)
-    }
-
-    def withTimeout(timeout: Int): Options = {
-      copy(timeout = Some(timeout))
     }
   }
 
