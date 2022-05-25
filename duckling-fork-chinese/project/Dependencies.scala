@@ -36,6 +36,7 @@ object Dependencies {
     config,
     logback % Provided,
     emoji,
+    trie,
     hanlp
   ) ++ testDependencies
 

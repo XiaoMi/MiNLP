@@ -21,7 +21,7 @@ import java.util
 import scala.collection.JavaConverters._
 import scala.collection.mutable
 
-import com.hankcs.hanlp.collection.AhoCorasick.AhoCorasickDoubleArrayTrie
+import com.hankcs.algorithm.AhoCorasickDoubleArrayTrie
 import com.typesafe.scalalogging.LazyLogging
 
 import com.xiaomi.duckling.Document
@@ -30,7 +30,7 @@ import com.xiaomi.duckling.dimension.matcher.{LexiconMatch, LexiconMatches}
 import com.xiaomi.duckling.types.Node
 
 /**
-  * 根据提供的词表进行匹配，目前实现得非常简单，如果有大词表还需要进行改进
+  * 根据提供的词表进行匹配，使用HanLP的AC自动机实现
   */
 object LexiconLookup extends LazyLogging {
 
@@ -78,11 +78,11 @@ object LexiconLookup extends LazyLogging {
     }
   }
 
-  def remainMaximumOnly(hits: mutable.Buffer[AhoCorasickDoubleArrayTrie[String]#Hit[String]]): mutable.Buffer[AhoCorasickDoubleArrayTrie[String]#Hit[String]] = {
+  def remainMaximumOnly(hits: mutable.Buffer[AhoCorasickDoubleArrayTrie.Hit[String]]): mutable.Buffer[AhoCorasickDoubleArrayTrie.Hit[String]] = {
     if (hits.isEmpty) hits
     else {
       val sorted = hits.sortWith((a, b) => !(a.begin < b.begin || a.begin == b.begin && a.end <= b.begin))
-      val buffer = mutable.Buffer[AhoCorasickDoubleArrayTrie[String]#Hit[String]](sorted.head)
+      val buffer = mutable.Buffer[AhoCorasickDoubleArrayTrie.Hit[String]](sorted.head)
       sorted.tail.foldLeft(buffer) { (b, hit) =>
         val last = b.last
         if (!(last.begin == hit.begin && last.end >= hit.end)) {
