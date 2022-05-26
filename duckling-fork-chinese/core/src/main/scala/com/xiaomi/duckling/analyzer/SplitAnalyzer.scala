@@ -16,34 +16,32 @@
 
 package com.xiaomi.duckling.analyzer
 
-import com.hankcs.hanlp.HanLP
-import com.hankcs.hanlp.tokenizer.StandardTokenizer
+import scala.collection.mutable
 
-import scala.collection.JavaConverters._
+import com.robrua.nlp.bert.BasicTokenizer
+import com.typesafe.scalalogging.LazyLogging
 
-import com.xiaomi.duckling.types
 import com.xiaomi.duckling.types.{LanguageInfo, TokenLabel}
 
 /**
-  * 使用了HanLP的切词，依存有需要也可以增加
+  * 使用了BERT的切字
   */
-class HanlpAnalyzer extends Analyzer {
 
-  StandardTokenizer.SEGMENT.enableIndexMode(true)
+class SplitAnalyzer extends Analyzer with LazyLogging {
+  val tokenizer = new BasicTokenizer(false)
 
   override def analyze(sentence: String): LanguageInfo = {
-    val terms = HanLP.segment(sentence)
-
-    val tokens = terms.asScala.zipWithIndex.map {
-      case (term, i) =>
-        TokenLabel(
-          id = i + 1,
-          word = term.word,
-          start = term.offset,
-          end = term.offset + term.length(),
-          tag = term.nature.toString
-        )
-    }.toArray
-    types.LanguageInfo(sentence, tokens, Map())
+    val words = tokenizer.tokenize(sentence)
+    val buf = mutable.Buffer[TokenLabel]()
+    words.foreach { word =>
+      val pos = buf.lastOption.map(_.end).getOrElse(0)
+      val start = sentence.indexOf(word, pos)
+      if (start == -1) {
+        logger.warn(s"${word} not found in '${sentence}:${start}''")
+      } else {
+        buf.append(TokenLabel(buf.size + 1, word, start, start + word.length, "o"))
+      }
+    }
+    LanguageInfo(sentence, buf.toArray)
   }
 }

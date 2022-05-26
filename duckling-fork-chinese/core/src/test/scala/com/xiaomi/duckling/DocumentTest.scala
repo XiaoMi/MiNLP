@@ -16,7 +16,7 @@
 
 package com.xiaomi.duckling
 
-import com.xiaomi.duckling.analyzer.HanlpAnalyzer
+import com.xiaomi.duckling.analyzer.SplitAnalyzer
 
 class DocumentTest extends UnitSpec {
 
@@ -30,9 +30,9 @@ class DocumentTest extends UnitSpec {
     }
 
     it("should phrase") {
-      val analyzer = new HanlpAnalyzer()
+      val analyzer = new SplitAnalyzer()
       val doc = Document.fromLang(analyzer.analyze("湖南长沙"))
-      doc.phrase(1, 2) shouldBe "长沙"
+      doc.phrase(2, 4) shouldBe "长沙"
     }
 
   }
