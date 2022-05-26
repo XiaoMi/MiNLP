@@ -223,17 +223,17 @@ object TimePredicateHelpers {
       else {
         def f(step: Int)(to: TimeObject): TimeObject = {
           val y = to.start.year
-          val dt = new DuckDateTime(solarTermTable.get(y + step, term).atStartOfDay().atZone(ZoneCN))
+          val dt = new DuckDateTime(solarTermTable.get(y + step).get(term).atStartOfDay().atZone(ZoneCN))
           TimeObject(dt, Day)
         }
 
         // 粒度调整，避免在节日当天比较出错
         val _t = timeRound(t, Day)
 
-        val termOfThisYear = new DuckDateTime(solarTermTable.get(_t.start.year, term).atStartOfDay().atZone(ZoneCN))
+        val termOfThisYear = new DuckDateTime(solarTermTable.get(_t.start.year).get(term).atStartOfDay().atZone(ZoneCN))
         val date =
           if (termOfThisYear.isBefore(_t.start)) {
-            new DuckDateTime(solarTermTable.get(t.start.year + 1, term).atStartOfDay().atZone(ZoneCN))
+            new DuckDateTime(solarTermTable.get(t.start.year + 1).get(term).atStartOfDay().atZone(ZoneCN))
           } else {
             termOfThisYear
           }
@@ -252,8 +252,9 @@ object TimePredicateHelpers {
     * @return     true/false
     */
   private def containSolarTerm(year: Int, term: String): Boolean = {
-    if (!solarTermTable.contains(year, term) || !solarTermTable.contains(year -1, term) ||
-        !solarTermTable.contains(year + 1, term)) false
+    if (!(solarTermTable.contains(year) || solarTermTable.get(year).contains(term)) ||
+        !(solarTermTable.contains(year - 1) || solarTermTable.get(year - 1).contains(term)) ||
+        !(solarTermTable.contains(year + 1) || solarTermTable.get(year + 1).contains(term))) false
     else true
   }
 }

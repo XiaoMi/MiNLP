@@ -27,7 +27,6 @@ object Dependencies {
     commonslang,
     commonsText,
     commonsIO,
-    guava,
     java8,
     lunar,
     jline,
@@ -69,7 +68,6 @@ object Dependencies {
   lazy val commonsIO = "commons-io" % "commons-io" % "2.6"
   lazy val jline = "org.jline" % "jline" % "3.11.0"
   lazy val config = "com.typesafe" % "config" % "1.3.4"
-  lazy val guava = "com.google.guava" % "guava" % "30.1.1-jre"
   lazy val lombok = "org.projectlombok" % "lombok" % "1.18.8" % Provided
   lazy val httpclient = "org.apache.httpcomponents" % "httpclient" % "4.5.6"
   lazy val java8 = "org.scala-lang.modules" %% "scala-java8-compat" % "0.9.0"

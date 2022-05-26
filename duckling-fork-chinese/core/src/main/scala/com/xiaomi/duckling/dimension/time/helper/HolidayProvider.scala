@@ -16,11 +16,9 @@
 
 package com.xiaomi.duckling.dimension.time.helper
 
-import com.google.common.collect.{ImmutableListMultimap, ImmutableMap, Maps}
 import java.time.DayOfWeek._
 
 import scala.collection.mutable
-
 import com.xiaomi.duckling.Types._
 import com.xiaomi.duckling.dimension.implicits._
 import com.xiaomi.duckling.dimension.time.Prods._
@@ -42,7 +40,7 @@ trait HolidayProvider {
     * ptn normal token
     * @return
     */
-  def holidayTokenMap: ImmutableMap[String, Token]
+  def holidayTokenMap: mutable.Map[String, Token]
 }
 
 class LocalHolidayProvider extends HolidayProvider {
@@ -263,7 +261,7 @@ class LocalHolidayProvider extends HolidayProvider {
     }
   }
 
-  def build(holidayList: List[(Token, String, String)]): (ImmutableMap[String, Token], java.util.TreeMap[String, String]) = {
+  def build(holidayList: List[(Token, String, String)]): (mutable.Map[String, Token], java.util.TreeMap[String, String]) = {
     val tokenMap = mutable.Map[String, Token]()
     val normalMap = mutable.Map[String, mutable.Set[String]]()
     holidayList.foreach{
@@ -277,19 +275,19 @@ class LocalHolidayProvider extends HolidayProvider {
         }
     }
 
-    val builder = Maps.newTreeMap[String, String]()
+    val builder = new java.util.TreeMap[String, String]()
     normalMap.foreach{
       case (pt, normalSet) => normalSet.foreach(normal => builder.put(pt, normal))
     }
-    val tokenMapBuilder = ImmutableMap.builder[String, Token]()
+    val tokenMapBuilder = mutable.Map[String, Token]()
     tokenMap.toMap.foreach{case (k, v) => tokenMapBuilder.put(k, v)}
 
-    (tokenMapBuilder.build(), builder)
+    (tokenMapBuilder, builder)
   }
 
   val (tokenMap, dictBuilder) = build(rulePeriodicHolidays ++ LunarDays.rulePeriodicHolidays)
 
   override def dict: Dict = new Dict(dictBuilder, false)
 
-  override def holidayTokenMap: ImmutableMap[String, Token] = tokenMap
+  override def holidayTokenMap: mutable.Map[String, Token] = tokenMap
 }

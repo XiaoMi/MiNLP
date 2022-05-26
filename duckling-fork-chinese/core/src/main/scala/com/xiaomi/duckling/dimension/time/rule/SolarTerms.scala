@@ -16,8 +16,7 @@
 
 package com.xiaomi.duckling.dimension.time.rule
 
-import com.google.common.collect.Table
-
+import scala.collection.mutable
 import java.time.LocalDate
 
 import com.xiaomi.duckling.Types.{conf, _}
@@ -40,13 +39,13 @@ object SolarTerms {
 
   def dict: Dict = provdier.dict
 
-  def solarTermTable: Table[Int, String, LocalDate] = provdier.solarTermTable
+  def solarTermTable: mutable.Map[Int, mutable.Map[String, LocalDate]] = provdier.solarTermTable
 
   val rule = Rule(
     name = "<solar term>",
     pattern = List(dict.lexicon),
     prod = tokens {
-      case Token(LexiconMatch, LexiconMatches(s, t)) :: _ =>
+      case Token(LexiconMatch, LexiconMatches(_, t)) :: _ =>
         val td = TimeData(
           timePred = solarTermPredicate(t),
           timeGrain = Day,

@@ -16,17 +16,14 @@
 
 package com.xiaomi.duckling.dimension.place
 
-import com.google.common.collect.{ImmutableListMultimap, Maps}
 import com.typesafe.scalalogging.LazyLogging
 import org.json4s.jackson.Serialization.{read, writePretty}
 import java.io.Reader
 import java.nio.charset.StandardCharsets
 import java.nio.file.{Files, Paths}
 import java.util
-import java.util.{Set => JSet}
-
+import java.util.TreeMap
 import scala.collection.JavaConverters._
-
 import com.xiaomi.duckling.JsonSerde._
 import com.xiaomi.duckling.Resources
 import com.xiaomi.duckling.Types._
@@ -63,25 +60,25 @@ object Types extends LazyLogging {
 
   val levelExcludes = Set("县", "市辖区", "省直辖县级行政区划")
 
-  private val placeByName: ImmutableListMultimap[String, PlaceOne] = {
-    val builder = ImmutableListMultimap.builder[String, PlaceOne]()
+  private val placeByName: Map[String, PlaceOne] = {
+    val immutableMap = scala.collection.mutable.Map[String, PlaceOne]()
     placeById.values.foreach { o =>
       val names = o.alias :+ o.name
-      names.foreach(s => builder.put(s, o))
+      names.foreach(s => immutableMap.put(s, o))
     }
-    builder.build()
+    immutableMap.toMap
   }
 
-  val placeNames: JSet[String] = placeByName.keySet()
+  val placeNames: Set[String] = placeByName.keySet
 
   val placeDict = {
-    val tm = Maps.newTreeMap[String, String]()
-    placeByName.keySet().asScala.diff(levelExcludes).foreach(k => tm.put(k, k))
+    val tm = new TreeMap[String, String]()
+    placeByName.keySet.diff(levelExcludes).foreach(k => tm.put(k, k))
     new Dict(tm, maximumOnly = true)
   }
 
   def getPlaceByName(w: String): List[PlaceOne] = {
-    placeByName.get(w).asScala.toList
+    placeByName.get(w).toList
   }
 
   /**

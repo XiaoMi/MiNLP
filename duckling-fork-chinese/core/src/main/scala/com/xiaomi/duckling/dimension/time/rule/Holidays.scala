@@ -16,7 +16,6 @@
 
 package com.xiaomi.duckling.dimension.time.rule
 
-import com.google.common.collect.ImmutableMap
 
 import com.xiaomi.duckling.Types._
 import com.xiaomi.duckling.dimension.implicits._
@@ -24,6 +23,7 @@ import com.xiaomi.duckling.dimension.matcher.{LexiconMatch, LexiconMatches}
 import com.xiaomi.duckling.dimension.time.helper.HolidayProvider
 import com.xiaomi.duckling.dimension.time.rule.LunarDays.ruleLunarNewYearsEve
 import com.xiaomi.duckling.engine.LexiconLookup.Dict
+import scala.collection.mutable.Map
 
 
 object Holidays {
@@ -36,7 +36,7 @@ object Holidays {
 
   def dict: Dict = provdier.dict
 
-  def holidayTokenMap: ImmutableMap[String, Token] = provdier.holidayTokenMap
+  def holidayTokenMap: Map[String, Token] = provdier.holidayTokenMap
 
   val rule = Rule(
     name = "<holidays>",

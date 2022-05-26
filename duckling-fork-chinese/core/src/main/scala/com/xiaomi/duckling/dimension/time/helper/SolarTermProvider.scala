@@ -16,9 +16,8 @@
 
 package com.xiaomi.duckling.dimension.time.helper
 
-import com.google.common.collect.{ImmutableListMultimap, ImmutableTable, Maps, Table}
 import java.time.LocalDate
-
+import scala.collection.mutable
 import com.xiaomi.duckling.Resources
 import com.xiaomi.duckling.Types.conf
 import com.xiaomi.duckling.engine.LexiconLookup.Dict
@@ -34,15 +33,15 @@ trait SolarTermProvider {
     * 节气按年分的查找表
     * @return
     */
-  def solarTermTable: Table[Int, String, LocalDate]
+  def solarTermTable: mutable.Map[Int, mutable.Map[String, LocalDate]]
 }
 
 class LocalSolarTermProvider extends SolarTermProvider {
   private val loadFrom = conf.getString("dimension.time.solar.days.load-from")
   private val file = "solar_terms.csv"
 
-  def build(): Table[Int, String, LocalDate] = {
-    val builder = ImmutableTable.builder[Int, String, LocalDate]()
+  def build(): mutable.Map[Int, mutable.Map[String, LocalDate]] = {
+    val builder = mutable.Map[Int, mutable.Map[String, LocalDate]]()
     val lines = loadFrom match {
       case "remote"   => Resources.readLinesFromUrl(file)
       case "resource" => Resources.readLines(file)
@@ -56,11 +55,16 @@ class LocalSolarTermProvider extends SolarTermProvider {
           val month = terms(1).substring(0, 2).toInt
           val day = terms(1).substring(2, 4).toInt
           val solarTerm = terms(2)
-          builder.put(year, solarTerm, LocalDate.of(year, month, day))
+          
+          val dateMap = builder.getOrElse(year, mutable.Map[String, LocalDate]())
+          dateMap.put(solarTerm, LocalDate.of(year, month, day))
+          
+          builder.put(year, dateMap)
         }
       }
     }
-    builder.build()
+    
+    builder
   }
 
   private val table = build()
@@ -68,10 +72,10 @@ class LocalSolarTermProvider extends SolarTermProvider {
   /**
     * 节气规律比较弱，查表实现
     */
-  override def solarTermTable: Table[Int, String, LocalDate] = table
+  override def solarTermTable: mutable.Map[Int, mutable.Map[String, LocalDate]] = table
 
   private val mmap = {
-    val builder = Maps.newTreeMap[String, String]()
+    val builder = new java.util.TreeMap[String, String]()
     builder.put("立春", "立春")
     builder.put("雨水", "雨水")
     builder.put("惊蛰", "惊蛰")

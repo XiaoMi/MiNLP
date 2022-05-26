@@ -16,8 +16,6 @@
 
 package com.xiaomi.duckling.dimension.gender
 
-import com.google.common.collect.{ImmutableListMultimap, Maps}
-
 import com.xiaomi.duckling.Types._
 import com.xiaomi.duckling.dimension.DimRules
 import com.xiaomi.duckling.dimension.implicits._
@@ -27,7 +25,7 @@ import com.xiaomi.duckling.engine.LexiconLookup.Dict
 trait Rules extends DimRules {
 
   val dict = {
-    val builder = Maps.newTreeMap[String, String]()
+    val builder = new java.util.TreeMap[String, String]()
     builder.put("女", "女")
     builder.put("女性", "女")
     builder.put("女生", "女")

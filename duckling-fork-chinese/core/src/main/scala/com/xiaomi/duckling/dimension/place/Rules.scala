@@ -16,7 +16,8 @@
 
 package com.xiaomi.duckling.dimension.place
 
-import com.google.common.collect.Sets
+
+import java.util
 
 import com.xiaomi.duckling.Types._
 import com.xiaomi.duckling.dimension.DimRules
@@ -24,11 +25,10 @@ import com.xiaomi.duckling.dimension.implicits._
 import com.xiaomi.duckling.dimension.matcher.Prods._
 import com.xiaomi.duckling.dimension.matcher.{LexiconMatch, LexiconMatches, Phrase, PhraseMatch}
 import com.xiaomi.duckling.dimension.place.Types._
-import com.xiaomi.duckling.engine.PhraseLookup.PhraseMatcherFn
 
 trait Rules extends DimRules {
 
-  private val levels = Sets.newHashSet("省", "市", "州", "区", "县")
+  private val levels = new util.HashSet[String](util.Arrays.asList("省", "市", "州", "区", "县"))
 
   val rulePlace = Rule(
     name = "place: any",
