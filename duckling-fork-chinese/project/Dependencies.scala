@@ -37,15 +37,12 @@ object Dependencies {
     logback % Provided,
     emoji,
     trie,
-    hanlp
+    easyBert
   ) ++ testDependencies
 
   lazy val serverDependencies = Seq(logback, spStarterWeb, spThymeleaf, reactor, lombok) ++ testDependencies
 
   lazy val benchmarkDependencies = Seq(scalaTest % Test, jmhAnn, jmhCore, slf4jnop)
-
-  // nlp
-  lazy val hanlp = "com.hankcs" % "hanlp" % "portable-1.7.8"
 
   // test
   lazy val junit = "junit" % "junit" % "4.12"
@@ -80,7 +77,9 @@ object Dependencies {
   lazy val lunar = "com.github.heqiao2010" % "lunar" % "1.5"
   lazy val emoji = "com.vdurmont" % "emoji-java" % "5.1.1"
   lazy val trie = "com.hankcs" % "aho-corasick-double-array-trie" % "1.2.2"
-
+  lazy val easyBert = ("com.robrua.nlp" % "easy-bert" % "1.0.3") // BERT tokenizer
+    .exclude("org.tensorflow", "tensorflow")
+    .exclude("com.fasterxml.jackson.core", "jackson-databind")
   //web
   lazy val spThymeleaf = "org.springframework.boot" % "spring-boot-starter-thymeleaf" % "2.4.5"
   lazy val spStarterWeb = "org.springframework.boot" % "spring-boot-starter-web" % "2.4.5"
