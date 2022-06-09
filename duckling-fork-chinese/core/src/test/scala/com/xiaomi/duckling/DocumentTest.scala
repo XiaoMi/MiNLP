@@ -16,6 +16,8 @@
 
 package com.xiaomi.duckling
 
+import com.xiaomi.duckling.analyzer.SplitAnalyzer
+
 class DocumentTest extends UnitSpec {
 
   describe("DocumentTest") {
@@ -25,6 +27,12 @@ class DocumentTest extends UnitSpec {
       Document
         .fromText(" a document ")
         .firstNonAdjacent should contain theSameElementsInOrderAs result
+    }
+
+    it("should phrase") {
+      val analyzer = new SplitAnalyzer()
+      val doc = Document.fromLang(analyzer.analyze("湖南长沙"))
+      doc.phrase(2, 4) shouldBe "长沙"
     }
   }
 }
