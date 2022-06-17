@@ -142,8 +142,9 @@ Intellij IDEA的设置中打开`Editor -> Code Style -> Scala`，点击Scheme右
 参照[olafurpg/sbt-ci-release](https://github.com/olafurpg/sbt-ci-release)，main分支上的代码会自动更新至sonatype的snapshot，推送名字为"*D"的分支则会触发github actions中的duckling的部署。
 
 ```
-发布确保version.sbt中的版本与待发布版本一致：ThisBuild / version := "x.x.xD"
-git tag -a "vx.x.xD" -m "duckling x.x.xD"
+发布确保version.sbt中的版本与待发布版本一致：ThisBuild / version := "x.y.z"
+git tag -a "vx.y.zD" -m "duckling x.y.z"
+git push origin vx.y.zD
 ```
 
 ## 4. 如何新增一个Dimension
