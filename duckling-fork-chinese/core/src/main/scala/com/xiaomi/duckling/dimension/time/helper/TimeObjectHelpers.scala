@@ -109,7 +109,7 @@ object TimeObjectHelpers {
   @tailrec
   def timeIntersect(t1: TimeObject)(t2: TimeObject): Option[TimeObject] = {
     (t1, t2) match {
-      case (TimeObject(start1, g1, end1), TimeObject(start2, g2, _)) =>
+      case (TimeObject(start1, g1, end1, _), TimeObject(start2, g2, _, _)) =>
         val e1 = timeEnd(t1)
         val e2 = timeEnd(t2)
         val s1 = timeStart(t1)
@@ -125,8 +125,10 @@ object TimeObjectHelpers {
 
   def timeValue(t: TimeObject): SingleTimeValue = {
     t match {
-      case TimeObject(s, g, None) => SimpleValue(InstantValue(s, g))
-      case TimeObject(s, g, Some(e)) => IntervalValue(InstantValue(s, g), InstantValue(e, g))
+      case TimeObject(s, g, None, None) => SimpleValue(InstantValue(s, g))
+      case TimeObject(s, g, Some(e), _) => IntervalValue(InstantValue(s, g), InstantValue(e, g))
+      case TimeObject(s, g, _, Some(direction)) => OpenIntervalValue(InstantValue(s, g), direction)
+      case t => throw new RuntimeException(s"invalid compose found: ${t}")
     }
   }
 
@@ -147,8 +149,8 @@ object TimeObjectHelpers {
   }
 
   def timeInterval(intervalType: IntervalType, to1: TimeObject, to2: TimeObject): TimeObject = {
-    val TimeObject(s1, g1, _) = to1
-    val TimeObject(s2, g2, e2) = to2
+    val TimeObject(s1, g1, _, _) = to1
+    val TimeObject(s2, g2, e2, _) = to2
     val g11 = if (g1 < g2) g1 else g2
     val g22 =
       if (g1 < Grain.Day && g2 < Grain.Day) g11

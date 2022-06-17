@@ -29,7 +29,7 @@ import com.xiaomi.duckling.dimension.time.duration.{Duration, DurationData}
 import com.xiaomi.duckling.dimension.time.enums.Grain._
 import com.xiaomi.duckling.dimension.time.enums.Hint._
 import com.xiaomi.duckling.dimension.time.enums.IntervalType.{Closed, Open}
-import com.xiaomi.duckling.dimension.time.enums.{Grain, Hint}
+import com.xiaomi.duckling.dimension.time.enums.{Grain, Hint, IntervalDirection}
 import com.xiaomi.duckling.dimension.time.form.{PartOfDay, TimeOfDay}
 import com.xiaomi.duckling.dimension.time.grain.{GrainData, TimeGrain}
 import com.xiaomi.duckling.dimension.time.helper.TimeDataHelpers._
@@ -314,6 +314,21 @@ trait Rules extends DimRules {
     }
   )
 
+  val ruleTimeBeforeOfAfter = Rule(
+    name = "<time> before/after",
+    pattern = List(isDimension(Time).predicate, "[之以]?([前后])".regex),
+    prod = tokens {
+      case Token(Time, td: TimeData) :: Token(_, GroupMatch(_ :: direction :: _)) :: _ =>
+        val intervalDirection =
+          if (direction == "前") IntervalDirection.Before
+          else IntervalDirection.Before
+        val predicate = SequencePredicate(
+          List(td, TimeData(TimeOpenIntervalPredicate(intervalDirection), timeGrain = Grain.NoGrain))
+        )
+        tt(TimeData(timePred = predicate, timeGrain = td.timeGrain))
+    }
+  )
+
   /**
     * 时间区间
     */
@@ -463,6 +478,11 @@ trait Rules extends DimRules {
     }
   )
 
+  def openInterval(td: TimeData, direction: IntervalDirection): Option[Token] = {
+    val pred = SequencePredicate(List(td, TimeData(TimeOpenIntervalPredicate(direction), timeGrain = Grain.NoGrain)))
+    tt(TimeData(pred, timeGrain = td.timeGrain, hint = Hint.Sequence))
+  }
+
   val composite = List(
     ruleRecentTime,
     ruleNthTimeOfTime,
@@ -480,7 +500,8 @@ trait Rules extends DimRules {
     ruleSequence,
     ruleSequence2,
     ruleSequence3,
-    ruleEndOfGrain
+    ruleEndOfGrain,
+    ruleTimeBeforeOfAfter
   )
 
   override def dimRules: List[Rule] =
