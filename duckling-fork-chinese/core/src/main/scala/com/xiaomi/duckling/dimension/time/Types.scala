@@ -16,14 +16,14 @@
 
 package com.xiaomi.duckling.dimension.time
 
-import com.github.heqiao2010.lunar.{LunarCalendar, LunarUtils}
-
 import java.time._
 import java.time.format.DateTimeFormatter
 import java.util.{Calendar => JCal}
 
+import com.github.heqiao2010.lunar.{LunarCalendar, LunarUtils}
+
 import com.xiaomi.duckling.Types.ZoneCN
-import com.xiaomi.duckling.dimension.time.enums.{Calendar, Grain, IntervalDirection, Solar, _}
+import com.xiaomi.duckling.dimension.time.enums._
 
 object Types {
 
@@ -388,7 +388,10 @@ object Types {
   case class OpenIntervalValue(start: InstantValue, direction: IntervalDirection)
       extends SingleTimeValue
 
-  case class TimeObject(start: DuckDateTime, grain: Grain, end: Option[DuckDateTime] = None) {
+  case class TimeObject(start: DuckDateTime,
+                        grain: Grain,
+                        end: Option[DuckDateTime] = None,
+                        direction: Option[IntervalDirection] = None) {
     def this(ref: ZonedDateTime, grain: Grain) = {
       this(new DuckDateTime(ref), grain)
     }

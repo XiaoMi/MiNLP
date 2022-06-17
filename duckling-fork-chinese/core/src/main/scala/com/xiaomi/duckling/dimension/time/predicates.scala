@@ -69,6 +69,8 @@ object predicates {
   case class TimeIntervalsPredicate(t: IntervalType, p1: TimePredicate, p2: TimePredicate)
     extends TimePredicate
 
+  case class TimeOpenIntervalPredicate(t: IntervalDirection) extends TimePredicate
+
   case class SequencePredicate(xs: List[TimeData]) extends TimePredicate
 
   /**

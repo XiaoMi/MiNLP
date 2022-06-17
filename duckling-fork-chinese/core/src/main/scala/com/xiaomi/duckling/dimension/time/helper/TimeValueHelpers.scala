@@ -56,9 +56,15 @@ object TimeValueHelpers {
           grain: Grain = Day,
           holiday: Option[String] = None,
           calendar: Calendar = Solar,
-          isLeapMonth: Boolean = false): TimeValue = {
+          isLeapMonth: Boolean = false,
+          direction: Option[IntervalDirection] = None): TimeValue = {
     if (calendar == Solar) {
-      datetime(LocalDateTime.of(y, m, d, 0, 0, 0), grain).copy(holiday = holiday)
+      if (direction.isEmpty) {
+        datetime(LocalDateTime.of(y, m, d, 0, 0, 0), grain).copy(holiday = holiday)
+      } else {
+        val tv = datetime(LocalDateTime.of(y, m, d, 0, 0, 0), grain).copy(holiday = holiday)
+        TimeValue(OpenIntervalValue(tv.timeValue.asInstanceOf[SimpleValue].instant, direction.get))
+      }
     } else {
       val dt =
         DuckDateTime(LunarDate(new LunarCalendar(y, m, d, isLeapMonth)), LocalTime.of(0, 0), ZoneCN)

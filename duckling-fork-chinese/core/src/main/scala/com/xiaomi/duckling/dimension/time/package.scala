@@ -154,6 +154,7 @@ package object time {
       case IntersectTimePredicate(pred1, pred2) => runIntersectPredicate(pred1, pred2)
       case TimeIntervalsPredicate(intervalType, p1, p2) =>
         runTimeIntervalsPredicate(intervalType, p1, p2)
+      case TimeOpenIntervalPredicate(t) => runTimeOpenIntervalPredicate(t)
       case SequencePredicate(xs)               => runSequencePredicate(xs)
       case ReplacePartPredicate(td1, td2)      => runReplacePartPredicate(td1, td2)
       case EndOfGrainPredicate                 => runEndOfGrainPredicate
@@ -397,5 +398,9 @@ package object time {
   def isEmptyPredicate(p: TimePredicate): Boolean = p match {
     case EmptyTimePredicate => true
     case _                  => false
+  }
+
+  def runTimeOpenIntervalPredicate(it: IntervalDirection)(t: TimeObject, context: TimeContext): PastFutureTime = {
+    (Stream(t.copy(direction = Some(it))), Stream.empty)
   }
 }

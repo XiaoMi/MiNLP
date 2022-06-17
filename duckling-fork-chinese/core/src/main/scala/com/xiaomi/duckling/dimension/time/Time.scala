@@ -258,7 +258,11 @@ case class TimeValue(timeValue: SingleTimeValue,
     timeValue match {
       case IntervalValue(start, end) => "[%s, %s)".format(start.datetime, end.datetime)
       case SimpleValue(instant)      => instant.datetime.toString
-      case _                         => super.toString
+      case OpenIntervalValue(instant, direction) =>
+        direction match {
+          case IntervalDirection.Before => "(_,%s]".format(instant.datetime)
+          case IntervalDirection.After => "[%s,_)".format(instant.datetime)
+        }
     }
   }
 }
