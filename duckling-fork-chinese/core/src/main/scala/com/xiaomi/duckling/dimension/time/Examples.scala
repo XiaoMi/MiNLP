@@ -368,7 +368,8 @@ trait Examples extends DimExamples {
     (ymd(2014, 1, 1, holiday = "元旦节"), List("下一个元旦节")),
     (ymd(2013, 8, 15, holiday = "中秋节", calendar = Lunar(false)), List("下一个中秋节")),
     (ymd(2012, 2, 12), List("一年前的今天")),
-    (ymd(2022, 10, 1, direction = IntervalDirection.Before), List("2022年10月1号之前"))
+    (ymd(2022, 10, 1, direction = IntervalDirection.Before), List("2022年10月1号之前")),
+    (ymd(2022, 10, 1, direction = IntervalDirection.After), List("2022年10月1号之后"))
   )
 
   override def pairs: List[(ResolvedValue, List[String])] =

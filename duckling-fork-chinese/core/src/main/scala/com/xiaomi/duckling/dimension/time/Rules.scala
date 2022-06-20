@@ -321,7 +321,7 @@ trait Rules extends DimRules {
       case Token(Time, td: TimeData) :: Token(_, GroupMatch(_ :: direction :: _)) :: _ =>
         val intervalDirection =
           if (direction == "前") IntervalDirection.Before
-          else IntervalDirection.Before
+          else IntervalDirection.After
         val predicate = SequencePredicate(
           List(td, TimeData(TimeOpenIntervalPredicate(intervalDirection), timeGrain = Grain.NoGrain))
         )
