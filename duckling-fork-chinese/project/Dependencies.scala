@@ -45,7 +45,7 @@ object Dependencies {
   lazy val benchmarkDependencies = Seq(scalaTest % Test, jmhAnn, jmhCore, slf4jnop)
 
   // test
-  lazy val junit = "junit" % "junit" % "4.12"
+  lazy val junit = "junit" % "junit" % "4.13.2"
   lazy val hamcrest = "org.hamcrest" % "hamcrest" % "2.2"
   lazy val junitInterface = "com.novocode" % "junit-interface" % "0.11"
   lazy val scalatic = "org.scalactic" %% "scalactic" % "3.2.10"
@@ -67,7 +67,7 @@ object Dependencies {
   lazy val arm = "com.michaelpollmeier" %% "scala-arm" % "2.1"
   lazy val commonslang = "org.apache.commons" % "commons-lang3" % "3.12.0"
   lazy val commonsText = "org.apache.commons" % "commons-text" % "1.9"
-  lazy val commonsIO = "commons-io" % "commons-io" % "2.6"
+  lazy val commonsIO = "commons-io" % "commons-io" % "2.11.0"
   lazy val jline = "org.jline" % "jline" % "3.11.0"
   lazy val config = "com.typesafe" % "config" % "1.3.4"
   lazy val guava = "com.google.guava" % "guava" % "30.1.1-jre"
