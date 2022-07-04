@@ -25,7 +25,7 @@ trait Rules extends DimRules {
 
   private lazy val lexemeMap = lexicons.flatMap(l => l.lexeme.map((_, l.target))).toMap
 
-  private val pattern = lexicons.flatMap(_.lexeme).mkString("(", "|", ")")
+  private lazy val pattern = lexicons.flatMap(_.lexeme).mkString("(", "|", ")")
 
   lazy val rule =
     Rule(name = "constellation", pattern = List(s"${pattern}座*".regex), prod = regexMatch {
