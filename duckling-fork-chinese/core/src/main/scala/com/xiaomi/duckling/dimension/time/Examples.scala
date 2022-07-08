@@ -17,7 +17,6 @@
 package com.xiaomi.duckling.dimension.time
 
 import com.github.heqiao2010.lunar.LunarCalendar
-
 import java.time.{LocalDateTime, LocalTime}
 
 import com.xiaomi.duckling.Types._
@@ -215,9 +214,17 @@ trait Examples extends DimExamples {
       localDateTimeInterval(
         LocalDateTime.of(2013, 2, 16, 0, 0, 0),
         LocalDateTime.of(2013, 2, 18, 0, 0, 0),
-        Hour
+        Day
       ),
       List("这周末")
+    ),
+    (
+      localDateTimeInterval(
+        LocalDateTime.of(2013, 2, 23, 0, 0, 0),
+        LocalDateTime.of(2013, 2, 25, 0, 0, 0),
+        Day
+      ),
+      List("下周末")
     ),
     (
       localDateTimeInterval(
@@ -238,6 +245,14 @@ trait Examples extends DimExamples {
     (
       datetime(LocalDateTime.of(2013, 3, 5, 4, 30, 0), Second),
       List("三星期后", "三星期之后", "三个礼拜后", "三个礼拜之后", "三星期以后", "三星期过后")
+    ),
+    (
+      localDateTimeInterval(
+        LocalDateTime.of(2013, 2, 23, 0, 0, 0),
+        LocalDateTime.of(2013, 2, 25, 0, 0, 0),
+        Day
+      ),
+      List("下周末")
     )
   )
 
@@ -361,6 +376,11 @@ trait Examples extends DimExamples {
       List("2019年腊月初一上午")
     ),
     (datetime(LocalDateTime.of(2013, 2, 11, 4, 30, 0), Second), List("昨天现在")),
+    (localDateTimeInterval(
+      LocalDateTime.of(2013, 2, 12, 11, 30, 0),
+      LocalDateTime.of(2013, 2, 12, 15, 20, 0),
+      Minute),
+      List("11点30分到15点20分")),
     (datetime(LocalDateTime.of(2013, 2, 22, 8, 0, 0), Hour), List("下周五8点")),
     (datetime(LocalDateTime.of(2013, 11, 20, 20, 0, 0), Hour), List("11.20 20点")),
     (datetime(LocalDateTime.of(2013, 12, 24, 0, 0, 0), Day), List("圣诞节的前一天", "圣诞节前一天")),

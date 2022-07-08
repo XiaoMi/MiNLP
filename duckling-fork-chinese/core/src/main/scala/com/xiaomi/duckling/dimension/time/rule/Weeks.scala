@@ -34,7 +34,7 @@ object Weeks {
     pattern = List("(这|今|本)个?".regex, isADayOfWeek.predicate),
     prod = tokens {
       case _ :: Token(Time, td: TimeData) :: _ =>
-        (predNth(0, false) >>> reset(Week) >>> tt) (td)
+        (predNth(0, false, true) >>> reset(Week) >>> tt) (td)
     }
   )
 
@@ -66,7 +66,7 @@ object Weeks {
     pattern = List("(明|下)个?".regex, isADayOfWeek.predicate),
     prod = tokens {
       case _ :: Token(Time, td: TimeData) :: _ =>
-        (predNth(1, false) >>> reset(Week) >>> tt) (td)
+        (predNth(1, false, false) >>> reset(Week) >>> tt) (td)
     }
   )
 

@@ -26,10 +26,10 @@ import com.xiaomi.duckling.dimension.ordinal.{Ordinal, OrdinalData}
 import com.xiaomi.duckling.dimension.time.Helpers._
 import com.xiaomi.duckling.dimension.time.Prods._
 import com.xiaomi.duckling.dimension.time.duration.{Duration, DurationData}
+import com.xiaomi.duckling.dimension.time.enums.{Grain, Hint, IntervalDirection}
 import com.xiaomi.duckling.dimension.time.enums.Grain._
 import com.xiaomi.duckling.dimension.time.enums.Hint._
 import com.xiaomi.duckling.dimension.time.enums.IntervalType.{Closed, Open}
-import com.xiaomi.duckling.dimension.time.enums.{Grain, Hint, IntervalDirection}
 import com.xiaomi.duckling.dimension.time.form.{PartOfDay, TimeOfDay}
 import com.xiaomi.duckling.dimension.time.grain.{GrainData, TimeGrain}
 import com.xiaomi.duckling.dimension.time.helper.TimeDataHelpers._
@@ -47,14 +47,14 @@ trait Rules extends DimRules {
       and(isDimension(Time), isNotLatent, not(isHint(Intersect)), not(isAPartOfDay)).predicate
     ),
     prod = tokens {
-      case Token(RegexMatch, GroupMatch(s :: _)) :: (t @ Token(Time, td: TimeData)) :: _ =>
+      case Token(RegexMatch, GroupMatch(s :: _)) :: (t@Token(Time, td: TimeData)) :: _ =>
         val offset =
           s(0) match {
             case '今' | '这' | '本' => 0
-            case '去' | '前'       => -1
-            case '明'             => 1
-            case '上'             => -1 * s.takeWhile(_ == '上').length
-            case '下'             => 1 * s.takeWhile(_ == '下').length
+            case '去' | '前' => -1
+            case '明' => 1
+            case '上' => -1 * s.takeWhile(_ == '上').length
+            case '下' => 1 * s.takeWhile(_ == '下').length
           }
 
         val isValidCombination = s(0) match { // 病态表达验证
@@ -64,14 +64,17 @@ trait Rules extends DimRules {
               case _ => false
             }
           case '上' | '下' => // 上/下， 不与‘天’和‘确切年’组合，eg:本今天，下二零一九年
-            if (td.timeGrain == Day && td.holiday.isEmpty || td.timeGrain == Year) false
+            if (td.timeGrain == Day && td.holiday.isEmpty &&
+              !td.timePred.isInstanceOf[TimeIntervalsPredicate] // 下周末是可以的
+              || td.timeGrain == Year) false
             else true
           case _ => true
         }
 
         if (isValidCombination) {
           val resetGrain = if (isADayOfWeek.isDefinedAt(t) && isADayOfWeek(t)) Week else td.timeGrain
-          (predNth(offset, false) >>> reset(resetGrain) >>> tt)(td)
+          val notHappenedAsFirst = if (td.holiday.nonEmpty) true else false
+          (predNth(offset, false, notHappenedAsFirst) >>> reset(resetGrain) >>> tt) (td)
         } else None
     }
   )
@@ -111,7 +114,7 @@ trait Rules extends DimRules {
         val join: Option[TimeData] = intersect(td2, td1)
         join match {
           case Some(x) =>
-            (predNth(od.value.toInt - 1, false) >>> tt)(x)
+            (predNth(od.value.toInt - 1, false, true) >>> tt)(x)
           case None => None
         }
     }

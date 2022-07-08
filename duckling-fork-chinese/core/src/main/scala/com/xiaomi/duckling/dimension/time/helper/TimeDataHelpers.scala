@@ -52,7 +52,7 @@ object TimeDataHelpers {
 
   def cycleNth(grain: Grain, n: Int, roundGrain: Grain): TimeData = {
     val pred =
-      takeNth(1, notImmediate = false, timeCycle(grain, roundGrain, step = n))
+      takeNth(1, notImmediate = false, notHappenedAsFirst = false, timeCycle(grain, roundGrain, step = n))
     TimeData(pred, timeGrain = grain)
   }
 
@@ -71,10 +71,10 @@ object TimeDataHelpers {
   /**
     * Generalized version of cycleNth with custom predicate
     */
-  val predNth = (n: Int, notImmediate: Boolean) =>
+  val predNth = (n: Int, notImmediate: Boolean, notHappenedAsFirst: Boolean) =>
     (td: TimeData) => {
       TimeData(
-        timePred = takeNth(n, notImmediate, td.timePred),
+        timePred = takeNth(n, notImmediate, notHappenedAsFirst, td.timePred),
         timeGrain = td.timeGrain,
         notImmediate = notImmediate,
         holiday = td.holiday
@@ -103,11 +103,7 @@ object TimeDataHelpers {
     year(n).copy(latent = true)
   }
 
-  def weekend: TimeData = {
-    val fri = intersect1(dayOfWeek(6), hour(false, 0))
-    val mon = intersect1(dayOfWeek(1), hour(false, 0))
-    interval1(Open, fri, mon)
-  }
+  def weekend: TimeData = interval1(Closed, dayOfWeek(6), dayOfWeek(7))
 
   def timeOfDayAMPM(isAM: Boolean, td: TimeData): TimeData = {
     val ampmPred: TimeDatePredicate = TimeDatePredicate(ampm = if (isAM) AM else PM)

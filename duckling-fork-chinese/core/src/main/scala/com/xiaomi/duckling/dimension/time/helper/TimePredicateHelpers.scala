@@ -185,7 +185,7 @@ object TimePredicateHelpers {
     * -1 is the first element in the past
     * 0 is the first element in the future
     */
-  def takeNth(n: Int, notImmediate: Boolean, f: TimePredicate): TimePredicate = {
+  def takeNth(n: Int, notImmediate: Boolean, notHappenedAsFirst: Boolean, f: TimePredicate): TimePredicate = {
     val series = (t: TimeObject, context: TimeContext) => {
       val (past, future) = runPredicate(f)(context.refTime, context)
       val rest = if (n >= 0) {
@@ -195,7 +195,7 @@ object TimePredicateHelpers {
             val series =
               if (notImmediate && timeIntersect(ahead)(context.refTime).nonEmpty) future.drop(n + 1)
               // 如果事件还未发生，那么下一个就是未来第一个未发生的，不需要drop
-              else if (timeBefore(context.refTime, ahead) && n >= 1) future.drop(n - 1)
+              else if (notHappenedAsFirst && timeBefore(context.refTime, ahead) && n >= 1) future.drop(n - 1)
               else future.drop(n)
             series
         }
