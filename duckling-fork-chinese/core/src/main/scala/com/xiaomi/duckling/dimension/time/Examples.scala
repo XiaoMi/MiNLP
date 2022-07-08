@@ -245,14 +245,6 @@ trait Examples extends DimExamples {
     (
       datetime(LocalDateTime.of(2013, 3, 5, 4, 30, 0), Second),
       List("三星期后", "三星期之后", "三个礼拜后", "三个礼拜之后", "三星期以后", "三星期过后")
-    ),
-    (
-      localDateTimeInterval(
-        LocalDateTime.of(2013, 2, 23, 0, 0, 0),
-        LocalDateTime.of(2013, 2, 25, 0, 0, 0),
-        Day
-      ),
-      List("下周末")
     )
   )
 
