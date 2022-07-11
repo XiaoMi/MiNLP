@@ -52,7 +52,7 @@ trait Examples extends DimExamples {
     (ym(2001, 5), List("零一年五月")),
     (ymd(2013, 2, 28), List("月底")),
     // 农历 2013.2.12 是 2013年正月初三
-    (ymd(2014, 1, 2, calendar = Lunar(false)), List("农历一月初二", "正月初二")),
+    (ymd(2014, 1, 2, calendar = Lunar(false)), List("农历一月初二", "正月初二", "农历的一月初二", "阴历的正月初二", "一月初二农历", "一月初二的农历")),
     (ymd(2013, 1, 18, calendar = Lunar(false)), List("农历一月十八", "正月十八")),
     (ymd(2013, 11, 8, calendar = Lunar(false)), List("农历十一月初八", "冬月初八")),
     (ymd(2013, 11, 22, calendar = Lunar(false)), List("农历十一月二十二", "冬月二十二")),
