@@ -162,6 +162,10 @@ object predicates {
     case _ => false
   }
 
+  val isWeekend: Predicate = {
+    case Token(_, td: TimeData) => td.form.contains(Weekend)
+  }
+
   val isNotLatent: Predicate = {
     case Token(_, td: TimeData) => !td.latent
   }

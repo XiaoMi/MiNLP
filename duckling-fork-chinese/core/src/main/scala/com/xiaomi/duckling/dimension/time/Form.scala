@@ -30,4 +30,5 @@ object form {
 
   case class PartOfDay(part: String) extends Form
 
+  case object Weekend extends Form
 }

@@ -215,9 +215,17 @@ trait Examples extends DimExamples {
       localDateTimeInterval(
         LocalDateTime.of(2013, 2, 16, 0, 0, 0),
         LocalDateTime.of(2013, 2, 18, 0, 0, 0),
-        Hour
+        Day
       ),
       List("这周末")
+    ),
+    (
+      localDateTimeInterval(
+        LocalDateTime.of(2013, 2, 23, 0, 0, 0),
+        LocalDateTime.of(2013, 2, 25, 0, 0, 0),
+        Day
+      ),
+      List("下周末")
     ),
     (
       localDateTimeInterval(

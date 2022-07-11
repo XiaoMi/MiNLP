@@ -103,11 +103,7 @@ object TimeDataHelpers {
     year(n).copy(latent = true)
   }
 
-  def weekend: TimeData = {
-    val fri = intersect1(dayOfWeek(6), hour(false, 0))
-    val mon = intersect1(dayOfWeek(1), hour(false, 0))
-    interval1(Open, fri, mon)
-  }
+  def weekend: TimeData = form(Weekend, interval1(Open, dayOfWeek(6), dayOfWeek(7)))
 
   def timeOfDayAMPM(isAM: Boolean, td: TimeData): TimeData = {
     val ampmPred: TimeDatePredicate = TimeDatePredicate(ampm = if (isAM) AM else PM)
