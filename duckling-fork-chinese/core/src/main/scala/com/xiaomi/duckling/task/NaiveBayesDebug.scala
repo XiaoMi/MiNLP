@@ -47,7 +47,7 @@ object NaiveBayesDebug {
     val options = Options(
       targets = targets,
       withLatent = false,
-      full = false,
+      full = true,
       rankOptions =
         RankOptions(ranker = Ranker.NaiveBayes, winnerOnly = true, combinationRank = false, rangeRankAhead = false),
       timeOptions = TimeOptions(resetTimeOfDay = false, recentInFuture = true, alwaysInFuture = true),

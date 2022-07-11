@@ -26,11 +26,11 @@ import com.xiaomi.duckling.dimension.ordinal.{Ordinal, OrdinalData}
 import com.xiaomi.duckling.dimension.time.Helpers._
 import com.xiaomi.duckling.dimension.time.Prods._
 import com.xiaomi.duckling.dimension.time.duration.{Duration, DurationData}
+import com.xiaomi.duckling.dimension.time.enums.{Grain, Hint, IntervalDirection}
 import com.xiaomi.duckling.dimension.time.enums.Grain._
 import com.xiaomi.duckling.dimension.time.enums.Hint._
 import com.xiaomi.duckling.dimension.time.enums.IntervalType.{Closed, Open}
-import com.xiaomi.duckling.dimension.time.enums.{Grain, Hint, IntervalDirection}
-import com.xiaomi.duckling.dimension.time.form.{PartOfDay, TimeOfDay}
+import com.xiaomi.duckling.dimension.time.form.{PartOfDay, TimeOfDay, Weekend}
 import com.xiaomi.duckling.dimension.time.grain.{GrainData, TimeGrain}
 import com.xiaomi.duckling.dimension.time.helper.TimeDataHelpers._
 import com.xiaomi.duckling.dimension.time.predicates._
@@ -54,7 +54,9 @@ trait Rules extends DimRules {
             case '去' | '前'       => -1
             case '明'             => 1
             case '上'             => -1 * s.takeWhile(_ == '上').length
-            case '下'             => 1 * s.takeWhile(_ == '下').length
+            case '下'             =>
+              val n = 1 * s.takeWhile(_ == '下').length
+              if (td.holiday.nonEmpty && n > 0) n - 1 else n
           }
 
         val isValidCombination = s(0) match { // 病态表达验证
@@ -64,13 +66,14 @@ trait Rules extends DimRules {
               case _ => false
             }
           case '上' | '下' => // 上/下， 不与‘天’和‘确切年’组合，eg:本今天，下二零一九年
-            if (td.timeGrain == Day && td.holiday.isEmpty || td.timeGrain == Year) false
+            if (td.timeGrain == Day && td.holiday.isEmpty && !td.form.contains(Weekend) // 下周末是可以的
+              || td.timeGrain == Year) false
             else true
           case _ => true
         }
 
         if (isValidCombination) {
-          val resetGrain = if (isADayOfWeek.isDefinedAt(t) && isADayOfWeek(t)) Week else td.timeGrain
+          val resetGrain = if (isADayOfWeek(t) || isWeekend(t)) Week else td.timeGrain
           (predNth(offset, false) >>> reset(resetGrain) >>> tt)(td)
         } else None
     }
