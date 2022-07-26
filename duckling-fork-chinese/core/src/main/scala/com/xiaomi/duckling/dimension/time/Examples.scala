@@ -332,6 +332,14 @@ trait Examples extends DimExamples {
     ),
     (
       localDateTimeInterval(
+        LocalDateTime.of(2013, 2, 12, 11, 15, 0),
+        LocalDateTime.of(2013, 2, 12, 15, 20, 0),
+        Minute
+      ),
+      List("11点15分到15点20分")
+    ),
+    (
+      localDateTimeInterval(
         LocalDateTime.of(2013, 2, 13, 15, 0, 0),
         LocalDateTime.of(2013, 2, 13, 18, 0, 0),
         Hour
