@@ -129,6 +129,7 @@ trait Examples extends DimExamples {
     (datetime(LocalDateTime.of(2013, 2, 13, 18, 0, 0), Hour), List("明晚6点", "明天晚上6点", "13号晚上6点")),
     (datetime(LocalDateTime.of(2013, 2, 12, 6, 0, 0), Hour), List("今早6点", "今天早上6点", "12号早上6点")),
     (datetime(LocalDateTime.of(2013, 2, 11, 20, 0, 0), Hour), List("昨晚8点", "昨天晚上8点", "这个月11号晚上8点")),
+    (datetime(LocalDateTime.of(2013, 2, 13, 10, 0, 0), Hour), List("明天10点", "明天上午十点", "明天中午10点")),
     (
       localDateTimeInterval(
         LocalDateTime.of(2013, 2, 12, 4, 29, 58),
