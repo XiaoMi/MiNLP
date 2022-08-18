@@ -19,7 +19,7 @@ package com.xiaomi.duckling.dimension.numeral.fraction
 import com.xiaomi.duckling.Types._
 import com.xiaomi.duckling.dimension.DimRules
 import com.xiaomi.duckling.dimension.implicits._
-import com.xiaomi.duckling.dimension.matcher.GroupMatch
+import com.xiaomi.duckling.dimension.matcher.{GroupMatch, RegexMatch}
 import com.xiaomi.duckling.dimension.numeral.Predicates._
 import com.xiaomi.duckling.dimension.numeral.{Numeral, NumeralData}
 
@@ -46,13 +46,14 @@ trait Rules extends DimRules {
 
   val percentLike = Rule(
     name = "|thousand|th of <number>",
-    pattern = List("(百|千|万)分之".regex, isDimension(Numeral).predicate),
+    pattern = List("(负的|负)?(百|千|万)分之".regex, isDimension(Numeral).predicate),
     prod = tokens {
-      case Token(_, GroupMatch(_ :: s :: _)) :: Token(_, n: NumeralData) :: _ =>
-        val scalar = s match {
-          case "百" => 100.0
-          case "千" => 1000.0
-          case "万" => 10000.0
+      case Token(_, GroupMatch(_ :: s1 :: s2 :: _)) :: Token(_, n: NumeralData) :: _ =>
+        val neg = s1.nonEmpty
+        val scalar = s2 match {
+          case "百" => if (neg) -100.0 else 100.0
+          case "千" => if (neg) -1000.0 else 1000.0
+          case "万" => if (neg) -10000.0 else 10000.0
         }
         fraction(n.value / scalar, n.value, scalar)
     }
@@ -78,9 +79,12 @@ trait Rules extends DimRules {
 
   val hundredPercentRule = Rule(
     name = "100%",
-    pattern = List("百分之?百".regex),
+    pattern = List("(负的|负)?百分之?百".regex),
     prod = tokens {
-      case _ => fraction(1.0, 100.0, 100.0)
+      case Token(RegexMatch, GroupMatch(_ :: m :: _)) :: _ =>
+        val scalar = if (m.nonEmpty) -100.0 else 100.0
+        val value = 100.0 / scalar
+        fraction(value, 100.0, scalar)
     }
   )
 }
