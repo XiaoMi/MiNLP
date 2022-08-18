@@ -144,7 +144,7 @@ object FuzzyDayIntervals {
     for ((is12H, h) <- p.hour) yield {
       val hAdjust =
         if (h == 12 && s == "凌晨") 0
-        else if (h > 10 && (s == "中午" || s == "午间")) h // 中午11点
+        else if (h >= 10 && (s == "中午" || s == "午间")) h // 中午11点
         else if (h == 12 && s == "凌晨") 0
         else if (h == 12 && s == "晚上" || s == "晚间") 24
         else {
