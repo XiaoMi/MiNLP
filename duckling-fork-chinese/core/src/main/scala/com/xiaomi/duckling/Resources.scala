@@ -83,7 +83,7 @@ object Resources extends LazyLogging {
   def reader[B](resource: String)(f: Reader => B): B = {
     val stream = tryResource(resource)
     try {
-      val reader = new InputStreamReader(stream)
+      val reader = new InputStreamReader(stream, StandardCharsets.UTF_8)
       f(reader)
     } finally {
       stream.close()
@@ -91,15 +91,7 @@ object Resources extends LazyLogging {
   }
 
   def tryResource(resource: String): InputStream = {
-    val input = if (!resource.startsWith("/")) {
-      val in = getClass.getResourceAsStream(s"/$resource")
-      if (in == null) getClass.getResourceAsStream(resource)
-      else in
-    } else {
-      val in = getClass.getResourceAsStream(resource)
-      if (in == null) getClass.getResourceAsStream(resource.substring(1))
-      else in
-    }
+    val input = Resources.getClass.getResourceAsStream(resource)
     if (input == null) throw new FileNotFoundException(s"Resource [$resource] not found")
     input
   }

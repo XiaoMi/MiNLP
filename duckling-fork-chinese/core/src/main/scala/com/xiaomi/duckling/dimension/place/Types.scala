@@ -41,10 +41,10 @@ object Types extends LazyLogging {
                       code: String,
                       partOf: Int) {
 
-    def isDescendentOf(o: PlaceOne, table: Map[Int, PlaceOne]): Boolean = {
+    def isDescendantOf(o: PlaceOne, table: Map[Int, PlaceOne]): Boolean = {
       if (partOf <= 0) false
       else if (partOf == o.id) true
-      else table(partOf).isDescendentOf(o, table)
+      else table(partOf).isDescendantOf(o, table)
     }
 
     def getPath(): util.List[PlaceOne] = {
@@ -56,9 +56,11 @@ object Types extends LazyLogging {
     }
   }
 
-  private lazy val placeById: Map[Int, PlaceOne] = Resources.reader("places4.json") {
+  private lazy val placeById: Map[Int, PlaceOne] = Resources.reader("/places4.json") {
     in: Reader =>
-      read[Seq[PlaceOne]](in).map(p => (p.id, p)).toMap
+      val ones = read[Seq[PlaceOne]](in).map(p => (p.id, p)).toMap
+      logger.info(s"read ${ones.size} for Place")
+      ones
   }
 
   val levelExcludes = Set("县", "市辖区", "省直辖县级行政区划")
@@ -104,8 +106,8 @@ object Types extends LazyLogging {
 
   def merge(c1: List[PlaceOne], c2: List[PlaceOne]): List[PlaceOne] = {
     (for (a <- c1; b <- c2) yield {
-      if (a.isDescendentOf(b, placeById)) Some(a)
-      else if (b.isDescendentOf(a, placeById)) Some(b)
+      if (a.isDescendantOf(b, placeById)) Some(a)
+      else if (b.isDescendantOf(a, placeById)) Some(b)
       else None
     }).flatten
   }
