@@ -26,7 +26,7 @@ import com.xiaomi.duckling.Resources
 package object constellation {
   case class Lexicon(lexeme: List[String], target: String)
 
-  lazy val lexicons = Resources.reader("constellation.json") { in: Reader =>
+  lazy val lexicons = Resources.reader("/constellation.json") { in: Reader =>
     read[Seq[Lexicon]](in)
   }
 }
