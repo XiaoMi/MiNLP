@@ -247,6 +247,7 @@ package object time {
     val h =
       // 应对今天晚上12点的情况
       if (nAdjust == 24 && t.start.hour == 0) 24
+      else if (nAdjust == 12 && t.start.hour == 0) 12
       else Math.floorMod(nAdjust - t.start.hour, step)
     val anchor = timePlus(rounded, Hour, h)
     (
