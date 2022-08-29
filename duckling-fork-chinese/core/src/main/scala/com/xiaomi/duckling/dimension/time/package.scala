@@ -112,7 +112,7 @@ package object time {
         case ahead #:: nextAhead #:: _ =>
           val happened =
             td.timePred match {
-              case a: TimeDatePredicate => timeBefore(ahead, refTime, td.timeGrain)
+              case _: TimeDatePredicate | _: TimeIntervalsPredicate => timeBefore(ahead, refTime, td.timeGrain)
               case _ => false
             }
           if (happened || td.notImmediate && timeIntersect(ahead)(refTime).nonEmpty) {
