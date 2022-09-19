@@ -341,6 +341,14 @@ trait Examples extends DimExamples {
     ),
     (
       localDateTimeInterval(
+        LocalDateTime.of(2013, 2, 12, 11, 5, 0),
+        LocalDateTime.of(2013, 2, 12, 15, 8, 0),
+        Minute
+      ),
+      List("11点05分到15点08分", "11点05到15点08", "十一点零五分到十五点零八分", "十一点零五到十五点零八")
+    ),
+    (
+      localDateTimeInterval(
         LocalDateTime.of(2013, 2, 13, 15, 0, 0),
         LocalDateTime.of(2013, 2, 13, 18, 0, 0),
         Hour
@@ -381,6 +389,7 @@ trait Examples extends DimExamples {
     (datetime(LocalDateTime.of(2013, 2, 22, 8, 0, 0), Hour), List("下周五8点")),
     (datetime(LocalDateTime.of(2013, 11, 20, 20, 0, 0), Hour), List("11.20 20点")),
     (datetime(LocalDateTime.of(2013, 12, 24, 0, 0, 0), Day), List("圣诞节的前一天", "圣诞节前一天")),
+    (datetime(LocalDateTime.of(2013, 2, 12, 11, 3, 0), Minute), List("11点03分", "11点03", "十一点零三分", "十一点零三")),
     (ymd(2013, 10, 1, holiday = "国庆节"), List("下一个国庆节")),
     (ymd(2014, 1, 1, holiday = "元旦节"), List("下一个元旦节")),
     (ymd(2013, 8, 15, holiday = "中秋节", calendar = Lunar(false)), List("下一个中秋节")),
