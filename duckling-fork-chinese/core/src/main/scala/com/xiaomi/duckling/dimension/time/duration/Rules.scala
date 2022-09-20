@@ -193,4 +193,31 @@ trait Rules extends DimRules {
         for (i <- getIntValue(t1)) yield Token(Duration, DurationData(i.toInt, g0) + DurationData(s.toInt, g1))
     }
   )
+  
+  /**
+    * 1小时9分(latentGrain)
+    */
+  val ruleCompositeDuration4 = Rule(
+    name = "x hour y minute (latentGrain)",
+    pattern = List(
+      isNatural.predicate,
+      isDimension(TimeGrain).predicate,
+      and(
+        isNatural,
+        isNumberOrUnitNumber,
+        not(isDigitLengthGt(1)),
+        // 一九八七 年 不召回
+        not(isCnSequence)
+      ).predicate,
+      "分(?!钟)".regex
+    ),
+    prod = tokens {
+      case t1 :: Token(TimeGrain, GrainData(g0, _)) :: t2 :: _
+        if g0 == Grain.Hour =>
+        for {
+          i <- getIntValue(t1)
+          j <- getIntValue(t2)
+        } yield Token(Duration, DurationData(i.toInt, g0) + DurationData(j.toInt, Grain.Minute))
+    }
+  )
 }

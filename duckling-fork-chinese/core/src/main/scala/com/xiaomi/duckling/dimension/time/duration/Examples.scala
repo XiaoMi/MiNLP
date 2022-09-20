@@ -42,7 +42,9 @@ trait Examples extends DimExamples {
     (DurationData(45, Day), List("一个半月")),
     (DurationData(15, Day), List("半个月")),
     (DurationData(27, Month), List("两年零三个月","两年外加三个月", "两年加上三个月", "两年加三个月", "两年三个月")),
-    (DurationData(31719604, Second), List("1年两天3小时四秒"))
+    (DurationData(31719604, Second), List("1年两天3小时四秒")),
+    (DurationData(185, Minute), List("三小时五分", "三小时五分钟", "三小时零五分", "三小时零五分钟", "3小时5分", "3小时05分", "3小时05分钟")),
+    (DurationData(75, Minute), List("1小时15分", "1小时15分钟", "一小时十五分", "一小时十五分钟"))
   )
 
 }

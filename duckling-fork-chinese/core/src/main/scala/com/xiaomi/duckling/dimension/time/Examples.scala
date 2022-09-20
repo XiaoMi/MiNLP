@@ -247,6 +247,14 @@ trait Examples extends DimExamples {
     (
       datetime(LocalDateTime.of(2013, 3, 5, 4, 30, 0), Second),
       List("三星期后", "三星期之后", "三个礼拜后", "三个礼拜之后", "三星期以后", "三星期过后")
+    ),
+    (
+      datetime(LocalDateTime.of(2013, 2, 12, 5, 35, 0), Second),
+      List("一小时五分后", "一小时零五分后", "1小时5分后", "1小时05分后", "一小时五分钟后", "一小时零五分钟后")
+    ),
+    (
+        datetime(LocalDateTime.of(2013, 2, 12, 5, 45, 0), Second),
+        List("一小时十五分后", "一小时十五分钟后", "1小时15分后", "1小时15分钟后")
     )
   )
 

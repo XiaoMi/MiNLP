@@ -33,7 +33,7 @@ package object seq {
   }
 
   def isDigitLeading0: Predicate = {
-    case Token(DigitSequence, DigitSequenceData(s, zh, _)) => s.startsWith("0") && !zh
+    case Token(DigitSequence, DigitSequenceData(s, _, _)) => s.startsWith("0") || s.startsWith("零")
   }
 
   def isDigitLengthGt(n: Int): Predicate = {
