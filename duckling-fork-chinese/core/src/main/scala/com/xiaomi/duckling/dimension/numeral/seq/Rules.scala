@@ -25,7 +25,7 @@ import com.xiaomi.duckling.dimension.numeral.{CNDigit, CapitalCNDigit}
 
 trait Rules extends DimRules {
   val cn = Rule(
-    name = "cn digit sequence",
+    name = "cn digit sequence1",
     pattern = List(s"($CNDigit{2,}|$CapitalCNDigit{2,})".regex),
     prod = singleRegexMatch {
       case text =>
@@ -35,7 +35,7 @@ trait Rules extends DimRules {
   )
 
   val cn1less = Rule(
-    name = "cn digit sequence",
+    name = "cn digit sequence2",
     pattern = List(s"($CNDigit{2,}(?=$CNDigit)|$CapitalCNDigit{2,}(?=$CapitalCNDigit))".regex),
     prod = singleRegexMatch {
       case text =>

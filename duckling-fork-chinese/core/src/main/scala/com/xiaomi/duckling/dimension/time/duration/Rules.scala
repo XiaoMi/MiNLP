@@ -55,10 +55,10 @@ trait Rules extends DimRules {
         // 一九八七 年 不召回
         not(isCnSequence)
       ).predicate,
-      isNotLatentGrain.predicate
+      isDimension(TimeGrain).predicate
     ),
     prod = tokens {
-      case t1 :: Token(TimeGrain, GrainData(g, _)) :: _ =>
+      case t1 :: Token(TimeGrain, GrainData(g, latent)) :: _ =>
         if (isDimension(UnitNumber)(t1) && !compatibleWithUnitNumber(g)) None
         else {
           if (isDimension(Numeral)(t1) && g == Month) None
@@ -68,7 +68,7 @@ trait Rules extends DimRules {
                 val n = math.floor(v).toInt
                 // 2012年 不召回, 两千年召回
                 if (seq.nonEmpty && g == Year && 1950 <= n && n <= 2050) None
-                else tt(n, g)
+                else Token(Duration, DurationData(n, g, latent = latent))
               case _ => None
             }
           }
@@ -164,7 +164,7 @@ trait Rules extends DimRules {
       isNatural.predicate,
       isDimension(TimeGrain).predicate,
       "(零|外加|加上|加)".regex,
-      isDimension(Duration).predicate
+      isNotLatentDuration.predicate
     ),
     prod = tokens {
       case t1 :: Token(TimeGrain, GrainData(g, _)) :: _ :: Token(_, dd@DurationData(_, dg, _, _)) :: _
