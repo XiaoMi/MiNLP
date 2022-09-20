@@ -124,13 +124,14 @@ object Times {
 
   val ruleRelativeMinutesAfterPastIntegerHourAndHalfOfDay = Rule(
     name = "half (hour-of-day):一点半/一十/二十五",
-    pattern = List(isAnHourOfDay.predicate, "点(半|零[一二三四五六七八九]|一十)".regex),
+    pattern = List(isAnHourOfDay.predicate, "点(半|零[一二三四五六七八九]|0[123456789]|一十)分?".regex),
     prod = tokens {
       case Token(Time, TimeData(_, _, _, _, Some(TimeOfDay(Some(hour), _)), _, _, _, _, _, _)) ::
             Token(RegexMatch, GroupMatch(_ :: g1 :: _)) :: _ =>
         val m =
           if (g1 == "半") 30
           else if (g1(0) == '零') integerMap(g1.substring(1))
+          else if (g1(0) == '0') g1.substring(1).toInt
           else 10
         tt(hourMinute(is12H = true, hour, m))
     }
