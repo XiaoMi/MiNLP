@@ -25,7 +25,7 @@ import com.xiaomi.duckling.dimension.matcher.{GroupMatch, RegexMatch}
 import com.xiaomi.duckling.dimension.ordinal.{Ordinal, OrdinalData}
 import com.xiaomi.duckling.dimension.time.Helpers._
 import com.xiaomi.duckling.dimension.time.Prods._
-import com.xiaomi.duckling.dimension.time.duration.{isNotLatentDuration, Duration, DurationData}
+import com.xiaomi.duckling.dimension.time.duration.{isFuzzyNotLatentDuration, isNotLatentDuration, Duration, DurationData}
 import com.xiaomi.duckling.dimension.time.enums.{Grain, Hint, IntervalDirection}
 import com.xiaomi.duckling.dimension.time.enums.Grain._
 import com.xiaomi.duckling.dimension.time.enums.Hint._
@@ -211,9 +211,9 @@ trait Rules extends DimRules {
     */
   val ruleLastNextNCycle = Rule(
     name = "recent/last/next <duration>",
-    pattern = List(RecentPattern.regex, isNotLatentDuration.predicate),
+    pattern = List(RecentPattern.regex, or(isNotLatentDuration, isFuzzyNotLatentDuration).predicate),
     prod = tokens {
-      case Token(_, GroupMatch(s :: _)) :: Token(Duration, DurationData(v, g, false, fuzzy)) :: _ =>
+      case Token(_, GroupMatch(s :: _)) :: Token(Duration, DurationData(v, g, _, fuzzy)) :: _ =>
         // 月必须是x个月
         s match {
           case "下" | "后" | "接下来" | "未来" | "今后" | "之后" | "向后" | "往后" =>
@@ -245,7 +245,7 @@ trait Rules extends DimRules {
               }
             } else tt(cycleNth(g, 0))
           case "上" | "前" | "之前" | "往前"  | "向前" | "过去" | "过去" =>
-            if (s == "上" && g == Day) None
+            if (s == "上" && (g == Day || g == Year)) None
             else if (s == "过去" && fuzzy) None
             else if (v > 1) tt(cycleN(notImmediate = true, g, -v).at(Hint.Recent))
             else tt(cycleNth(g, -1).at(Hint.Recent))
