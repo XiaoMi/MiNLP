@@ -31,11 +31,11 @@ import com.xiaomi.duckling.dimension.time.predicates._
 
 object FuzzyDayIntervals {
 
-  val pattern = "(早上|早晨|晨间|下午|晚上|中午|午间|上午|傍晚|黄昏|凌晨|半夜|夜间|夜晚|夜里)"
+  val pattern = "(早上|早晨|晨间|清晨|下午|晚上|中午|午间|上午|傍晚|黄昏|凌晨|半夜|夜间|夜晚|夜里)"
 
   def between(s: String): (String, (Int, Int)) = {
     s match {
-      case "早上" | "早晨" | "晨间"               => ("早上", (4, 12))
+      case "早上" | "早晨" | "晨间" | "清晨"              => ("早上", (4, 12))
       case "上午"                             => ("上午", (8, 12))
       case "中午" | "午间"                      => ("中午", (12, 14))
       case "下午"                             => ("下午", (12, 18))
