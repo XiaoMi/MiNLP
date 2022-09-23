@@ -25,7 +25,7 @@ import com.xiaomi.duckling.dimension.matcher.{GroupMatch, RegexMatch}
 import com.xiaomi.duckling.dimension.ordinal.{Ordinal, OrdinalData}
 import com.xiaomi.duckling.dimension.time.Helpers._
 import com.xiaomi.duckling.dimension.time.Prods._
-import com.xiaomi.duckling.dimension.time.duration.{Duration, DurationData}
+import com.xiaomi.duckling.dimension.time.duration.{isFuzzyNotLatentDuration, isNotLatentDuration, Duration, DurationData}
 import com.xiaomi.duckling.dimension.time.enums.{Grain, Hint, IntervalDirection}
 import com.xiaomi.duckling.dimension.time.enums.Grain._
 import com.xiaomi.duckling.dimension.time.enums.Hint._
@@ -211,7 +211,7 @@ trait Rules extends DimRules {
     */
   val ruleLastNextNCycle = Rule(
     name = "recent/last/next <duration>",
-    pattern = List(RecentPattern.regex, isDimension(Duration).predicate),
+    pattern = List(RecentPattern.regex, or(isNotLatentDuration, isFuzzyNotLatentDuration).predicate),
     prod = tokens {
       case Token(_, GroupMatch(s :: _)) :: Token(Duration, DurationData(v, g, _, fuzzy)) :: _ =>
         // 月必须是x个月
@@ -245,7 +245,7 @@ trait Rules extends DimRules {
               }
             } else tt(cycleNth(g, 0))
           case "上" | "前" | "之前" | "往前"  | "向前" | "过去" | "过去" =>
-            if (s == "上" && g == Day) None
+            if (s == "上" && (g == Day || g == Year)) None
             else if (s == "过去" && fuzzy) None
             else if (v > 1) tt(cycleN(notImmediate = true, g, -v).at(Hint.Recent))
             else tt(cycleNth(g, -1).at(Hint.Recent))
@@ -259,9 +259,9 @@ trait Rules extends DimRules {
     */
   val ruleNCycleNextLast1 = Rule(
     name = "n <cycle> next/last 1: <duration> 之后",
-    pattern = List(isDimension(Duration).predicate, "((之|以)?(后|前))|过后".regex),
+    pattern = List(isNotLatentDuration.predicate, "((之|以)?(后|前))|过后".regex),
     prod = tokens {
-      case Token(Duration, DurationData(v, grain, _, _)) :: Token(_, GroupMatch(s :: _)) :: _ =>
+      case Token(Duration, DurationData(v, grain, false, _)) :: Token(_, GroupMatch(s :: _)) :: _ =>
         val offset = if (s.endsWith("后")) v else -v
         tt(cycleNth(grain, offset, NoGrain))
     }
@@ -272,7 +272,7 @@ trait Rules extends DimRules {
     */
   val ruleNCycleNext2 = Rule(
     name = "n <cycle> next/last: 过 <duration>",
-    pattern = List("过".regex, isDimension(Duration).predicate),
+    pattern = List("过".regex, isNotLatentDuration.predicate),
     prod = tokens {
       case _ :: Token(Duration, DurationData(v, grain, _, _)) :: _ =>
         tt(cycleNth(grain, v, NoGrain))
@@ -284,7 +284,7 @@ trait Rules extends DimRules {
     */
   val ruleNCycleNext3 = Rule(
     name = "n <cycle> next/last 3:过 <duration> 之后",
-    pattern = List("过".regex, isDimension(Duration).predicate, "之?(后|前)".regex),
+    pattern = List("过".regex, isNotLatentDuration.predicate, "之?(后|前)".regex),
     prod = tokens {
       case _ :: Token(Duration, DurationData(v, grain, _, _)) :: _ =>
         tt(cycleNth(grain, v, NoGrain))
@@ -296,7 +296,7 @@ trait Rules extends DimRules {
     */
   val ruleDurationIntersectTime = Rule(
     name = "<duration> before/after <time>",
-    pattern = List(isDimension(Duration).predicate, "之?(前|后)的?".regex, isNotLatent.predicate),
+    pattern = List(isNotLatentDuration.predicate, "之?(前|后)的?".regex, isNotLatent.predicate),
     prod = tokens {
       case Token(Duration, DurationData(v, g, _, _)) :: Token(_, GroupMatch(_ :: s :: _)) ::
         Token(Time, td: TimeData) :: _ =>
@@ -367,7 +367,7 @@ trait Rules extends DimRules {
     */
   val ruleInAInterval = Rule(
     name = "in a <duration>",
-    pattern = List(isDimension(Duration).predicate, "内".regex),
+    pattern = List(isNotLatentDuration.predicate, "内".regex),
     prod = tokens {
       case Token(Duration, DurationData(value, grain, _, _)) :: _ =>
         tt(cycleN(notImmediate = false, grain, value, NoGrain))
@@ -449,7 +449,7 @@ trait Rules extends DimRules {
   val ruleSequence3 = Rule(
     name = "sequence3: <recent nominal> <duration>",
     pattern =
-      List(isHint(RecentNominal).predicate, "(往|向|之)?(前|后)的?".regex, isDimension(Duration).predicate),
+      List(isHint(RecentNominal).predicate, "(往|向|之)?(前|后)的?".regex, isNotLatentDuration.predicate),
     prod = tokens {
       case Token(_, td1: TimeData) :: Token(_, GroupMatch(_ :: s :: _)) :: Token(
             _,

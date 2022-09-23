@@ -58,6 +58,14 @@ package object duration {
     case Token(TimeGrain, GrainData(Month, _)) => true
   }
 
+  def isNotLatentDuration: Predicate = {
+    case Token(Duration, DurationData(_, _, latent, _)) => !latent
+  }
+
+  def isFuzzyNotLatentDuration: Predicate = {
+    case Token(Duration, DurationData(_, _, _, fuzzy)) => fuzzy
+  }
+
   def isNotLatentGrain: Predicate = {
     case Token(TimeGrain, GrainData(_, latent)) => !latent
   }
