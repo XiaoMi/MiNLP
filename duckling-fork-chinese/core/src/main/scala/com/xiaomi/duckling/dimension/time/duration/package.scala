@@ -24,8 +24,15 @@ import com.xiaomi.duckling.dimension.time.enums.Grain._
 import com.xiaomi.duckling.dimension.time.grain._
 
 package object duration {
-
-  def tt(v: Int, g: Grain): Token = Token(Duration, DurationData(v, g))
+  /**
+    * generate duration token
+    * @param v  duration value
+    * @param g  duration grain
+    * @param ov origin value
+    * @param og origin grain
+    * @return
+    */
+  def tt(v: Int, g: Grain, ov: String, og: Grain): Token = Token(Duration, DurationData(v, g, schema = durationSchema(ov, og)))
 
   /**
     * Convert a duration to the given grain, rounded to the
@@ -35,17 +42,18 @@ package object duration {
     if (g == d.grain) d
     else {
       val v = math.round(1.0f * inSeconds(d.grain, d.value) / inSeconds(g, 1))
-      DurationData(v, g)
+      DurationData(v, g, schema = d.schema)
     }
   }
 
   def timesOneAndAHalf(grain: Grain, n: Int): Option[DurationData] = {
+    val sv = (n + 0.5).toString
     grain match {
-      case Minute => DurationData(60 * n + 30, Second)
-      case Hour => DurationData(60 * n + 30, Minute)
-      case Day => DurationData(24 * n + 12, Hour)
-      case Month => DurationData(30 * n + 15, Day)
-      case Year => DurationData(12 * n + 6, Month)
+      case Minute => DurationData(60 * n + 30, Second, schema = durationSchema(sv, Minute))
+      case Hour => DurationData(60 * n + 30, Minute, schema = durationSchema(sv, Hour))
+      case Day => DurationData(24 * n + 12, Hour, schema = durationSchema(sv, Day))
+      case Month => DurationData(30 * n + 15, Day, schema = durationSchema(sv, Month))
+      case Year => DurationData(12 * n + 6, Month, schema = durationSchema(sv, Year))
       case _ => None
     }
   }
@@ -59,14 +67,47 @@ package object duration {
   }
 
   def isNotLatentDuration: Predicate = {
-    case Token(Duration, DurationData(_, _, latent, _)) => !latent
+    case Token(Duration, DurationData(_, _, latent, _, _)) => !latent
   }
 
   def isFuzzyNotLatentDuration: Predicate = {
-    case Token(Duration, DurationData(_, _, _, fuzzy)) => fuzzy
+    case Token(Duration, DurationData(_, _, _, fuzzy, _)) => fuzzy
   }
 
   def isNotLatentGrain: Predicate = {
     case Token(TimeGrain, GrainData(_, latent)) => !latent
+  }
+  
+  private def grainShorthand(grain: Grain): String = {
+    grain match {
+      case Quarter => "Q"
+      case Year => "Y"
+      case Month => "M"
+      case Week => "W"
+      case Day => "D"
+      case Hour => "H"
+      case Minute => "M"
+      case Second => "S"
+      case NoGrain => ""
+      case _ => throw new IllegalArgumentException("unsupported Grain")
+    }
+  }
+  
+  def durationSchema(value: String, grain: Grain): Option[String] = {
+    if (grainShorthand(grain).isEmpty) None
+    else if (grain < Day) Some(s"PT$value${grainShorthand(grain)}")
+    else Some(s"P$value${grainShorthand(grain)}")
+  }
+  
+  def durationSchema(d1: DurationData, d2: DurationData): Option[String] = {
+    if (d1.schema.isEmpty) d2.schema
+    else if (d2.schema.isEmpty) d1.schema
+    else {
+      if (d1.schema.get.contains("T")) {
+        Some(s"${d1.schema.get}${d2.schema.get.replace("PT", "")}")
+      } else {
+        Some(s"${d1.schema.get}${d2.schema.get.replace("P", "")}")
+      }
+    }
   }
 }

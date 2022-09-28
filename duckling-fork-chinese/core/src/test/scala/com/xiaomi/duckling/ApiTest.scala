@@ -45,7 +45,7 @@ class ApiTest extends UnitSpec {
 
     it("should date") {
       val options = testOptions.copy(targets = Set(Numeral, Time, Duration, Date), full = false)
-      println(Api.analyze("上周一过去几天了", testContext, options))
+      println(Api.analyze("1分9秒", testContext, options))
     }
 
     it("should age") {
