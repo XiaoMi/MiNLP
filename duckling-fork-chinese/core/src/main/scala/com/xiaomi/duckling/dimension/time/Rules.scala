@@ -63,6 +63,7 @@ trait Rules extends DimRules {
           case '本' => // 本，之和周月组合
             td.timeGrain match {
               case Week | Month => true
+              case Day if td.form.contains(Weekend) => true // 本周末
               case _ => false
             }
           case '上' | '下' => // 上/下， 不与‘天’和‘确切年’组合，eg:本今天，下二零一九年
