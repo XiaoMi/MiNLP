@@ -44,7 +44,7 @@ class TimeTest extends UnitSpec {
     it("零一年五月八月") {
       val a = parse("零一年五月八月", combinationOptions)
       a.head.token.value match {
-        case TimeValue(_, _, _, Some(x), _) => x shouldBe ("2001-05-xTx:x:x", false)
+        case TimeValue(_, _, _, Some(x), _, _) => x shouldBe ("2001-05-xTx:x:x", false)
         case _ => true shouldBe false
       }
     }
@@ -52,7 +52,7 @@ class TimeTest extends UnitSpec {
     it("八点九点") {
       parse("八点九点").map { a =>
         a.token.value match {
-          case TimeValue(SimpleValue(InstantValue(datetime, grain)), _, _, _, _) =>
+          case TimeValue(SimpleValue(InstantValue(datetime, grain)), _, _, _, _, _) =>
             datetime.hour
         }
       } should contain theSameElementsInOrderAs List(8, 9)
@@ -73,7 +73,7 @@ class TimeTest extends UnitSpec {
     it("2月11 (ref 2013-2-12)") {
       parse("2月11").map { a =>
         a.token.value match {
-          case TimeValue(SimpleValue(InstantValue(datetime, grain)), _, _, _, _) =>
+          case TimeValue(SimpleValue(InstantValue(datetime, grain)), _, _, _, _, _) =>
             datetime.year
         }
       }.head shouldBe 2014
@@ -95,7 +95,7 @@ class TimeTest extends UnitSpec {
 
       parse("雨水", context = context).map { a =>
         a.token.value match {
-          case TimeValue(SimpleValue(InstantValue(datetime, grain)), _, _, _, _) =>
+          case TimeValue(SimpleValue(InstantValue(datetime, grain)), _, _, _, _, _) =>
             datetime.year
           case _ => 0
         }
@@ -134,7 +134,7 @@ class TimeTest extends UnitSpec {
         case (query, target) =>
           val answers = analyze(query, testContext, options)
           answers.head.token.value match {
-            case TimeValue(_, _, _, x, _) => x shouldBe Some(target)
+            case TimeValue(_, _, _, x, _, _) => x shouldBe Some(target)
             case _ => true shouldBe false
           }
       }

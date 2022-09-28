@@ -84,7 +84,7 @@ object FuzzyDayIntervals {
   )
 
   private def fuzzyIntervalTimeOfDay(td0: TimeData, td: TimeData): Option[Token] = {
-    val TimeData(pred, _, _, _, Some(form), _, _, _, _, _, _) = td
+    val TimeData(pred, _, _, _, Some(form), _, _, _, _, _, _, _) = td
     val part = td0.form.get.asInstanceOf[PartOfDay].part
     // 利用左侧的区间将右侧的时间从12AMPM转换到24H制
     val partOfDay = (pred, form) match {
