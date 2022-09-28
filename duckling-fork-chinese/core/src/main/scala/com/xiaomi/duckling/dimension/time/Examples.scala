@@ -218,7 +218,7 @@ trait Examples extends DimExamples {
         LocalDateTime.of(2013, 2, 18, 0, 0, 0),
         Day
       ),
-      List("这周末")
+      List("这周末", "本周末")
     ),
     (
       localDateTimeInterval(
