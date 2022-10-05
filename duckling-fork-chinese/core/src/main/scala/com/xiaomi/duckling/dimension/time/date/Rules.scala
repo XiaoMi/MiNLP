@@ -316,6 +316,16 @@ trait Rules extends DimRules {
       Token(Date, td)
   })
 
+  val ruleHalfYear = Rule(name = "date - 上/下半年", pattern = List("(上|下)半年".regex), prod = regexMatch {
+    case _ :: half :: _ =>
+      val start = if (half == "上") 0 else 6
+      val from = cycleNth(Month, start, Year)
+      val to = cycleNth(Month, start + 6, Year)
+      for (td <- interval(Open, from, to)) yield {
+        Token(Date, td)
+      }
+  })
+
   val ruleIntersect =
     Rule(
       name = "dates: intersect",

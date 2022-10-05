@@ -116,6 +116,14 @@ trait Examples extends DimExamples {
         Day
       ),
       List("明天的之后三天", "明天的往后三天", "明天的向后三天")
+    ),
+    (
+      localDateTimeInterval(
+        LocalDateTime.of(2013, 1, 1, 0, 0, 0),
+        LocalDateTime.of(2013, 7, 1, 0, 0, 0),
+        Month
+      ),
+      List("上半年")
     )
   )
 
