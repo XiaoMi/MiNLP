@@ -16,11 +16,17 @@
 
 package com.xiaomi.duckling.task
 
-import org.jline.reader.LineReaderBuilder
+import java.nio.charset.StandardCharsets
+import java.time.ZonedDateTime
+
+import org.fusesource.jansi.Ansi
+import org.jline.reader.{EndOfFileException, LineReader, LineReaderBuilder}
+import org.jline.reader.impl.DefaultParser
+import org.jline.reader.impl.completer._
 import org.jline.terminal.TerminalBuilder
 import org.json4s.jackson.Serialization.write
 
-import java.time.ZonedDateTime
+import com.typesafe.scalalogging.LazyLogging
 
 import com.xiaomi.duckling.Api
 import com.xiaomi.duckling.Api.formatToken
@@ -34,41 +40,112 @@ import com.xiaomi.duckling.dimension.time.TimeOptions
 import com.xiaomi.duckling.ranking.{Ranker, Testing}
 import com.xiaomi.duckling.types.Node
 
-object NaiveBayesConsole {
-  private val context = Testing.testContext.copy(referenceTime = ZonedDateTime.now())
+/**
+ * sbt duckConsole的jline启动有点问题，可以使用sbt console
+ * @example <p>sbt core/console
+ *          <p>> com.xiaomi.duckling.task.NaiveBayesConsole.run()
+ *          <p>> dimension time duration
+ *          <p>> 今天的天气
+ *          <p>> option with-latent false
+ *          <p>...
+ */
+object NaiveBayesConsole extends LazyLogging {
+  private val context =
+    Testing.testContext.copy(referenceTime = ZonedDateTime.now())
 
   // 方便设置训练捂的断点
   var debug = false
 
-  def main(args: Array[String]): Unit = {
-    val dim = args(0)
-    val targets = dim.split(",").map(s => CorpusSets.namedDimensions(s.toLowerCase())).toSet
-    val options = Options(
-      targets = targets,
-      withLatent = false,
-      rankOptions =
-        RankOptions(ranker = Ranker.NaiveBayes, winnerOnly = true, combinationRank = true),
-      timeOptions = TimeOptions(resetTimeOfDay = true, recentInFuture = false),
-      numeralOptions = NumeralOptions(allowZeroLeadingDigits = false, cnSequenceAsNumber = false)
+  def buildLineReader(): LineReader = {
+    val terminal = TerminalBuilder
+      .builder()
+      .encoding(StandardCharsets.UTF_8)
+      .name("DUCK")
+      .build();
+
+    val dimension = new ArgumentCompleter(
+      new StringsCompleter("dimension"),
+      new StringsCompleter(CorpusSets.namedDimensions.keys.toList: _*)
     )
 
-    // 初始化分类器
-    Api.analyze("今天123", context, options)
+    val options = new ArgumentCompleter(
+      new StringsCompleter("option"),
+      new StringsCompleter("winner-only", "with-latent", "full"),
+      NullCompleter.INSTANCE
+    )
 
-    debug = true
+    val completer = new AggregateCompleter(dimension, options)
 
-    val terminal = TerminalBuilder.builder.build()
-
-    val reader = LineReaderBuilder
+    LineReaderBuilder
       .builder()
-      .appName("duckling - example")
+      .appName("duckling - console")
       .terminal(terminal)
+      .parser(new DefaultParser())
+      .completer(completer)
       .build()
+  }
 
-    while (true) {
-      val line = reader.readLine("input > ").trim
-      terminal.flush()
-      val answers = Api.analyze(line, context, options)
+  def getPrompt(): String = {
+    Ansi
+      .ansi()
+      .eraseScreen()
+      .fg(Ansi.Color.BLUE)
+      .bold()
+      .a("duckling")
+      .fgBright(Ansi.Color.BLACK)
+      .bold()
+      .a(" > ")
+      .reset()
+      .toString
+  }
+
+  def setOptions(options: Options, line: String): (Boolean, Options) = {
+    val cols = line.split("\\s+")
+    if (cols.length >= 2) {
+      if (line.startsWith("dimension ")) {
+        val targets = cols.tail.map(s => CorpusSets.namedDimensions(s)).toSet
+        (true, options.copy(targets = targets))
+      } else if (line.startsWith("option ")) {
+        val opt =
+          if (cols.length >= 3 && Set("true", "false")
+                .contains(cols(2).toLowerCase)) {
+            val value = cols(2).toBoolean
+            val opt = cols(1) match {
+              case "winner-only" =>
+                options.withRankOptions(
+                  options.rankOptions.copy(winnerOnly = value)
+                )
+              case "with-latent" => options.copy(withLatent = value)
+              case "full"        => options.copy(full = value)
+              case _             => options
+            }
+            opt
+          } else {
+            logger.info("{}: true/false expected", cols(1))
+            options
+          }
+        (true, opt)
+      } else (false, options)
+    } else (false, options)
+  }
+
+  def round(reader: LineReader, options: Options): Options = {
+    reader.getTerminal.flush()
+
+    val line =
+      try {
+        reader.readLine(getPrompt()).trim
+      } catch {
+        case ex: EndOfFileException =>
+          logger.info("bye!")
+          System.exit(0)
+          ""
+      }
+
+    val (isOpt, _options) = setOptions(options, line)
+
+    if (!isOpt) {
+      val answers = Api.analyze(line, context, _options)
 
       if (answers.isEmpty) println("empty results")
       else println(s"found ${answers.size} results")
@@ -79,6 +156,39 @@ object NaiveBayesConsole {
         ptree(line)(entity)
       }
     }
+
+    _options
+  }
+
+  def run(): Unit = {
+    var options = Options(
+      targets = Set(),
+      withLatent = false,
+      rankOptions = RankOptions(
+        ranker = Ranker.NaiveBayes,
+        winnerOnly = true,
+        combinationRank = false
+      ),
+      timeOptions = TimeOptions(resetTimeOfDay = false, recentInFuture = true),
+      numeralOptions = NumeralOptions(
+        allowZeroLeadingDigits = false,
+        cnSequenceAsNumber = false
+      )
+    )
+
+    // 初始化分类器
+    Api.analyze("今天123", context, options)
+
+    debug = true
+
+    val reader = buildLineReader()
+    while (true) {
+      options = round(reader, options)
+    }
+  }
+
+  def main(args: Array[String]): Unit = {
+    run()
   }
 
   def pnode(sentence: String, depth: Int)(node: Node): Unit = {

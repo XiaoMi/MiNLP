@@ -86,3 +86,7 @@ lazy val benchmark = project
     logBuffered := false
   )
   .dependsOn(core)
+
+// 不能正常工作，jline不能正常初始化，先留着
+lazy val duckConsole = taskKey[Unit]("duck console task")
+duckConsole := (core / Runtime / runMain).toTask(" com.xiaomi.duckling.task.NaiveBayesConsole").value
