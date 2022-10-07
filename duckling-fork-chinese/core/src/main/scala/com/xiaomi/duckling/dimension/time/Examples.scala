@@ -396,7 +396,10 @@ trait Examples extends DimExamples {
     (ymd(2012, 2, 12), List("一年前的今天")),
     (ymd(2022, 10, 1, direction = IntervalDirection.Before), List("2022年10月1号之前")),
     (ymd(2022, 10, 1, direction = IntervalDirection.After), List("2022年10月1号之后")),
-    (h(12), List("今天12点"))
+    (h(12), List("今天12点")),
+    // 8点，不是20点
+    (datetime(LocalDateTime.of(2013, 2, 11, 8, 0, 0), Hour), List("2013年2月11号8点")),
+    (datetime(LocalDateTime.of(2013, 2, 14, 8, 0, 0), Hour), List("2月14号8点"))
   )
 
   override def pairs: List[(ResolvedValue, List[String])] =

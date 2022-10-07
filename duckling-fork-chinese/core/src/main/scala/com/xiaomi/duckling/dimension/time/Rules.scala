@@ -143,7 +143,7 @@ trait Rules extends DimRules {
             val hint =
               if (td1.timeGrain == Year && td2.hint == MonthOnly) YearMonth
               else Intersect
-            val td = intersect(td1, td2).map(_.copy(hint = hint))
+            val td = intersect(td1, removeAMPM(td2)).map(_.copy(hint = hint))
             tt(td)
           }
       }
@@ -161,7 +161,7 @@ trait Rules extends DimRules {
           val hint =
             if (td1.timeGrain == Year && td2.hint == MonthOnly) YearMonth
             else NoHint
-          val td = intersect(td1, td2).map(_.copy(hint = hint))
+          val td = intersect(td1, removeAMPM(td2)).map(_.copy(hint = hint))
           tt(td)
         }
     }
