@@ -20,7 +20,8 @@ import com.xiaomi.duckling.Types._
 import com.xiaomi.duckling.dimension.implicits._
 import com.xiaomi.duckling.dimension.time.enums.Grain
 import com.xiaomi.duckling.dimension.time.enums.Grain._
-import com.xiaomi.duckling.dimension.time.form.{Month => _}
+import com.xiaomi.duckling.dimension.time.form.{TimeOfDay, Month => _}
+import com.xiaomi.duckling.dimension.time.helper.TimeDataHelpers.hour
 import com.xiaomi.duckling.dimension.time.predicates.{TimeDatePredicate, TimePredicate}
 
 object Helpers {
@@ -44,4 +45,25 @@ object Helpers {
       case _ => None
     }
   }
+
+  /**
+   * 年月日 + 8点 = 8点，不再有20点的情况
+   * @param td2
+   * @return
+   */
+  def removeAMPM(td2: TimeData): TimeData = {
+      if (td2.timeGrain == Grain.Hour) {
+        val (pred, form) = td2.form match {
+          case Some(tod@TimeOfDay(d, _)) =>
+            td2.timePred match {
+              case TimeDatePredicate(None, None, Some((true, h)), None, None, None, None, None, None) =>
+                (hour(false, h).timePred, Some(tod.copy(is12H = false)))
+              case _ => (td2.timePred, Some(tod))
+            }
+          case None => (td2.timePred, td2.form)
+        }
+        td2.copy(timePred = pred, form = form)
+      } else td2
+  }
+
 }
