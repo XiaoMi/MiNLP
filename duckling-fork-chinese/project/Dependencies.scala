@@ -30,7 +30,8 @@ object Dependencies {
     guava,
     java8,
     lunar,
-    jline,
+    jline % Provided,
+    jlineJansi % Provided,
     slf4jApi,
     scalaLogging,
     config,
@@ -68,7 +69,8 @@ object Dependencies {
   lazy val commonslang = "org.apache.commons" % "commons-lang3" % "3.12.0"
   lazy val commonsText = "org.apache.commons" % "commons-text" % "1.9"
   lazy val commonsIO = "commons-io" % "commons-io" % "2.11.0"
-  lazy val jline = "org.jline" % "jline" % "3.11.0"
+  lazy val jline = "org.jline" % "jline-reader" % "3.21.0"
+  lazy val jlineJansi = "org.jline" % "jline-terminal-jansi" % "3.21.0"
   lazy val config = "com.typesafe" % "config" % "1.3.4"
   lazy val guava = "com.google.guava" % "guava" % "30.1.1-jre"
   lazy val lombok = "org.projectlombok" % "lombok" % "1.18.8" % Provided
