@@ -261,10 +261,11 @@ trait Rules extends DimRules {
   val ruleNCycleNextLast1 = Rule(
     name = "n <cycle> next/last 1: <duration> 之后",
     pattern = List(isNotLatentDuration.predicate, "((之|以)?(后|前))|过后".regex),
-    prod = tokens {
-      case Token(Duration, DurationData(v, grain, false, _, _)) :: Token(_, GroupMatch(s :: _)) :: _ =>
+    prod = optTokens {
+      case (options: Options, Token(Duration, DurationData(v, grain, false, _, _)) :: Token(_, GroupMatch(s :: _)) :: _) =>
         val offset = if (s.endsWith("后")) v else -v
-        tt(cycleNth(grain, offset, NoGrain))
+        val roundGrain = if (options.timeOptions.inheritGrainOfDuration) grain else NoGrain
+        tt(cycleNth(grain, offset, roundGrain))
     }
   )
 
@@ -274,9 +275,10 @@ trait Rules extends DimRules {
   val ruleNCycleNext2 = Rule(
     name = "n <cycle> next/last: 过 <duration>",
     pattern = List("过".regex, isNotLatentDuration.predicate),
-    prod = tokens {
-      case _ :: Token(Duration, DurationData(v, grain, _, _, _)) :: _ =>
-        tt(cycleNth(grain, v, NoGrain))
+    prod = optTokens {
+      case (options: Options, _ :: Token(Duration, DurationData(v, grain, _, _, _)) :: _ ) =>
+        val roundGrain = if (options.timeOptions.inheritGrainOfDuration) grain else NoGrain
+        tt(cycleNth(grain, v, roundGrain))
     }
   )
 
@@ -286,9 +288,10 @@ trait Rules extends DimRules {
   val ruleNCycleNext3 = Rule(
     name = "n <cycle> next/last 3:过 <duration> 之后",
     pattern = List("过".regex, isNotLatentDuration.predicate, "之?(后|前)".regex),
-    prod = tokens {
-      case _ :: Token(Duration, DurationData(v, grain, _, _, _)) :: _ =>
-        tt(cycleNth(grain, v, NoGrain))
+    prod = optTokens {
+      case (options: Options, _ :: Token(Duration, DurationData(v, grain, _, _, _)) :: _ ) =>
+        val roundGrain = if (options.timeOptions.inheritGrainOfDuration) grain else NoGrain
+        tt(cycleNth(grain, v, roundGrain))
     }
   )
 

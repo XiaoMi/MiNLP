@@ -39,6 +39,7 @@ object Types {
   type Pattern = List[PatternItem]
   type Production = PartialFunction[(Options, List[Token]), Option[Token]]
   type TokensProduction = PartialFunction[List[Token], Option[Token]]
+  type OptionTokensProduction = PartialFunction[(Options, List[Token]), Option[Token]]
   type Predicate = PartialFunction[Token, Boolean]
   type Extraction = PartialFunction[(Document, List[Node]), List[Feature]]
 
@@ -50,6 +51,11 @@ object Types {
 
   def tokens(tp: TokensProduction): Production = {
     case (_: Options, _tokens: List[Token]) if tp.isDefinedAt(_tokens) => tp(_tokens)
+    case _ => None
+  }
+
+  def optTokens(tp: OptionTokensProduction): Production = {
+    case (option: Options, _tokens: List[Token]) if tp.isDefinedAt((option, _tokens)) => tp(option, _tokens)
     case _ => None
   }
 

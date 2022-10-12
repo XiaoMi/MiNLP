@@ -41,14 +41,14 @@ import com.xiaomi.duckling.ranking.{Ranker, Testing}
 import com.xiaomi.duckling.types.Node
 
 /**
- * sbt duckConsole的jline启动有点问题，可以使用sbt console
- * @example <p>sbt core/console
- *          <p>> com.xiaomi.duckling.task.NaiveBayesConsole.run()
- *          <p>> dimension time duration
- *          <p>> 今天的天气
- *          <p>> option with-latent false
- *          <p>...
- */
+  * sbt duckConsole的jline启动有点问题，可以使用sbt console
+  * @example <p>sbt core/console
+  *          <p>> com.xiaomi.duckling.task.NaiveBayesConsole.run()
+  *          <p>> dimension time duration
+  *          <p>> 今天的天气
+  *          <p>> option with-latent false
+  *          <p>...
+  */
 object NaiveBayesConsole extends LazyLogging {
   private val context =
     Testing.testContext.copy(referenceTime = ZonedDateTime.now())
@@ -70,7 +70,12 @@ object NaiveBayesConsole extends LazyLogging {
 
     val options = new ArgumentCompleter(
       new StringsCompleter("option"),
-      new StringsCompleter("winner-only", "with-latent", "full"),
+      new StringsCompleter(
+        "winner-only",
+        "with-latent",
+        "full",
+        "inherit-duration-grain"
+      ),
       NullCompleter.INSTANCE
     )
 
@@ -117,7 +122,12 @@ object NaiveBayesConsole extends LazyLogging {
                 )
               case "with-latent" => options.copy(withLatent = value)
               case "full"        => options.copy(full = value)
-              case _             => options
+              case "inherit-duration-grain" =>
+                options.withTimeOptions(
+                  timeOptions =
+                    options.timeOptions.copy(inheritGrainOfDuration = value)
+                )
+              case _ => options
             }
             opt
           } else {

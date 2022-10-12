@@ -67,9 +67,13 @@ case object Time extends Dimension with Rules with Examples {
   *
   * @param resetTimeOfDay 上午是否总是需要指今天的上午，默认是未来一个上午
   * @param recentInFuture 最近是向前计算还是向后计算，默认是未来
-	* @param alwaysInFuture 对于过去的日期是否取未来一年的日期
+  * @param alwaysInFuture 对于过去的日期是否取未来一年的日期
+  * @param inheritGrainOfDuration 继承来自持续时间的粒度，比如"三天后"，返回天级
   */
-case class TimeOptions(resetTimeOfDay: Boolean = false, recentInFuture: Boolean = true, alwaysInFuture: Boolean = true)
+case class TimeOptions(resetTimeOfDay: Boolean = false,
+                       recentInFuture: Boolean = true,
+                       alwaysInFuture: Boolean = true,
+                       inheritGrainOfDuration: Boolean = false)
 
 case class TimeData(timePred: TimePredicate,
                     latent: Boolean = false,

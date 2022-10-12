@@ -19,18 +19,18 @@
 
 ## 1.1 Scala
 
-目前只发布了scala_2.11版本的包，有需要2.12/2.13的，可以在Issue区留言。
+目前只发布了scala_2.11/2.12/2.13的版本，3.0尚未适配，有需要可以在Issue区留言。
 ```
 maven
 
 <dependency>
   <groupId>com.xiaomi.duckling</groupId>
-  <artifactId>duckling-core_2.11</artifactId>
-  <version>1.2.2D</version>
+  <artifactId>duckling-core_2.1x</artifactId>
+  <version>x.y.z</version>
 </dependency>
 
 sbt
-"com.xiaomi.duckling" % "duckling-core" %% "1.2.2D"
+"com.xiaomi.duckling" % "duckling-core" %% "x.y.z"
 ```
 
 
@@ -120,6 +120,24 @@ cd server/target/universal/stage
 bash bin/duckling-server
 ```
 
+### 1.4 Console
+
+借助于sbt/console可以在命令行中进行尝试，例如
+```bash
+> sbt core/console
+> com.xiaomi.duckling.task.NaiveBayesConsole.run()
+
+# 设置解析维度，可以按tab进行自动补全（下面都可以补全）
+> dimension time duration
+> 三天后
+# -2.76096 => {"timeValue":{...,"grain":"Second"}}...}
+
+
+# 设置参数，开放了四个，有需要可以增加
+> option inherit-duration-grain true
+> 三天后
+# -2.76096 => {"timeValue":{...,"grain":"Day"}}...}
+```
 
 
 在线体验Demo：`/duckling?dim=...&query=...`
