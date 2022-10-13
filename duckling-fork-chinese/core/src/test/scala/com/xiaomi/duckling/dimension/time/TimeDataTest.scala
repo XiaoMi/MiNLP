@@ -24,6 +24,7 @@ import com.xiaomi.duckling.dimension.time.Types._
 import com.xiaomi.duckling.dimension.time.enums.Grain
 import com.xiaomi.duckling.dimension.time.predicates.TimeDatePredicate
 import com.xiaomi.duckling.ranking.Testing.{testContext, testOptions}
+import com.xiaomi.duckling.Types.Options
 import com.xiaomi.duckling.UnitSpec
 
 class TimeDataTest extends UnitSpec with LazyLogging {
@@ -73,6 +74,22 @@ class TimeDataTest extends UnitSpec with LazyLogging {
               true shouldBe false
           }
       }
+    }
+
+    it("Grain of duration inheritance") {
+      val options = testOptions.copy(targets = Set(Time))
+
+      def parse(query: String, options: Options): InstantValue = {
+        analyze(query, testContext, options).get.head.token.value
+          .asInstanceOf[TimeValue].timeValue
+          .asInstanceOf[SimpleValue].instant
+      }
+
+      val options1 = options.withTimeOptions(new TimeOptions(inheritGrainOfDuration = false))
+      parse("三天后", options1).grain should (be (Grain.NoGrain) or be (Grain.Second))
+
+      val options2 = options.withTimeOptions(new TimeOptions(inheritGrainOfDuration = true))
+      parse("三天后", options2).grain shouldBe Grain.Day
     }
   }
 }
