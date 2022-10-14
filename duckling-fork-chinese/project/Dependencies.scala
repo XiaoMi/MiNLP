@@ -61,24 +61,24 @@ object Dependencies {
   lazy val slf4jApi = "org.slf4j" % "slf4j-api" % "1.7.26"
   lazy val slf4jnop = "org.slf4j" % "slf4j-nop" % "1.7.26"
   lazy val logback = "ch.qos.logback" % "logback-classic" % "1.2.3"
-  lazy val scalaLogging = "com.typesafe.scala-logging" %% "scala-logging" % "3.9.4"
+  lazy val scalaLogging = "com.typesafe.scala-logging" %% "scala-logging" % "3.9.5"
 
   // utils
   lazy val scalaz = "org.scalaz" %% "scalaz-core" % "7.2.27"
   lazy val arm = "com.michaelpollmeier" %% "scala-arm" % "2.1"
   lazy val commonslang = "org.apache.commons" % "commons-lang3" % "3.12.0"
-  lazy val commonsText = "org.apache.commons" % "commons-text" % "1.9"
+  lazy val commonsText = "org.apache.commons" % "commons-text" % "1.10.0"
   lazy val commonsIO = "commons-io" % "commons-io" % "2.11.0"
   lazy val jline = "org.jline" % "jline-reader" % "3.21.0"
   lazy val jlineJansi = "org.jline" % "jline-terminal-jansi" % "3.21.0"
   lazy val config = "com.typesafe" % "config" % "1.3.4"
   lazy val guava = "com.google.guava" % "guava" % "30.1.1-jre"
-  lazy val lombok = "org.projectlombok" % "lombok" % "1.18.8" % Provided
-  lazy val httpclient = "org.apache.httpcomponents" % "httpclient" % "4.5.6"
-  lazy val java8 = "org.scala-lang.modules" %% "scala-java8-compat" % "0.9.0"
+  lazy val lombok = "org.projectlombok" % "lombok" % "1.18.24" % Provided
+  lazy val httpclient = "org.apache.httpcomponents" % "httpclient" % "4.5.13"
+  lazy val java8 = "org.scala-lang.modules" %% "scala-java8-compat" % "1.0.2"
   lazy val lunar = "com.github.heqiao2010" % "lunar" % "1.5"
   lazy val emoji = "com.vdurmont" % "emoji-java" % "5.1.1"
-  lazy val trie = "com.hankcs" % "aho-corasick-double-array-trie" % "1.2.2"
+  lazy val trie = "com.hankcs" % "aho-corasick-double-array-trie" % "1.2.3"
   lazy val easyBert = ("com.robrua.nlp" % "easy-bert" % "1.0.3") // BERT tokenizer
     .exclude("org.tensorflow", "tensorflow")
     .exclude("com.fasterxml.jackson.core", "jackson-databind")

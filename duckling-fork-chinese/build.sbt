@@ -7,7 +7,7 @@ import Dependencies._
 lazy val sharedSettings = Seq(
   organization := "com.xiaomi.duckling",
   scalaVersion := "2.11.12",
-  crossScalaVersions := Seq("2.11.12", "2.12.12", "2.13.8"),
+  crossScalaVersions := Seq("2.11.12", "2.12.12", "2.13.10"),
   scalacOptions ++= compilerOptions,
   resolvers ++= Seq(
     Resolver.mavenLocal, // 加速
