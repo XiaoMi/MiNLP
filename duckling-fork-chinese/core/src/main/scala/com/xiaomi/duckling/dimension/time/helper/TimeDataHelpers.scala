@@ -236,7 +236,7 @@ object TimeDataHelpers {
       if (td1.timeGrain == td2.timeGrain && td1.timeGrain == Day) Closed
       else intervalType
     TimeData(
-      timePred = mkTimeIntervalsPredicate(it, td1.timePred, td2.timePred),
+      timePred = mkTimeIntervalsPredicate(it, td1, td2),
       timeGrain = if (td1.timeGrain > td2.timeGrain) td2.timeGrain else td1.timeGrain
     )
   }

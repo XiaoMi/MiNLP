@@ -383,6 +383,14 @@ trait Examples extends DimExamples {
       List("今天到中秋节")
     ),
     (
+      datetimeInterval(
+        new DuckDateTime(LocalDateTime.of(2013, 2, 12, 8, 0, 0)),
+        new DuckDateTime(LocalDateTime.of(2013, 2, 13, 18, 0, 0)),
+        Hour
+      ),
+      List("今天上午到明天下午")
+    ),
+    (
       lunarDateTimeInterval(
         new LunarCalendar(2019, 12, 1, false),
         LocalTime.of(8, 0),
