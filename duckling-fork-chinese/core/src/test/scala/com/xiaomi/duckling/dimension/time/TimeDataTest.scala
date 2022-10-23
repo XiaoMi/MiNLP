@@ -16,6 +16,8 @@
 
 package com.xiaomi.duckling.dimension.time
 
+import java.time.{LocalDate, LocalTime, ZonedDateTime}
+
 import com.typesafe.scalalogging.LazyLogging
 
 import com.xiaomi.duckling.Api.analyze
@@ -24,7 +26,7 @@ import com.xiaomi.duckling.dimension.time.Types._
 import com.xiaomi.duckling.dimension.time.enums.Grain
 import com.xiaomi.duckling.dimension.time.predicates.TimeDatePredicate
 import com.xiaomi.duckling.ranking.Testing.{testContext, testOptions}
-import com.xiaomi.duckling.Types.Options
+import com.xiaomi.duckling.Types.{Options, ZoneCN}
 import com.xiaomi.duckling.UnitSpec
 
 class TimeDataTest extends UnitSpec with LazyLogging {
@@ -80,16 +82,21 @@ class TimeDataTest extends UnitSpec with LazyLogging {
       val options = testOptions.copy(targets = Set(Time))
 
       def parse(query: String, options: Options): InstantValue = {
-        analyze(query, testContext, options).get.head.token.value
+        val ref = ZonedDateTime.of(LocalDate.of(2022, 10, 1), LocalTime.of(0, 0, 5), ZoneCN)
+        analyze(query, testContext.copy(referenceTime = ref), options).get.head.token.value
           .asInstanceOf[TimeValue].timeValue
           .asInstanceOf[SimpleValue].instant
       }
 
       val options1 = options.withTimeOptions(new TimeOptions(inheritGrainOfDuration = false))
-      parse("三天后", options1).grain should (be (Grain.NoGrain) or be (Grain.Second))
+      val t1 = parse("三分钟后", options1)
+      t1.grain should (be(Grain.NoGrain) or be(Grain.Second))
+      t1.datetime.toString should be ("2022-10-01 00:03:05 [Asia/Shanghai]")
 
       val options2 = options.withTimeOptions(new TimeOptions(inheritGrainOfDuration = true))
-      parse("三天后", options2).grain shouldBe Grain.Day
+      val t2 = parse("三分钟后", options2)
+      t2.grain shouldBe Grain.Minute
+      t2.datetime.toString should be ("2022-10-01 00:03:00 [Asia/Shanghai]")
     }
   }
 }

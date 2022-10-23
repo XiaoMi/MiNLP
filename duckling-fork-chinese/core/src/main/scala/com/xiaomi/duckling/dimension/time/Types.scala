@@ -303,7 +303,7 @@ object Types {
       else {
         val sum = time.getMinute + 60 * time.getHour + n
         val (days, minutes) = step(sum, MINUTE_OF_DAY)
-        this.copy(date = date.plusDays(days), time = LocalTime.of(minutes / 60, minutes % 60))
+        this.copy(date = date.plusDays(days), time = LocalTime.of(minutes / 60, minutes % 60, time.getSecond))
       }
     }
 
