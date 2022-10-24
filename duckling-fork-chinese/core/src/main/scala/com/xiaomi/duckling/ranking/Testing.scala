@@ -61,7 +61,7 @@ object Testing extends LazyLogging {
   val testContext: Context =
     Context(
       locale = Locale.CHINA,
-      referenceTime = ZonedDateTime.of(LocalDateTime.of(2013, 2, 12, 4, 30, 0), ZoneCN)
+      referenceTime = ZonedDateTime.of(LocalDateTime.of(2013, 2, 12, 4, 30, 12), ZoneCN)
     )
 
   val testOptions: Options = Options(full = true, debug = true)

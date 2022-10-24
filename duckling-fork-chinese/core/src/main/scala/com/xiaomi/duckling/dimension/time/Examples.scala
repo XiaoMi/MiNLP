@@ -128,11 +128,11 @@ trait Examples extends DimExamples {
   )
 
   val times = List(
-    (hms(4, 30, 0), List("现在", "此时", "此刻", "当前")),
+    (hms(4, 30, 12), List("现在", "此时", "此刻", "当前")),
     (hm(15, 15), List("下午三点十五", "下午3:15", "15:15", "3:15pm", "3:15p.m", "下午三点一刻", "下午的三点一刻")),
     (hm(16, 40), List("十六时四十分", "十六点四十")),
     (hm(6, 10), List("六点十分", "六点一十")),
-    (hms(4, 33, 0), List("过三分钟")),
+    (hms(4, 33, 12), List("过三分钟", "三分钟后")),
     (datetime(LocalDateTime.of(2013, 2, 14, 0, 0, 0), Hour), List("明天晚上12点", "13号晚上12点")),
     (datetime(LocalDateTime.of(2013, 2, 13, 18, 0, 0), Hour), List("明晚6点", "明天晚上6点", "13号晚上6点")),
     (datetime(LocalDateTime.of(2013, 2, 12, 6, 0, 0), Hour), List("今早6点", "今天早上6点", "12号早上6点")),
@@ -140,16 +140,16 @@ trait Examples extends DimExamples {
     (datetime(LocalDateTime.of(2013, 2, 13, 10, 0, 0), Hour), List("明天10点", "明天上午十点", "明天中午10点")),
     (
       localDateTimeInterval(
-        LocalDateTime.of(2013, 2, 12, 4, 29, 58),
-        LocalDateTime.of(2013, 2, 12, 4, 30, 0),
+        LocalDateTime.of(2013, 2, 12, 4, 30, 10),
+        LocalDateTime.of(2013, 2, 12, 4, 30, 12),
         Second
       ),
       List("上两秒", "上二秒", "前两秒", "前二秒", "上两秒")
     ),
     (
       localDateTimeInterval(
-        LocalDateTime.of(2013, 2, 12, 4, 30, 0),
-        LocalDateTime.of(2013, 2, 12, 4, 30, 3),
+        LocalDateTime.of(2013, 2, 12, 4, 30, 12),
+        LocalDateTime.of(2013, 2, 12, 4, 30, 15),
         Second
       ),
       List("下三秒", "后三秒")
@@ -253,7 +253,7 @@ trait Examples extends DimExamples {
       List("未来一周")
     ),
     (
-      datetime(LocalDateTime.of(2013, 3, 5, 4, 30, 0), Second),
+      datetime(LocalDateTime.of(2013, 3, 5, 4, 30, 12), Second),
       List("三星期后", "三星期之后", "三个礼拜后", "三个礼拜之后", "三星期以后", "三星期过后")
     )
   )
@@ -393,7 +393,7 @@ trait Examples extends DimExamples {
       ),
       List("2019年腊月初一上午")
     ),
-    (datetime(LocalDateTime.of(2013, 2, 11, 4, 30, 0), Second), List("昨天现在")),
+    (datetime(LocalDateTime.of(2013, 2, 11, 4, 30, 12), Second), List("昨天现在")),
     (datetime(LocalDateTime.of(2013, 2, 22, 8, 0, 0), Hour), List("下周五8点")),
     (datetime(LocalDateTime.of(2013, 11, 20, 20, 0, 0), Hour), List("11.20 20点")),
     (datetime(LocalDateTime.of(2013, 12, 24, 0, 0, 0), Day), List("圣诞节的前一天", "圣诞节前一天")),
