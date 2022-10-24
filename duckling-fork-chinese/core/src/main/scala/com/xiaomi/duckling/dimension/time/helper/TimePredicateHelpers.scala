@@ -23,7 +23,7 @@ import com.xiaomi.duckling.dimension.time._
 import com.xiaomi.duckling.dimension.time.enums.Grain._
 import com.xiaomi.duckling.dimension.time.enums.IntervalType._
 import com.xiaomi.duckling.dimension.time.enums.{Grain, IntervalType}
-import com.xiaomi.duckling.dimension.time.form.{Month => _}
+import com.xiaomi.duckling.dimension.time.form.{PartOfDay, Month => _}
 import com.xiaomi.duckling.dimension.time.helper.TimeObjectHelpers._
 import com.xiaomi.duckling.dimension.time.predicates._
 import com.xiaomi.duckling.dimension.time.rule.SolarTerms.solarTermTable
@@ -89,16 +89,27 @@ object TimePredicateHelpers {
   def timeDayOfWeek(i: Int): TimePredicate = TimeDatePredicate(dayOfWeek = Some(i))
 
   def mkTimeIntervalsPredicate(t: IntervalType,
-                               a: TimePredicate,
-                               b: TimePredicate): TimePredicate = {
+                               ta: TimeData,
+                               tb: TimeData): TimePredicate = {
+    val a = ta.timePred
+    val b = tb.timePred
+
     if (a == EmptyTimePredicate || b == EmptyTimePredicate) EmptyTimePredicate
     // `from (... from a to b ...) to c` and `from c to (... from a to b ...)` don't
     // really have a good interpretation, so abort early
-    else if (containsTimeIntervalsPredicate(a) || containsTimeIntervalsPredicate(b)) {
+    // 允许上午到下午作为区间
+    else if (containsTimeIntervalsPredicate(a) && !isPartOfDay(ta) || containsTimeIntervalsPredicate(b) && !isPartOfDay(tb)) {
       EmptyTimePredicate
     }
     // this is potentially quadratic, but the sizes involved should be small
     else TimeIntervalsPredicate(t, a, b)
+  }
+
+  def isPartOfDay(td: TimeData): Boolean = {
+    td.form match {
+      case Some(PartOfDay(_)) => true
+      case _ => false
+    }
   }
 
   def containsTimeIntervalsPredicate(predicate: TimePredicate): Boolean = {

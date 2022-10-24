@@ -156,7 +156,7 @@ object TimeObjectHelpers {
       if (g1 < Grain.Day && g2 < Grain.Day) g11
       else g2
     val end = intervalType match {
-      case Open => s2
+      case Open => if (e2.isEmpty) s2 else e2.get
       case Closed => e2.getOrElse(add(s2, g22, 1))
     }
     TimeObject(s1, g11, Some(end))
