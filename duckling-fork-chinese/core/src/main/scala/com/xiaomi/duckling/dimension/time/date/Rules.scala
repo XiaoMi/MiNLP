@@ -278,7 +278,7 @@ trait Rules extends DimRules {
     }
   )
 
-  val ruleSpecial0 = Rule(name = "date - special days: 今明两天", pattern = List("今明两天".regex), prod = tokens {
+  val ruleSpecial0 = Rule(name = "date - special days: 今明两天", pattern = List("今明两天|今天明天".regex), prod = tokens {
     case _ =>
       val from = cycleNth(Day, 0, Day)
       val to = cycleNth(Day, 1, Day)
