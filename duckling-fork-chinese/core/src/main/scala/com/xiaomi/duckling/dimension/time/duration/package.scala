@@ -28,11 +28,9 @@ package object duration {
     * generate duration token
     * @param v  duration value
     * @param g  duration grain
-    * @param ov origin value
-    * @param og origin grain
     * @return
     */
-  def tt(v: Int, g: Grain, ov: String, og: Grain): Token = Token(Duration, DurationData(v, g, schema = durationSchema(ov, og)))
+  def tt(v: Int, g: Grain): Token = Token(Duration, DurationData(v, g, schema = durationSchema(v.toString, g)))
 
   /**
     * Convert a duration to the given grain, rounded to the
@@ -47,13 +45,12 @@ package object duration {
   }
 
   def timesOneAndAHalf(grain: Grain, n: Int): Option[DurationData] = {
-    val sv = (n + 0.5).toString
     grain match {
-      case Minute => DurationData(60 * n + 30, Second, schema = durationSchema(sv, Minute))
-      case Hour => DurationData(60 * n + 30, Minute, schema = durationSchema(sv, Hour))
-      case Day => DurationData(24 * n + 12, Hour, schema = durationSchema(sv, Day))
-      case Month => DurationData(30 * n + 15, Day, schema = durationSchema(sv, Month))
-      case Year => DurationData(12 * n + 6, Month, schema = durationSchema(sv, Year))
+      case Minute => DurationData(60 * n + 30, Second, schema = Some(s"PT${n}M30S"))
+      case Hour => DurationData(60 * n + 30, Minute, schema = Some(s"PT${n}H30M"))
+      case Day => DurationData(24 * n + 12, Hour, schema = Some(s"P${n}DT12H"))
+      case Month => DurationData(30 * n + 15, Day, schema = Some(s"P${n}M15D"))
+      case Year => DurationData(12 * n + 6, Month, schema = Some(s"P${n}Y6M"))
       case _ => None
     }
   }

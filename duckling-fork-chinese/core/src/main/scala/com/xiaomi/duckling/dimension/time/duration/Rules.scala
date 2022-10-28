@@ -92,7 +92,7 @@ trait Rules extends DimRules {
     pattern = List(and(isNatural, isNumberOrUnitNumber).predicate, "刻钟?".regex),
     prod = tokens {
       case t1 :: _ =>
-        for (i <- getIntValue(t1)) yield tt(15 * i.toInt, Minute, "15", Minute)
+        for (i <- getIntValue(t1)) yield tt(15 * i.toInt, Minute)
     }
   )
 
@@ -106,7 +106,7 @@ trait Rules extends DimRules {
           mm <- parseInt(m).toOption
         } yield {
           val mden = math.pow(10, m.length).toInt
-          tt(60 * hh + 60 * mm / mden, Minute, s"$hh.$mm", Hour)
+          tt(60 * hh + 60 * mm / mden, Minute)
         }
     }
   )
