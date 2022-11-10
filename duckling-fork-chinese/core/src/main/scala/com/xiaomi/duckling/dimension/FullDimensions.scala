@@ -43,6 +43,7 @@ import com.xiaomi.duckling.dimension.temperature.Temperature
 import com.xiaomi.duckling.dimension.time.date.Date
 import com.xiaomi.duckling.dimension.time.Time
 import com.xiaomi.duckling.dimension.time.duration.Duration
+import com.xiaomi.duckling.dimension.time.repeat.Repeat
 import com.xiaomi.duckling.dimension.url.DuckURL
 
 class FullDimensions extends Dimensions {
@@ -71,6 +72,7 @@ class FullDimensions extends Dimensions {
     Place,
     Quantity,
     Rating,
+    Repeat,
     Season,
     Temperature,
     Time,
