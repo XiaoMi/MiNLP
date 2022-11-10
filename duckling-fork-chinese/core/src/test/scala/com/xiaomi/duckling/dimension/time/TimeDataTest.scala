@@ -91,12 +91,12 @@ class TimeDataTest extends UnitSpec with LazyLogging {
       val options1 = options.withTimeOptions(new TimeOptions(inheritGrainOfDuration = false))
       val t1 = parse("三分钟后", options1)
       t1.grain should (be(Grain.NoGrain) or be(Grain.Second))
-      t1.datetime.toString should be ("2022-10-01 00:03:05 [Asia/Shanghai]")
+      t1.datetime.toString should be ("2022-10-01 00:03:05 [+08:00]")
 
       val options2 = options.withTimeOptions(new TimeOptions(inheritGrainOfDuration = true))
       val t2 = parse("三分钟后", options2)
       t2.grain shouldBe Grain.Minute
-      t2.datetime.toString should be ("2022-10-01 00:03:00 [Asia/Shanghai]")
+      t2.datetime.toString should be ("2022-10-01 00:03:00 [+08:00]")
     }
   }
 }
