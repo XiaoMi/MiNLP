@@ -79,7 +79,7 @@ object Testing extends LazyLogging {
         val expected = write(value)
         val actual = write(resolvedToken.value)
         val equals = expected == actual
-        if (testOptions.debug) {
+        if (!equals && testOptions.debug) {
           logger.debug(s"checking: ${doc.rawInput}")
           logger.debug(s"expected ${if (expected == actual) "=" else "!="} actual")
           logger.debug(s"expected: $expected")

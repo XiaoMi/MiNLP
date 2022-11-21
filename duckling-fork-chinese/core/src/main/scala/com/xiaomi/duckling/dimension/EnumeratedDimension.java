@@ -41,6 +41,7 @@ public enum EnumeratedDimension {
     Place(com.xiaomi.duckling.dimension.place.Place$.MODULE$),
     Quantity(com.xiaomi.duckling.dimension.quantity.Quantity$.MODULE$),
     Rating(com.xiaomi.duckling.dimension.rating.Rating$.MODULE$),
+    Repeat(com.xiaomi.duckling.dimension.time.repeat.Repeat$.MODULE$),
     Season(com.xiaomi.duckling.dimension.season.Season$.MODULE$),
     Temperature(com.xiaomi.duckling.dimension.temperature.Temperature$.MODULE$),
     Time(com.xiaomi.duckling.dimension.time.Time$.MODULE$),

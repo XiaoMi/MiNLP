@@ -60,7 +60,7 @@ object Helpers {
                 (hour(false, h).timePred, Some(tod.copy(is12H = false)))
               case _ => (td2.timePred, Some(tod))
             }
-          case None => (td2.timePred, td2.form)
+          case _ => (td2.timePred, td2.form)
         }
         td2.copy(timePred = pred, form = form)
       } else td2

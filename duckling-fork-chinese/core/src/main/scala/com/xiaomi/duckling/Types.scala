@@ -47,7 +47,7 @@ object Types {
   val LT = -1
   val GT = 1
 
-  val ZoneCN = ZoneId.of("Asia/Shanghai")
+  val ZoneCN = ZoneId.of("+08:00")
 
   def tokens(tp: TokensProduction): Production = {
     case (_: Options, _tokens: List[Token]) if tp.isDefinedAt(_tokens) => tp(_tokens)

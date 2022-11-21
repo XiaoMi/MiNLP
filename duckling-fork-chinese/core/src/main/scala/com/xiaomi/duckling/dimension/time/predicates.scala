@@ -17,6 +17,7 @@
 package com.xiaomi.duckling.dimension.time
 
 import com.xiaomi.duckling.Types._
+import com.xiaomi.duckling.dimension.implicits._
 import com.xiaomi.duckling.dimension.numeral.Predicates.isIntegerBetween
 import com.xiaomi.duckling.dimension.numeral.seq.{DigitSequence, DigitSequenceData}
 import com.xiaomi.duckling.dimension.numeral.{Numeral, NumeralData}
@@ -27,7 +28,9 @@ import com.xiaomi.duckling.dimension.time.enums._
 import com.xiaomi.duckling.dimension.time.form.{Month => _, _}
 
 object predicates {
-  trait TimePredicate
+  trait TimePredicate {
+    val maxGrain: Option[Grain] = None
+  }
 
   case object EmptyTimePredicate extends TimePredicate
 
@@ -44,6 +47,17 @@ object predicates {
                                year: Option[Int] = None,
                                calendar: Option[Calendar] = None)
     extends TimePredicate {
+
+    override val maxGrain: Option[Grain] = {
+      if (year.nonEmpty) Grain.Year
+      else if (month.nonEmpty) Grain.Month
+      else if (dayOfWeek.nonEmpty) Grain.Week
+      else if (dayOfMonth.nonEmpty) Grain.Day
+      else if (hour.nonEmpty) Grain.Hour
+      else if (minute.nonEmpty) Grain.Minute
+      else Grain.Second
+    }
+
     override def toString: String = {
       val sb = new StringBuilder("{")
       if (calendar.nonEmpty) sb.append(s"calendar = ${calendar.get}")
@@ -64,10 +78,25 @@ object predicates {
   }
 
   case class IntersectTimePredicate(pred1: TimePredicate, pred2: TimePredicate)
-    extends TimePredicate
+    extends TimePredicate {
+    override val maxGrain: Option[Grain] = {
+      (pred1.maxGrain, pred2.maxGrain) match {
+        case (Some(a), Some(b)) => if (a > b) a else b
+        case _ => None
+      }
+    }
+  }
 
   case class TimeIntervalsPredicate(t: IntervalType, p1: TimePredicate, p2: TimePredicate)
-    extends TimePredicate
+    extends TimePredicate {
+
+    override val maxGrain: Option[Grain] = {
+      (p1.maxGrain, p2.maxGrain) match {
+        case (Some(a), Some(b)) => if (a > b) a else b
+        case _ => None
+      }
+    }
+  }
 
   case class TimeOpenIntervalPredicate(t: IntervalDirection) extends TimePredicate
 

@@ -162,7 +162,11 @@ object NaiveBayesConsole extends LazyLogging {
 
       answers.foreach { answer: Answer =>
         val entity = formatToken(line, withNode = true)(answer.token)
-        println("%.5f => %s".format(answer.score, write(answer.token.value)))
+        val json = write(answer.token.value)
+        answer.token.value.schema match {
+          case Some(schema) => println("%.5f => %s\n%s".format(answer.score, schema, json))
+          case None => println("%.5f => %s".format(answer.score, json))
+        }
         ptree(line)(entity)
       }
     }
