@@ -46,7 +46,7 @@ object NaiveBayesLearning extends LazyLogging {
     val start = System.currentTimeMillis()
     val classifiers = makeDataset(rules, corpus).map {
       case (rule, listDatum) =>
-        logger.info(s"training for $rule")
+        logger.debug(s"training for $rule")
         (rule, Bayes.train(listDatum))
     }
     val end = System.currentTimeMillis()

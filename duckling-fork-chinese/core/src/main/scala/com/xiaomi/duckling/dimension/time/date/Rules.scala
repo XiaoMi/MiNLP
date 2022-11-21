@@ -302,7 +302,7 @@ trait Rules extends DimRules {
     }
   )
 
-  val ruleSpecial3 = Rule(name = "date - special days: 明后天", pattern = List("明后两?天".regex), prod = tokens {
+  val ruleSpecial3 = Rule(name = "date - special days: 明后天", pattern = List("明后两?天|明天后天".regex), prod = tokens {
     case _ =>
       val from = cycleNth(Day, 1, Day)
       val to = cycleNth(Day, 2, Day)
