@@ -24,7 +24,7 @@ import com.xiaomi.duckling.dimension.implicits._
 import com.xiaomi.duckling.dimension.time.duration.DurationData
 import com.xiaomi.duckling.dimension.time.enums.Grain._
 import com.xiaomi.duckling.dimension.time.Types.DuckDateTime
-import com.xiaomi.duckling.dimension.time.helper.TimeValueHelpers.{datetimeInterval, ymd}
+import com.xiaomi.duckling.dimension.time.helper.TimeValueHelpers.{datetimeInterval, h, ymd}
 import com.xiaomi.duckling.dimension.time.TimeValue
 
 trait Examples extends DimExamples {
@@ -40,7 +40,8 @@ trait Examples extends DimExamples {
         new DuckDateTime(LocalDateTime.of(2013, 3, 5, 12, 0, 0)),
         Hour)), List("每个月五号的早上")),
     (RepeatValue(DurationData(1, Month), start = ymd(2013, 3, 5)), List("每个月的五号")),
-    (RepeatValue(DurationData(1, Week), start = ymd(2013, 2, 13)), List("每周三", "每个星期三"))
+    (RepeatValue(DurationData(1, Week), start = ymd(2013, 2, 13)), List("每周三", "每个星期三")),
+    (RepeatValue(DurationData(1, Day), start = h(8)), List("每天上午八点", "每个上午八点"))
   )
 
 }

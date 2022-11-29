@@ -51,7 +51,7 @@ import com.xiaomi.duckling.types.Node
   */
 object NaiveBayesConsole extends LazyLogging {
   private val context =
-    Testing.testContext.copy(referenceTime = ZonedDateTime.now())
+    Testing.testContext.copy(referenceTime = ZonedDateTime.now(ZoneCN))
 
   // 方便设置训练捂的断点
   var debug = false
