@@ -25,7 +25,7 @@ import com.xiaomi.duckling.dimension.matcher.GroupMatch
 import com.xiaomi.duckling.dimension.time.{Time, TimeData}
 import com.xiaomi.duckling.dimension.time.duration.{Duration, DurationData}
 import com.xiaomi.duckling.dimension.time.enums.Grain
-import com.xiaomi.duckling.dimension.time.predicates.{isNotLatent, isTimeDatePredicate, TimeDatePredicate}
+import com.xiaomi.duckling.dimension.time.predicates.{isAPartOfDay, isATimeOfDay, isNotLatent, isTimeDatePredicate, TimeDatePredicate}
 
 trait Rules extends DimRules with LazyLogging {
   /**
@@ -47,10 +47,13 @@ trait Rules extends DimRules with LazyLogging {
     name = "<every> <datetime>",
     pattern = List("每(一|一个|个)?".regex, isTimeDatePredicate.predicate),
     prod = tokens {
-      case _ :: Token(_, td: TimeData) :: _ =>
+      case _ :: (t @ Token(_, td: TimeData)) :: _ =>
         val grainOfInterval = td.timePred.asInstanceOf[TimeDatePredicate].maxGrain.get
-        val interval = DurationData(1, grainOfInterval)
-        (Token(Repeat, RepeatData(interval, start = td)))
+        val grain =
+          if (grainOfInterval == Grain.Hour && (isAPartOfDay(t) || isATimeOfDay(t))) Grain.Day
+          else grainOfInterval
+        val interval = DurationData(1, grain)
+        Token(Repeat, RepeatData(interval, start = td))
     }
   )
 
@@ -67,7 +70,7 @@ trait Rules extends DimRules with LazyLogging {
           case "年" | "年度" => Grain.Year
           case "月" => Grain.Month
           case "周" | "星期" => Grain.Week
-          case "日" => Grain.Day
+          case "日" | "天" => Grain.Day
           case "小时" => Grain.Hour
           case "分钟" => Grain.Minute
           case _ => None
