@@ -100,5 +100,5 @@ lazy val benchmark = project
 lazy val duckConsole = taskKey[Unit]("duck console task")
 duckConsole := (core / Runtime / runMain).toTask(" com.xiaomi.duckling.task.NaiveBayesConsole").value
 
-lazy val duckLiteModel = taskKey[Unit]("duck lite naive bayes training task")
-duckLiteModel := (lite / Test / runMain).toTask(" com.xiaomi.duckling.task.Training").value
+lazy val duckModel = taskKey[Unit]("duck naive bayes training task")
+duckModel := (core / Runtime / runMain).toTask(" com.xiaomi.duckling.task.Training").value
