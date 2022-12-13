@@ -11,7 +11,6 @@ lazy val sharedSettings = Seq(
   scalacOptions ++= compilerOptions,
   resolvers ++= Seq(
     Resolver.mavenLocal, // 加速
-    Resolver.typesafeIvyRepo("releases"), // 插件
     Resolver.mavenCentral
   ),
   Test / parallelExecution := false,

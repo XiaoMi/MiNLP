@@ -2,21 +2,13 @@ package com.xiaomi.duckling.ranking
 
 import java.io.{FileInputStream, FileOutputStream, InputStream}
 
-import com.esotericsoftware.kryo.kryo5.Kryo
-import com.esotericsoftware.kryo.kryo5.io.{Input, Output}
-import com.esotericsoftware.kryo.kryo5.objenesis.strategy.SerializingInstantiatorStrategy
+import com.esotericsoftware.kryo.Kryo
+import com.twitter.chill.{Input, KryoSerializer, Output}
 
 import com.xiaomi.duckling.ranking.Bayes.Classifier
 
 object KryoSerde {
-  private val kryo: Kryo = {
-    val kryo = new Kryo()
-    kryo.register(classOf[java.util.HashMap[String, Classifier]])
-    kryo.register(classOf[com.xiaomi.duckling.ranking.Bayes.Classifier])
-    kryo.register(classOf[com.xiaomi.duckling.ranking.Bayes.ClassData])
-    kryo.setInstantiatorStrategy(new SerializingInstantiatorStrategy())
-    kryo
-  }
+  private val kryo: Kryo = KryoSerializer.registered.newKryo()
 
   def makeSerializedFile[T](o: T, file: String): Unit = {
     val output = new Output(new FileOutputStream(file))
