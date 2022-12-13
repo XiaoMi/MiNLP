@@ -16,10 +16,14 @@
 
 package com.xiaomi.duckling.ranking
 
-import com.typesafe.scalalogging.LazyLogging
-
 import java.time.Duration
+import java.util.{Map => JMap}
+
 import scala.collection.mutable
+import scala.collection.JavaConverters._
+
+import com.google.common.collect.Maps
+import com.typesafe.scalalogging.LazyLogging
 
 import com.xiaomi.duckling.Types._
 import com.xiaomi.duckling.engine.Engine._
@@ -29,7 +33,7 @@ import com.xiaomi.duckling.ranking.Types._
 import com.xiaomi.duckling.types.Node
 
 object NaiveBayesLearning extends LazyLogging {
-  type Classifiers = Map[String, Classifier]
+  type Classifiers = JMap[String, Classifier]
   type Dataset = mutable.Map[String, List[Datum]]
 
   /**
@@ -57,7 +61,7 @@ object NaiveBayesLearning extends LazyLogging {
         throw new RuntimeException(s"duplicate name of rules detected, fix it $duplicateRules")
       }
     }
-    classifiers.toMap
+    Maps.newHashMap(classifiers.toMap.asJava)
   }
 
   /**

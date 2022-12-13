@@ -18,12 +18,17 @@ package com.xiaomi.duckling.ranking
 
 import com.xiaomi.duckling.ranking.Types.{BagOfFeatures, Class, Datum}
 import scalaz.Scalaz._
+import java.util.{Map => JMap}
+
+import scala.collection.JavaConverters._
+
+import com.google.common.collect.Maps
 
 object Bayes {
 
   case class Classifier(okData: ClassData, koData: ClassData)
 
-  case class ClassData(prior: Double, unseen: Double, likelihoods: Map[String, Double], n: Int)
+  case class ClassData(prior: Double, unseen: Double, likelihoods: JMap[String, Double], n: Int)
 
   /**
     * Compute prior and likelihoods log-probabilities for one class.
@@ -38,7 +43,7 @@ object Bayes {
     val prior = math.log(1.0 * (classTotal + 1e-9) / total)
     val denum = vocSize + feats.values.sum
     val unseen = math.log(1.0 / (denum + 1.0))
-    val likelihoods = feats.fmap(x => math.log((x + 1.0) / denum))
+    val likelihoods: JMap[String, Double] = Maps.newHashMap(feats.fmap(x => math.log((x + 1.0) / denum)).asJava)
 
     ClassData(prior, unseen, likelihoods, classTotal)
   }
@@ -75,7 +80,7 @@ object Bayes {
   def prob(feats: BagOfFeatures, classData: ClassData): Double = {
     val ClassData(prior, unseen, likelihoods, _) = classData
     prior + feats.foldRight(0.0) {
-      case ((feat, x), res) => res + x * likelihoods.getOrElse(feat, unseen)
+      case ((feat, x), res) => res + x * likelihoods.getOrDefault(feat, unseen)
     }
   }
 }

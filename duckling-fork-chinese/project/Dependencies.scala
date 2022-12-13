@@ -21,7 +21,6 @@ object Dependencies {
     Seq(junit % Test, junitInterface % Test, scalaTest % Test, hamcrest % Test)
 
   lazy val coreDependencies = Seq(
-    arm,
     scalaz,
     json4sJackson,
     commonslang,
@@ -38,7 +37,8 @@ object Dependencies {
     logback % Provided,
     emoji,
     trie,
-    easyBert
+    easyBert,
+    kryo
   ) ++ testDependencies
 
   lazy val serverDependencies = Seq(logback, spStarterWeb, spThymeleaf, reactor, lombok) ++ testDependencies
@@ -65,7 +65,6 @@ object Dependencies {
 
   // utils
   lazy val scalaz = "org.scalaz" %% "scalaz-core" % "7.2.27"
-  lazy val arm = "com.michaelpollmeier" %% "scala-arm" % "2.1"
   lazy val commonslang = "org.apache.commons" % "commons-lang3" % "3.12.0"
   lazy val commonsText = "org.apache.commons" % "commons-text" % "1.10.0"
   lazy val commonsIO = "commons-io" % "commons-io" % "2.11.0"
@@ -82,6 +81,8 @@ object Dependencies {
   lazy val easyBert = ("com.robrua.nlp" % "easy-bert" % "1.0.3") // BERT tokenizer
     .exclude("org.tensorflow", "tensorflow")
     .exclude("com.fasterxml.jackson.core", "jackson-databind")
+  lazy val kryo = "com.esotericsoftware.kryo" % "kryo5" % "5.3.0"
+
   //web
   lazy val spThymeleaf = "org.springframework.boot" % "spring-boot-starter-thymeleaf" % "2.4.5"
   lazy val spStarterWeb = "org.springframework.boot" % "spring-boot-starter-web" % "2.4.5"
