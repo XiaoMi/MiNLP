@@ -11,7 +11,7 @@ jobs:
         with:
           fetch-depth: 0
       - uses: olafurpg/setup-scala@v10
-      - run: "cd duckling-fork-chinese; sbt ci-release"
+      - run: "cd duckling-fork-chinese; sbt duckLiteModel; sbt ci-release"
         env:
           PGP_PASSPHRASE: ${{ secrets.PGP_PASSPHRASE }}
           PGP_SECRET: ${{ secrets.PGP_SECRET }}

@@ -1,9 +1,8 @@
-addSbtPlugin("com.github.sbt" % "sbt-native-packager" % "1.9.11")
-addSbtPlugin("com.timushev.sbt" % "sbt-updates" % "0.6.4")
+addSbtPlugin("com.typesafe.sbt" % "sbt-native-packager" % "1.3.21")
+addSbtPlugin("com.timushev.sbt" % "sbt-updates" % "0.4.0")
 
-//addSbtPlugin("com.github.sbt" % "sbt-ci-release" % "1.5.11")
-addSbtPlugin("org.xerial.sbt" % "sbt-sonatype" % "3.9.13")
+addSbtPlugin("com.geirsson" % "sbt-ci-release" % "1.5.7")
 
 // coverage
-addSbtPlugin("org.scoverage" % "sbt-scoverage" % "2.0.6")
+addSbtPlugin("org.scoverage" % "sbt-scoverage" % "1.6.0")
 addSbtPlugin("com.alejandrohdezma" % "sbt-codecov" % "0.2.0")
