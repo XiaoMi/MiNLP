@@ -13,23 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.xiaomi.duckling.task
 
-package com.xiaomi.duckling.dimension.time
+import java.io.File
 
-import com.xiaomi.duckling.Types.{Predicate, Token}
-import com.xiaomi.duckling.dimension.implicits._
-import com.xiaomi.duckling.dimension.numeral.Predicates._
-import com.xiaomi.duckling.dimension.time.enums.Grain
-import com.xiaomi.duckling.dimension.time.enums.Grain._
-import com.xiaomi.duckling.dimension.time.grain._
+import com.xiaomi.duckling.ranking.NaiveBayesRank
 
-package object repeat {
-  /**
-    * generate duration token
-    * @param v  duration value
-    * @param g  duration grain
-    * @return
-    */
-//  def tt(v: Int, g: Grain): Token = Token(Repeat, RepeatData(v, g, schema = durationSchema(v.toString, g)))
-
+object Training {
+  def main(args: Array[String]): Unit = {
+    println(new File("").getAbsolutePath)
+    NaiveBayesRank.main(Array("src/main/resources/naive_bayes.kryo"))
+  }
 }

@@ -90,6 +90,15 @@ object Resources extends LazyLogging {
     }
   }
 
+  def inputStream[B](resource: String)(f: InputStream => B): B = {
+    val stream = tryResource(resource)
+    try {
+      f(stream)
+    } finally {
+      stream.close()
+    }
+  }
+
   def tryResource(resource: String): InputStream = {
     val input = Resources.getClass.getResourceAsStream(resource)
     if (input == null) throw new FileNotFoundException(s"Resource [$resource] not found")

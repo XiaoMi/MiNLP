@@ -79,7 +79,7 @@ object JsonSerde {
 
   private val durationData = FieldSerializer[DurationData]({
     case ("grain", g: Grain) => Some("grain", g.name())
-    case ("schema", s: Option[String]) => None
+    case ("schema", _: Option[_]) => None
   })
 
   // 忽略

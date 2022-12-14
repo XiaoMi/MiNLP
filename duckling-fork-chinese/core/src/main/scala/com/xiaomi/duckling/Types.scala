@@ -34,7 +34,7 @@ import com.xiaomi.duckling.types.Node
 
 object Types {
 
-  val conf = ConfigFactory.load().getConfig("duckling.core")
+  val conf = ConfigFactory.load(getClass.getClassLoader).getConfig("duckling.core")
 
   type Pattern = List[PatternItem]
   type Production = PartialFunction[(Options, List[Token]), Option[Token]]

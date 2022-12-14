@@ -16,21 +16,20 @@
 
 package com.xiaomi.duckling.ranking
 
-import com.typesafe.scalalogging.LazyLogging
-import org.json4s.jackson.Serialization.{read, writePretty}
-
-import java.nio.charset.StandardCharsets
-import java.nio.file.{Files, Paths}
 import scala.collection.JavaConverters._
 
+import org.json4s.jackson.Serialization.writePretty
+
+import com.typesafe.scalalogging.LazyLogging
+
+import com.xiaomi.duckling.{Resources, Rules}
 import com.xiaomi.duckling.JsonSerde._
-import com.xiaomi.duckling.Types.{Answer, Rule, conf}
+import com.xiaomi.duckling.Types.{conf, Answer, Rule}
 import com.xiaomi.duckling.dimension.CorpusSets
 import com.xiaomi.duckling.dimension.CorpusSets.CorpusSet
 import com.xiaomi.duckling.ranking.NaiveBayesLearning._
 import com.xiaomi.duckling.ranking.Testing.Corpus
 import com.xiaomi.duckling.types.Node
-import com.xiaomi.duckling.{Resources, Rules}
 
 object NaiveBayesRank extends LazyLogging {
 
@@ -57,11 +56,11 @@ object NaiveBayesRank extends LazyLogging {
       val path =
         if (conf.hasPathOrNull(modelPath)) conf.getString(modelPath)
         else "file_not_found"
-      logger.info("read NaiveBayes model from resource")
-      Resources.reader(path)(in => read[Classifiers](in))
+      logger.info(s"read NaiveBayes model from resource: $path")
+      Resources.inputStream(path)(in => KryoSerde.loadSerializedResource(in, classOf[Classifiers]))
     } catch {
-      case _: Throwable =>
-        logger.warn("model not found, training now")
+      case t: Throwable =>
+        logger.warn("load model failed, now training from corpus", t)
         makeClassifiers(
           rules,
           namedCorpus
@@ -92,13 +91,16 @@ object NaiveBayesRank extends LazyLogging {
 
   def main(args: Array[String]): Unit = {
     if (args.length != 0) {
-      val file = Paths.get(args(0))
-      val writer = Files.newBufferedWriter(file, StandardCharsets.UTF_8)
-      writePretty(classifiers, writer)
-      writer.close()
 
-      val reader = Files.newBufferedReader(file, StandardCharsets.UTF_8)
-      read[Classifiers](reader)
+      val file = args(0)
+
+      val origin = writePretty(classifiers)
+
+      KryoSerde.makeSerializedFile(classifiers, file)
+      val out = KryoSerde.loadSerializedFile(file, classOf[Classifiers])
+
+      val after = writePretty(out)
+      assert(origin == after)
     }
   }
 }
