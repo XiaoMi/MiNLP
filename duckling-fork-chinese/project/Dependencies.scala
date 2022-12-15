@@ -18,7 +18,7 @@ import sbt._
 
 object Dependencies {
   lazy val testDependencies =
-    Seq(junit % Test, junitInterface % Test, scalaTest % Test, hamcrest % Test)
+    Seq(junit, junitInterface, scalaTest, hamcrest)
 
   lazy val coreDependencies = Seq(
     scalaz,
@@ -39,18 +39,25 @@ object Dependencies {
     trie,
     easyBert,
     chill
-  ) ++ testDependencies
+  )
 
-  lazy val serverDependencies = Seq(logback, spStarterWeb, spThymeleaf, reactor, lombok) ++ testDependencies
+  lazy val serverDependencies = Seq(logback, spStarterWeb, spThymeleaf, reactor, lombok)
 
   lazy val benchmarkDependencies = Seq(scalaTest % Test, jmhAnn, jmhCore, slf4jnop)
+
+  lazy val liteExcludes = Seq(
+    "com.vdurmont" % "emoji-java",
+    "commons-io" % "commons-io",
+    "org.apache.commons" % "commons-text",
+    "org.apache.commons" % "commons-lang3"
+  )
 
   // test
   lazy val junit = "junit" % "junit" % "4.13.2"
   lazy val hamcrest = "org.hamcrest" % "hamcrest" % "2.2"
   lazy val junitInterface = "com.novocode" % "junit-interface" % "0.11"
-  lazy val scalatic = "org.scalactic" %% "scalactic" % "3.2.10"
-  lazy val scalaTest = "org.scalatest" %% "scalatest" % "3.2.10"
+  lazy val scalatic = "org.scalactic" %% "scalactic" % "3.2.14"
+  lazy val scalaTest = "org.scalatest" %% "scalatest" % "3.2.14"
   lazy val scalaMeter = "com.storm-enroute" %% "scalameter" % "0.18"
   lazy val jmhAnn = "org.openjdk.jmh" % "jmh-generator-annprocess" % "1.21"
   lazy val jmhCore = "org.openjdk.jmh" % "jmh-core" % "1.21"
