@@ -33,7 +33,7 @@ object TimeAnswerSizeDetector {
     val examples = Time.allExamples
     val suspicious = examples
       .map {
-        case (doc, _, _) =>
+        case (doc, _) =>
           Api.analyze(doc.rawInput, context, options)
       }
       .filter(_.size > 1)

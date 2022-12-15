@@ -49,7 +49,8 @@ object Dependencies {
     "com.vdurmont" % "emoji-java",
     "commons-io" % "commons-io",
     "org.apache.commons" % "commons-text",
-    "org.apache.commons" % "commons-lang3"
+    "org.apache.commons" % "commons-lang3",
+    "org.json4s" %% "json4s-jackson"
   )
 
   // test

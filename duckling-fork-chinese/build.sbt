@@ -75,7 +75,7 @@ lazy val lite = project
       logback % Provided // logging
     ),
     excludeDependencies ++= liteExcludes
-  ).dependsOn(core, test % "test->test")
+  ).dependsOn(core % "compile->compile", test % "test->test")
 
 lazy val server = project
   .settings(
