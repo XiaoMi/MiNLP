@@ -51,13 +51,20 @@ publish / skip := true // don't publish the root project
 
 lazy val `duckling-fork-chinese` = project.in(file("."))
   .settings(sharedSettings)
-  .aggregate(core, lite, server, benchmark)
+  .aggregate(core, lite, test, server, benchmark)
 
 lazy val core = project
   .settings(
     name := "duckling-core",
     sharedSettings,
     libraryDependencies ++= coreDependencies
+  ).dependsOn(test % "test->test")
+
+lazy val test = project
+  .settings(
+    name := "duckling-test",
+    sharedSettings,
+    libraryDependencies ++= testDependencies
   )
 
 lazy val lite = project
@@ -66,8 +73,9 @@ lazy val lite = project
     sharedSettings,
     libraryDependencies ++= Seq(
       logback % Provided // logging
-    )
-  ).dependsOn(core)
+    ),
+    excludeDependencies ++= liteExcludes
+  ).dependsOn(core % "compile->compile", test % "test->test")
 
 lazy val server = project
   .settings(
@@ -79,7 +87,7 @@ lazy val server = project
     Universal / javaOptions ++= Seq("-J-Xmx1g"),
     scriptClasspath := Seq("../conf", "*")
   )
-  .dependsOn(core)
+  .dependsOn(core, test % "test->test")
   .enablePlugins(JavaServerAppPackaging)
 
 lazy val benchmark = project

@@ -17,3 +17,4 @@ out
 duckling.log
 /release/
 /server/naive_bayes.json
+core/src/main/resources/naive_bayes.kryo

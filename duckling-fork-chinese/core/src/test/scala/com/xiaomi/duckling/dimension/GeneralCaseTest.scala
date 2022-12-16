@@ -23,7 +23,7 @@ import com.typesafe.scalalogging.LazyLogging
 import com.xiaomi.duckling.Api.analyze
 import com.xiaomi.duckling.ranking.Testing.{testContext, testOptions}
 import com.xiaomi.duckling.task.NaiveBayesDebug
-import com.xiaomi.duckling.UnitSpec
+import com.xiaomi.duckling.{JsonSerde, UnitSpec}
 
 class GeneralCaseTest
     extends UnitSpec
@@ -50,10 +50,10 @@ class GeneralCaseTest
 
       it(s"${dim.name} - cases") {
         forAll(corpusTable) {
-          case (doc, predicate, _) =>
+          case (doc, rv) =>
             val candidates = analyze(doc.rawInput, testContext, options)
             val found = candidates.zipWithIndex.find {
-              case (c, _) => predicate(doc, testContext)(c.token)
+              case (c, _) => JsonSerde.simpleCheck(doc, c.token, rv)
             }
             val matches = found match {
               case Some((_, 0)) => logger.info(s"✅ ${doc.rawInput}"); true

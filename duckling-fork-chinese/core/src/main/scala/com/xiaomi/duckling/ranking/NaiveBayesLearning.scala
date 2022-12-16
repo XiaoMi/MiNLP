@@ -17,8 +17,8 @@
 package com.xiaomi.duckling.ranking
 
 import com.typesafe.scalalogging.LazyLogging
-
 import java.time.Duration
+
 import scala.collection.mutable
 
 import com.xiaomi.duckling.Types._
@@ -27,6 +27,7 @@ import com.xiaomi.duckling.ranking.Bayes.Classifier
 import com.xiaomi.duckling.ranking.Testing.{Corpus, Example}
 import com.xiaomi.duckling.ranking.Types._
 import com.xiaomi.duckling.types.Node
+import com.xiaomi.duckling.JsonSerde
 
 object NaiveBayesLearning extends LazyLogging {
   type Classifiers = Map[String, Classifier]
@@ -94,9 +95,9 @@ object NaiveBayesLearning extends LazyLogging {
   def makeDataset1(rules: List[Rule],
                    context: Context,
                    options: Options)(dataset: Dataset, example: Example): Dataset = {
-    val (doc, predicate, _) = example
+    val (doc, rv) = example
     val tokens = parseAndResolve(rules, doc, context, options)
-    val (ok, ko) = tokens.partition(predicate(doc, context))
+    val (ok, ko) = tokens.partition(JsonSerde.simpleCheck(doc, _, rv))
 
     val nodesOK: Set[Node] = nodes(ok)
     val nodesKO = nodes(ko).diff(nodesOK)

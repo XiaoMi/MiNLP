@@ -60,7 +60,7 @@ object NaiveBayesRank extends LazyLogging {
       Resources.inputStream(path)(in => KryoSerde.loadSerializedResource(in, classOf[Classifiers]))
     } catch {
       case t: Throwable =>
-        logger.warn("load model failed, now training from corpus", t)
+        logger.warn(s"load model failed, now training from corpus, reason: ${t.getMessage}")
         makeClassifiers(
           rules,
           namedCorpus

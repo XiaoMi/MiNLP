@@ -17,11 +17,13 @@ package com.xiaomi.duckling.task
 
 import java.io.File
 
+import com.typesafe.scalalogging.LazyLogging
+
 import com.xiaomi.duckling.ranking.NaiveBayesRank
 
-object Training {
+object Training extends LazyLogging {
   def main(args: Array[String]): Unit = {
-    println(new File("").getAbsolutePath)
+    logger.info("working directory: " + new File("").getAbsolutePath)
     NaiveBayesRank.main(Array("src/main/resources/naive_bayes.kryo"))
   }
 }

@@ -22,8 +22,9 @@ import java.nio.charset.StandardCharsets
 import java.nio.file.{Files, Paths}
 
 import scala.collection.JavaConverters._
+import scala.io.{Codec, Source}
 
-import org.apache.commons.io.{FileUtils, IOUtils}
+import org.apache.commons.io.FileUtils
 
 import com.typesafe.scalalogging.LazyLogging
 
@@ -41,9 +42,9 @@ object Resources extends LazyLogging {
     } else {
       val input = url(path).openStream()
       try {
-        val lines = IOUtils.readLines(input, StandardCharsets.UTF_8)
-        if (enableCache) Files.write(file, lines)
-        lines.asScala.toList
+        val lines = Source.fromInputStream(input)(Codec.UTF8).getLines().toList
+        if (enableCache) Files.write(file, lines.asJava)
+        lines
       } finally {
         input.close()
       }
@@ -53,7 +54,7 @@ object Resources extends LazyLogging {
   def readLines(resource: String): List[String] = {
     val input = tryResource(resource)
     try {
-      IOUtils.readLines(input, StandardCharsets.UTF_8).asScala.toList
+      Source.fromInputStream(input)(Codec.UTF8).getLines().toList
     } finally {
       input.close()
     }

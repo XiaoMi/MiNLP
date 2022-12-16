@@ -22,11 +22,14 @@ import java.time.format.DateTimeFormatter
 
 import org.json4s.{CustomSerializer, DefaultFormats, FieldSerializer, Formats, NoTypeHints, Serializer, TypeHints}
 import org.json4s.JsonAST.JString
+import org.json4s.jackson.Serialization.write
+
+import com.typesafe.scalalogging.LazyLogging
 
 import com.xiaomi.duckling.dimension.time._
-import com.xiaomi.duckling.Types.{Entity, ResolvedVal, Token}
+import com.xiaomi.duckling.Types.{Entity, ResolvedToken, ResolvedVal, ResolvedValue, Token}
 import com.xiaomi.duckling.dimension.numeral.NumeralValue
-import com.xiaomi.duckling.dimension.quantity.QuantityValue
+import com.xiaomi.duckling.dimension.quantity.{QuantityData, QuantityValue}
 import com.xiaomi.duckling.dimension.time.Types.{DuckDateTime, InstantValue}
 import com.xiaomi.duckling.dimension.time.duration.DurationData
 import com.xiaomi.duckling.dimension.time.enums.{Grain, IntervalDirection, IntervalType}
@@ -34,9 +37,10 @@ import com.xiaomi.duckling.dimension.Dimension
 import com.xiaomi.duckling.dimension.ordinal.OrdinalData
 import com.xiaomi.duckling.dimension.place.PlaceData
 import com.xiaomi.duckling.dimension.time.predicates.SeriesPredicate
+import com.xiaomi.duckling.ranking.Testing
 import com.xiaomi.duckling.types.Node
 
-object JsonSerde {
+object JsonSerde extends LazyLogging {
 
   private val node = FieldSerializer[Node]({
     case ("production" | "features", _) => None
@@ -92,6 +96,27 @@ object JsonSerde {
   })
 
   /**
+   * 有一些字段构造起来比较困难，或者不用比较，可以忽略掉
+   */
+  val sTimeValue = FieldSerializer[TimeValue]({
+    case ("values", _) => None
+    case ("simple", _) => None
+  })
+
+  val sNumeralValue = FieldSerializer[NumeralValue]({
+    case ("precision", _) => None
+  })
+
+  val sPlaceData = FieldSerializer[PlaceData]({
+    case ("texts", _) => None
+    case ("level", _) => None
+  })
+
+  val sQuantityValue = FieldSerializer[QuantityData]({
+    case ("isLatent", _) => None
+  })
+
+  /**
     * json4s未发布的代码 [[https://github.com/json4s/json4s/blob/master/ext/src/main/scala/org/json4s/ext/JavaEnumSerializer.scala]]
     */
   class JavaEnumNameSerializer[E <: JEnum[E]](implicit ct: Manifest[E])
@@ -122,7 +147,11 @@ object JsonSerde {
     quantityValue +
     durationData +
     placeData +
-    ordinalData
+    ordinalData +
+    sTimeValue +
+    sNumeralValue +
+    sPlaceData +
+    sQuantityValue
 
   object DuckFormats extends DefaultFormats {
     override val typeHintFieldName: String = "class"
@@ -133,5 +162,18 @@ object JsonSerde {
         new JavaEnumNameSerializer[IntervalType](),
         new JavaEnumNameSerializer[IntervalDirection]()
       )
+  }
+
+  def simpleCheck(doc: Document, resolvedToken: ResolvedToken, value: ResolvedValue): Boolean = {
+    val expected = write(value)
+    val actual = write(resolvedToken.value)
+    val equals = expected == actual
+    if (!equals && Testing.testOptions.debug) {
+      logger.debug(s"checking: ${doc.rawInput}")
+      logger.debug(s"expected ${if (expected == actual) "=" else "!="} actual")
+      logger.debug(s"expected: $expected")
+      logger.debug(s"actual  : $actual")
+    }
+    equals
   }
 }

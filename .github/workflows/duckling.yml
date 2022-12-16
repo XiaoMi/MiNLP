@@ -25,8 +25,8 @@ jobs:
     - name: Run tests
       run: |
         cd duckling-fork-chinese
-        sbt +test
         sbt duckModel
+        sbt +test
         sbt coverage
         sbt coverageAggregate
         bash <(curl -s https://codecov.io/bash) -r du00cs/MiNLP -t 'd2de025e-e5b7-4115-a98e-07e6fc3d7001'

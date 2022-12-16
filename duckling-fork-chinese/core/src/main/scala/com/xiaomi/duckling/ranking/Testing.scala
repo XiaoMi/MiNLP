@@ -30,33 +30,8 @@ import com.xiaomi.duckling.dimension.time.TimeValue
 import com.xiaomi.duckling.{Document, JsonSerde}
 
 object Testing extends LazyLogging {
-  type TestPredicate = (Document, Context) => ResolvedToken => Boolean
-  type Example = (Document, TestPredicate, Int)
+  type Example = (Document, ResolvedValue)
   type Corpus = (Context, Options, List[Example])
-  type NegativeCorpus = (Context, Options, List[String])
-
-  /**
-   * 有一些字段构造起来比较困难，或者不用比较，可以忽略掉
-   */
-  val sTimeValue = FieldSerializer[TimeValue]({
-    case ("values", _) => None
-    case ("simple", _) => None
-  })
-
-  val sNumeralValue = FieldSerializer[NumeralValue]({
-    case ("precision", _) => None
-  })
-
-  val sPlaceData = FieldSerializer[PlaceData]({
-    case ("texts", _) => None
-    case ("level", _) => None
-  })
-
-  val sQuantityValue = FieldSerializer[QuantityData]({
-    case ("isLatent", _) => None
-  })
-
-  implicit val formats = JsonSerde.formats + sTimeValue + sNumeralValue + sPlaceData + sQuantityValue
 
   val testContext: Context =
     Context(
@@ -68,23 +43,7 @@ object Testing extends LazyLogging {
 
   def examples(output: ResolvedValue,
                texts: List[String],
-               weight: Int = 1,
                enableAnalyzer: Boolean = false): List[Example] = {
-    texts.map(text => (Document.fromText(text, enableAnalyzer = enableAnalyzer), simpleCheck(output), weight))
+    texts.map(text => (Document.fromText(text, enableAnalyzer = enableAnalyzer), output))
   }
-
-  def simpleCheck(value: ResolvedValue): TestPredicate =
-    (doc: Document, _: Context) =>
-      (resolvedToken: ResolvedToken) => {
-        val expected = write(value)
-        val actual = write(resolvedToken.value)
-        val equals = expected == actual
-        if (!equals && testOptions.debug) {
-          logger.debug(s"checking: ${doc.rawInput}")
-          logger.debug(s"expected ${if (expected == actual) "=" else "!="} actual")
-          logger.debug(s"expected: $expected")
-          logger.debug(s"actual  : $actual")
-        }
-        equals
-    }
 }
