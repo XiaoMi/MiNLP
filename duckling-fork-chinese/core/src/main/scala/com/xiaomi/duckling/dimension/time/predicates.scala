@@ -252,6 +252,18 @@ object predicates {
         case _ => false
       }
   }
+  
+  val is12oClockOfDay: Predicate = {
+    case Token(Time, td: TimeData) =>
+      (td.timePred, td.form) match {
+        case (date: TimeDatePredicate, Some(TimeOfDay(_, _))) =>
+          date.hour match {
+            case Some((_, hour)) => hour == 12
+            case None            => false
+          }
+        case _ => false
+      }
+  }
 
   val isDurationAmountGt1: Predicate = {
     case Token(Duration, DurationData(value, _, _, _, _)) => value > 1
