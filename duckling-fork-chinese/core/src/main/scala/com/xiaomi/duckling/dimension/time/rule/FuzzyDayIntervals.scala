@@ -18,6 +18,7 @@ package com.xiaomi.duckling.dimension.time.rule
 
 import com.xiaomi.duckling.Types._
 import com.xiaomi.duckling.dimension.implicits._
+import com.xiaomi.duckling.dimension.matcher.GroupMatch
 import com.xiaomi.duckling.dimension.matcher.Prods._
 import com.xiaomi.duckling.dimension.time.{Time, TimeData}
 import com.xiaomi.duckling.dimension.time.Prods._
@@ -164,12 +165,41 @@ object FuzzyDayIntervals {
         tt(TimeData(pred, timeGrain = Hour))
     }
   )
+  
+  val rule0OClockOfDay = Rule(
+    name = "0 o'clock of day",
+    pattern = List("(今|明|昨)晚上?".regex, is12oClockOfDay.predicate),
+    prod = tokens {
+      case Token(_, GroupMatch(_ :: s :: _)) :: Token(Time, td2: TimeData) :: _ =>
+        val offset =
+          s match {
+            case "今" => 0
+            case "明" => 1
+            case "昨" => -1
+          }
+  
+        val (m, grain) =
+          (td2.timePred, td2.form) match {
+            case (date: TimeDatePredicate, Some(TimeOfDay(_, _))) =>
+              date.minute match {
+                case Some((minute)) => (minute, Minute)
+                case None => (0, Hour)
+              }
+            case _ => (0, Hour)
+          }
+  
+        val td = if (grain == Minute) hourMinute(is12H = true, 24, m) else hour(true, 24)
+        val pred = SequencePredicate(List(cycleNth(Day, offset), td))
+        tt(TimeData(pred, timeGrain = grain))
+    }
+  )
 
   val rules = List(
     ruleFuzzyDayIntervals,
     ruleRecent,
     ruleFuzzyIntervalTimeOfDay1,
     ruleFuzzyIntervalTimeOfDay2,
-    rule24OClockOfDay
+    rule24OClockOfDay,
+    rule0OClockOfDay
   )
 }
