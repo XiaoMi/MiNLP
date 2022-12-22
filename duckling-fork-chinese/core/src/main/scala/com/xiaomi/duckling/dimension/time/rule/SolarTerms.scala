@@ -17,18 +17,22 @@
 package com.xiaomi.duckling.dimension.time.rule
 
 import com.google.common.collect.Table
-
 import java.time.LocalDate
 
 import com.xiaomi.duckling.Types.{conf, _}
 import com.xiaomi.duckling.dimension.implicits._
-import com.xiaomi.duckling.dimension.matcher.{LexiconMatch, LexiconMatches}
+import com.xiaomi.duckling.dimension.matcher.{GroupMatch, LexiconMatch, LexiconMatches}
 import com.xiaomi.duckling.dimension.time.Prods._
 import com.xiaomi.duckling.dimension.time.TimeData
+import com.xiaomi.duckling.dimension.time.date.Date
 import com.xiaomi.duckling.dimension.time.enums.Grain.Day
+import com.xiaomi.duckling.dimension.time.enums.IntervalType.Open
 import com.xiaomi.duckling.dimension.time.helper.SolarTermProvider
 import com.xiaomi.duckling.dimension.time.helper.TimePredicateHelpers._
 import com.xiaomi.duckling.engine.LexiconLookup.Dict
+import com.xiaomi.duckling.dimension.time.helper.TimeDataHelpers._
+import com.xiaomi.duckling.dimension.time.enums.Hint
+import com.xiaomi.duckling.dimension.time.predicates.SequencePredicate
 
 object SolarTerms {
 
@@ -42,7 +46,7 @@ object SolarTerms {
 
   def solarTermTable: Table[Int, String, LocalDate] = provdier.solarTermTable
 
-  val rule = Rule(
+  val solarTermRule = Rule(
     name = "<solar term>",
     pattern = List(dict.lexicon),
     prod = tokens {
@@ -56,6 +60,34 @@ object SolarTerms {
         tt(td)
     }
   )
+  
+  val seasonsRule = Rule(
+    name = "<four seasons>",
+    pattern = List("(春|夏|秋|冬)(天|季)".regex),
+    prod = optTokens {
+      case (options: Options, Token(_, GroupMatch(_ :: s :: _)) :: _) =>
+        if (options.timeOptions.parseFourSeasons) {
+          val (holiday, ss, se) = s match {
+            case "春" => ("春季", "立春", "立夏")
+            case "夏" => ("夏季", "立夏", "立秋")
+            case "秋" => ("秋季", "立秋", "立冬")
+            case _    => ("冬季", "立冬", "立春")
+          }
+  
+          val from = TimeData(timePred = solarTermPredicate(ss), timeGrain = Day, okForThisNext = true, holiday = ss) // 开始日期
+          val to = TimeData( // 结束日期
+            SequencePredicate(List(
+              TimeData(timePred = solarTermPredicate(se), timeGrain = Day, okForThisNext = true, holiday = se),
+              cycleNth(Day, -1).at(Hint.Recent) // 后开区间，需要减去一天
+            )),
+            timeGrain = Day,
+            hint = Hint.Sequence,
+            calendar = from.calendar
+          )
+  
+          for (td <- interval(Open, from, to)) yield Token(Date, td.copy(holiday = holiday))
+        } else None
+    })
 
-  val rules = List(rule)
+  val rules = List(solarTermRule, seasonsRule)
 }
