@@ -124,6 +124,24 @@ trait Examples extends DimExamples {
         Month
       ),
       List("上半年")
+    ),
+    (
+        localDateTimeInterval(
+          LocalDateTime.of(2014, 2, 4, 0, 0, 0),
+          LocalDateTime.of(2014, 5, 5, 0, 0, 0),
+          Day,
+          holiday = "春季"
+        ),
+        List("春天", "春季")
+    ),
+    (
+        localDateTimeInterval(
+          LocalDateTime.of(2013, 11, 7, 0, 0, 0),
+          LocalDateTime.of(2014, 2, 4, 0, 0, 0),
+          Day,
+          holiday = "冬季"
+        ),
+        List("冬天", "冬季")
     )
   )
 

@@ -17,17 +17,12 @@
 package com.xiaomi.duckling.ranking
 
 import com.typesafe.scalalogging.LazyLogging
-import org.json4s.FieldSerializer
-import org.json4s.jackson.Serialization.write
-
 import java.time.{LocalDateTime, ZonedDateTime}
 import java.util.Locale
 
 import com.xiaomi.duckling.Types._
-import com.xiaomi.duckling.dimension.place.PlaceData
-import com.xiaomi.duckling.dimension.quantity.QuantityData
-import com.xiaomi.duckling.dimension.time.TimeValue
-import com.xiaomi.duckling.{Document, JsonSerde}
+import com.xiaomi.duckling.dimension.time.TimeOptions
+import com.xiaomi.duckling.Document
 
 object Testing extends LazyLogging {
   type Example = (Document, ResolvedValue)
@@ -39,7 +34,7 @@ object Testing extends LazyLogging {
       referenceTime = ZonedDateTime.of(LocalDateTime.of(2013, 2, 12, 4, 30, 0), ZoneCN)
     )
 
-  val testOptions: Options = Options(full = true, debug = true)
+  val testOptions: Options = Options(full = true, debug = true, timeOptions = TimeOptions(parseFourSeasons = true))
 
   def examples(output: ResolvedValue,
                texts: List[String],
