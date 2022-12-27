@@ -119,7 +119,7 @@ object FuzzyDayIntervals {
     pattern = List(
       // 避免[2017年三月2号早上][10点半] 与 [2017年三月2号][早上10点半] 同时出现，只保留后者
       and(isAPartOfDay, not(isHint(PartOfDayAtLast))).predicate,
-      and(isNotLatent, or(isATimeOfDay, isIntervalOfDay)).predicate
+      and(or(isNotLatent, isLatent0oClockOfDay), or(isATimeOfDay, isIntervalOfDay)).predicate
     ),
     prod = tokens {
       case Token(Time, td0: TimeData) :: Token(Time, td: TimeData) :: _ =>

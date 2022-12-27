@@ -60,8 +60,8 @@ object Times {
         if (nd.isCnSeq) None
         else
           for (h <- getIntValue(t1)) yield {
-            val hint = if (h == 0 && s == "点") Hint.ComposeNeeded else Hint.NoHint
-            val td = hour(is12H = h > 0, h.toInt).copy(hint = hint)
+            val latent = if (h == 0 && s == "点") true else false
+            val td = hour(is12H = h > 0, h.toInt).copy(latent = latent, hint = Hint.NoHint)
             tt(td)
           }
     }
