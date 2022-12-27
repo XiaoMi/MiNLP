@@ -128,7 +128,7 @@ trait Rules extends DimRules {
       pattern = List(
         and(isDimension(Time), isNotLatent, not(isAPartOfDay)).predicate,
         // "一日"单独是latent，但是可以参与组合
-        and(isDimension(Time), or(and(isNotLatent, not(isAPartOfDay)), isADayOfMonth)).predicate
+        and(isDimension(Time), or(and(or(isNotLatent, isLatent0oClockOfDay), not(isAPartOfDay)), isADayOfMonth)).predicate
       ),
       prod = tokens {
         case Token(Time, td1: TimeData) :: Token(Time, td2: TimeData) :: _
