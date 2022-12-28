@@ -102,7 +102,9 @@ object Resources extends LazyLogging {
 
   def tryResource(resource: String): InputStream = {
     // explicit classloader for android
-    val input = Resources.getClass.getClassLoader.getResourceAsStream(resource)
+    // please reference to https://www.baeldung.com/java-class-vs-classloader-getresource for detailed info
+    val classLoader: ClassLoader = getClass.getClassLoader
+    val input = classLoader.getResourceAsStream(resource)
     if (input == null) throw new FileNotFoundException(s"Resource [$resource] not found")
     input
   }

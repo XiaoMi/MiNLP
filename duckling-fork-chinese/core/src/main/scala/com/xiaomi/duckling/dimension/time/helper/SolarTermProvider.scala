@@ -39,7 +39,7 @@ trait SolarTermProvider {
 
 class LocalSolarTermProvider extends SolarTermProvider {
   private val loadFrom = conf.getString("dimension.time.solar.days.load-from")
-  private val file = "/solar_terms.csv"
+  private val file = "solar_terms.csv"
 
   def build(): Table[Int, String, LocalDate] = {
     val builder = ImmutableTable.builder[Int, String, LocalDate]()
