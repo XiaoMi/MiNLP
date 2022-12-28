@@ -56,7 +56,7 @@ object Types extends LazyLogging {
     }
   }
 
-  private lazy val placeById: Map[Int, PlaceOne] = Resources.reader("/places4.json") {
+  private lazy val placeById: Map[Int, PlaceOne] = Resources.reader("places4.json") {
     in: Reader =>
       val ones = read[Seq[PlaceOne]](in).map(p => (p.id, p)).toMap
       logger.info(s"read ${ones.size} for Place")
