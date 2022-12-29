@@ -60,7 +60,7 @@ object NaiveBayesRank extends LazyLogging {
       Resources.inputStream(path)(in => KryoSerde.loadSerializedResource(in, classOf[Classifiers]))
     } catch {
       case t: Throwable =>
-        logger.warn(s"load model failed, now training from corpus", t)
+        logger.warn(s"load model failed, now training from corpus: ${t.getMessage}", t.getCause)
         makeClassifiers(
           rules,
           namedCorpus
@@ -79,8 +79,8 @@ object NaiveBayesRank extends LazyLogging {
       case Node(_, _, _, None, _, _) => 0.0
       case Node(_, _, children, Some(rule), _, _) =>
         classifiers.get(rule) match {
-          case None => 0.0
-          case Some(c) =>
+          case null => 0.0
+          case c =>
             val feats = extractFeatures(node)
             val childSum = children.map(score).sum
             if (feats.nonEmpty) Bayes.classify(c, feats)._2 + childSum
