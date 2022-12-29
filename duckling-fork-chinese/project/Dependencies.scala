@@ -38,7 +38,7 @@ object Dependencies {
     emoji,
     trie,
     easyBert,
-    chill
+    kryo5
   )
 
   lazy val serverDependencies = Seq(logback, spStarterWeb, spThymeleaf, reactor, lombok)
@@ -89,7 +89,7 @@ object Dependencies {
   lazy val easyBert = ("com.robrua.nlp" % "easy-bert" % "1.0.3") // BERT tokenizer
     .exclude("org.tensorflow", "tensorflow")
     .exclude("com.fasterxml.jackson.core", "jackson-databind")
-  lazy val chill = "com.twitter" %% "chill" % "0.10.0"
+  lazy val kryo5 = "com.esotericsoftware.kryo" % "kryo5" % "5.3.0"
 
   //web
   lazy val spThymeleaf = "org.springframework.boot" % "spring-boot-starter-thymeleaf" % "2.4.5"
