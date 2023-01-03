@@ -20,7 +20,7 @@ import com.xiaomi.duckling.Types._
 import com.xiaomi.duckling.dimension.Dimension
 import com.xiaomi.duckling.dimension.implicits._
 
-case object BloodType extends Dimension with Rules with Examples {
+case object BloodType extends Dimension with Rules {
   override val name: String = "BloodType"
 }
 

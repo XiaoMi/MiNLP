@@ -18,7 +18,6 @@ package com.xiaomi.duckling.dimension
 
 import com.xiaomi.duckling.Document
 import com.xiaomi.duckling.Types.Token
-import com.xiaomi.duckling.ranking.Testing.{examples, testContext, testOptions, Corpus, Example}
 import com.xiaomi.duckling.ranking.Types.{DiscreteFeature, Feature}
 import com.xiaomi.duckling.types.Node
 
@@ -27,7 +26,7 @@ import com.xiaomi.duckling.types.Node
   * Each dimension should have its own constructor and provide the data structure
   * for its parsed data
   */
-trait Dimension extends DimRules with DimExamples {
+trait Dimension extends DimRules {
   val name: String
   val dimDependents: List[Dimension] = Nil
   val nonOverlapDims: List[Dimension] = Nil
@@ -41,12 +40,6 @@ trait Dimension extends DimRules with DimExamples {
   def combinationFeatures(node: Node): List[Feature] = {
     List(DiscreteFeature(node.rule.get))
   }
-
-  lazy val allExamples: List[Example] = pairs.flatMap {
-    case (expected, texts) => examples(expected, texts, enableAnalyzer = enableAnalyzer)
-  }
-
-  lazy val corpus: Corpus = (testContext, testOptions.copy(targets = Set(this)), allExamples)
 }
 
 object Dimension {

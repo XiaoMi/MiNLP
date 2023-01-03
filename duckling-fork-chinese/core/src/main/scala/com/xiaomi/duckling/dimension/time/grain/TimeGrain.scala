@@ -19,9 +19,9 @@ package com.xiaomi.duckling.dimension.time.grain
 import com.xiaomi.duckling.Types._
 import com.xiaomi.duckling.dimension.implicits._
 import com.xiaomi.duckling.dimension.time.enums.Grain
-import com.xiaomi.duckling.dimension.{Dimension, NilExamples}
+import com.xiaomi.duckling.dimension.Dimension
 
-case object TimeGrain extends Dimension with Rules with NilExamples {
+case object TimeGrain extends Dimension with Rules {
   override val name: String = "TimeGrain"
 }
 

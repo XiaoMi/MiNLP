@@ -45,7 +45,7 @@ trait Rules extends DimRules {
   )
 
   val perHourNumberKm = Rule(
-    name = "per <number> km",
+    name = "per <number> km 1",
     pattern = List("(每|一)小时".regex, isDimension(Numeral).predicate, "(千米|公里|英里|迈|码)".regex),
     prod = tokens {
       case _ :: Token(_, NumeralData(value, _, _, _, _, _)) :: Token(_, GroupMatch(s :: _)) :: _ =>
@@ -63,7 +63,7 @@ trait Rules extends DimRules {
   )
 
   val perSecondNumberM = Rule(
-    name = "per <number> km",
+    name = "per <number> km 2",
     pattern = List("(每|一)秒".regex, isDimension(Numeral).predicate, "(米|英尺|尺)".regex),
     prod = tokens {
       case _ :: Token(_, NumeralData(value, _, _, _, _, _)) :: Token(_, GroupMatch(s :: _)) :: _ =>

@@ -22,7 +22,7 @@ import com.xiaomi.duckling.dimension.Dimension
 import com.xiaomi.duckling.dimension.implicits._
 import com.xiaomi.duckling.dimension.numeral.Numeral
 
-case object Fraction extends Dimension with Rules with Examples {
+case object Fraction extends Dimension with Rules {
   override val name: String = "Fraction"
 
   override val dimDependents: List[Dimension] = List(Numeral)
