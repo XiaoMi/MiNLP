@@ -143,7 +143,12 @@ trait Rules extends DimRules {
             val hint =
               if (td1.timeGrain == Year && td2.hint == MonthOnly) YearMonth
               else Intersect
-            val td = intersect(td1, removeAMPM(td2)).map(_.copy(hint = hint))
+            // 10号八点，需要去掉AMPM (今天是10号9点时，不应再出20点)
+            // 今天8点，需要根据当前时间是出8/20点
+            val _td2 =
+              if (td1.hint == Hint.RecentNominal) td2
+              else removeAMPM(td2)
+            val td = intersect(td1, _td2).map(_.copy(hint = hint))
             tt(td)
           }
       }
