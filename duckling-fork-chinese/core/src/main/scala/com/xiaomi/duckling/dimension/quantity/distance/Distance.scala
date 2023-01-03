@@ -19,7 +19,7 @@ package com.xiaomi.duckling.dimension.quantity.distance
 import com.xiaomi.duckling.dimension.Dimension
 import com.xiaomi.duckling.dimension.numeral.Numeral
 
-case object Distance extends Dimension with Rules with Examples {
+case object Distance extends Dimension with Rules {
   override val name: String = "Distance"
 
   override val dimDependents: List[Dimension] = List(Numeral)

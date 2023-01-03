@@ -22,7 +22,7 @@ import com.xiaomi.duckling.dimension.numeral.Numeral
 import com.xiaomi.duckling.dimension.numeral.seq.DigitSequence
 import com.xiaomi.duckling.dimension.time.duration.Duration
 
-case object Date extends Dimension with Rules with Examples {
+case object Date extends Dimension with Rules {
   override val name: String = "Date"
 
   override val dimDependents: List[Dimension] = List(Numeral, DigitSequence, Duration)

@@ -29,8 +29,6 @@ object Dependencies {
     guava,
     java8,
     lunar,
-    jline % Provided,
-    jlineJansi % Provided,
     slf4jApi,
     scalaLogging,
     config,
@@ -52,6 +50,8 @@ object Dependencies {
     "org.apache.commons" % "commons-lang3",
     "org.json4s" %% "json4s-jackson"
   )
+
+  lazy val learningDependencies = Seq(jline, jlineJansi, logback, reflections, shapeless)
 
   // test
   lazy val junit = "junit" % "junit" % "4.13.2"
@@ -90,6 +90,8 @@ object Dependencies {
     .exclude("org.tensorflow", "tensorflow")
     .exclude("com.fasterxml.jackson.core", "jackson-databind")
   lazy val kryo5 = "com.esotericsoftware.kryo" % "kryo5" % "5.3.0"
+  lazy val reflections = "org.reflections" % "reflections" % "0.10.2"
+  lazy val shapeless = "com.chuusai" %% "shapeless" % "2.3.10"
 
   //web
   lazy val spThymeleaf = "org.springframework.boot" % "spring-boot-starter-thymeleaf" % "2.4.5"

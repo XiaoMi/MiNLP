@@ -19,7 +19,7 @@ package com.xiaomi.duckling.dimension.music
 import com.xiaomi.duckling.Types._
 import com.xiaomi.duckling.dimension.Dimension
 
-case object Lyric extends Dimension with Rules with Examples {
+case object Lyric extends Dimension with Rules {
   override val name: String = "Lyric"
 }
 

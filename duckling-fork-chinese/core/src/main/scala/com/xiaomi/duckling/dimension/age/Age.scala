@@ -21,7 +21,7 @@ import com.xiaomi.duckling.dimension.Dimension
 import com.xiaomi.duckling.dimension.implicits._
 import com.xiaomi.duckling.dimension.numeral.{IntervalValue, Numeral}
 
-case object Age extends Dimension with Rules with Examples {
+case object Age extends Dimension with Rules {
   override val name: String = "Age"
 
   override val dimDependents: List[Dimension] = List(Numeral)

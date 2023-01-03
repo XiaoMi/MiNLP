@@ -98,7 +98,7 @@ object Types extends LazyLogging {
       .asJava
   }
 
-  val isPlace: Predicate = isDimension(Place)
+  def isPlace: Predicate = isDimension(Place)
 
   val isPlaceLevel1: Predicate = {
     case Token(Place, PlaceData(_, _, level, _)) => level == 1

@@ -19,7 +19,7 @@ package com.xiaomi.duckling.dimension.quantity.area
 import com.xiaomi.duckling.dimension.Dimension
 import com.xiaomi.duckling.dimension.numeral.Numeral
 
-case object Area extends Dimension with Rules with Examples {
+case object Area extends Dimension with Rules {
   override val name: String = "Area"
 
   override val dimDependents: List[Dimension] = List(Numeral)

@@ -31,7 +31,7 @@ trait Rules extends DimRules {
   private val levels = Sets.newHashSet("省", "市", "州", "区", "县")
 
   val rulePlace = Rule(
-    name = "place: any",
+    name = "place: any 1",
     pattern = List(placeDict.lexicon),
     prod = tokens {
       case Token(LexiconMatch, LexiconMatches(s, t)) :: _ =>
@@ -41,7 +41,7 @@ trait Rules extends DimRules {
   )
 
   val rulePlaceBirth = Rule(
-    name = "place: any",
+    name = "place: any 2",
     pattern = List(isPlace.predicate, "人".regex),
     prod = tokens {
       case Token(Place, pd: PlaceData) :: _ =>

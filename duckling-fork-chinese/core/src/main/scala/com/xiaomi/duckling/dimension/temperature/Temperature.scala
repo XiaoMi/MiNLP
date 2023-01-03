@@ -19,7 +19,7 @@ package com.xiaomi.duckling.dimension.temperature
 import com.xiaomi.duckling.dimension.Dimension
 import com.xiaomi.duckling.dimension.numeral.Numeral
 
-case object Temperature extends Dimension with Rules with Examples {
+case object Temperature extends Dimension with Rules {
   override val name: String = "Temperature"
 
   override val dimDependents: List[Dimension] = List(Numeral)

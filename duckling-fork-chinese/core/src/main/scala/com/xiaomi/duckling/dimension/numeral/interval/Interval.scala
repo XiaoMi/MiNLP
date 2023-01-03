@@ -16,8 +16,8 @@
 
 package com.xiaomi.duckling.dimension.numeral.interval
 
-import com.xiaomi.duckling.dimension.{Dimension, NilExamples, NilRules}
+import com.xiaomi.duckling.dimension.{Dimension, NilRules}
 
-case object Interval extends Dimension with NilRules with NilExamples {
+case object Interval extends Dimension with NilRules {
   override val name: String = "Interval"
 }

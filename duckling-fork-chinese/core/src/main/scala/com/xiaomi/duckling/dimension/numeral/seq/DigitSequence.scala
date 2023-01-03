@@ -23,7 +23,7 @@ import com.xiaomi.duckling.dimension.implicits._
 /**
   * 中文数字序列，比如：一一零，一九八七
   */
-case object DigitSequence extends Dimension with Rules with Examples {
+case object DigitSequence extends Dimension with Rules {
   override val name: String = "DigitSequence"
 }
 

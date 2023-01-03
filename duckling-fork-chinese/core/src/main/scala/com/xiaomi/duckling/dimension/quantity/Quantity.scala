@@ -24,7 +24,7 @@ import com.xiaomi.duckling.dimension.numeral.Numeral
 /**
   * quantity = number + unit
   */
-case object Quantity extends Dimension with Rules with Examples {
+case object Quantity extends Dimension with Rules {
   override val name: String = "Quantity"
 
   override val dimDependents: List[Dimension] = List(Numeral)
