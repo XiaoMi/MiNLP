@@ -22,7 +22,7 @@ import scala.collection.JavaConverters._
 import scala.util.matching.Regex
 import com.typesafe.config.ConfigFactory
 
-import com.xiaomi.duckling.dimension.{CorpusSets, Dimension, EnumeratedDimension}
+import com.xiaomi.duckling.dimension.{RuleSets, Dimension, EnumeratedDimension}
 import com.xiaomi.duckling.dimension.numeral.NumeralOptions
 import com.xiaomi.duckling.dimension.time.TimeOptions
 import com.xiaomi.duckling.dimension.time.Types.DuckDateTime
@@ -211,7 +211,7 @@ object Types {
         rankOptions = RankOptions(ranker = Some(Ranker.NaiveBayes), combinationRank = true),
         full = false,
         debug = false,
-        targets = targets.asScala.map(CorpusSets.namedDimensions).toSet,
+        targets = targets.asScala.map(RuleSets.namedDimensions).toSet,
         varcharExpand = false,
         entityWithNode = false
       )

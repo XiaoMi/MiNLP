@@ -23,7 +23,7 @@ import com.xiaomi.duckling.dimension.implicits._
 import com.xiaomi.duckling.dimension.numeral.Numeral
 import com.xiaomi.duckling.dimension.quantity.QuantityValue
 
-case object Currency extends Dimension with Rules with Examples {
+case object Currency extends Dimension with Rules {
   override val name: String = "Currency"
 
   override val dimDependents: List[Dimension] = List(Numeral)

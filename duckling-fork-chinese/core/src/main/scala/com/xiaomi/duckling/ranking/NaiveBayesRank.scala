@@ -16,42 +16,36 @@
 
 package com.xiaomi.duckling.ranking
 
-import scala.collection.JavaConverters._
+import java.util.{Map => JMap}
 
-import org.json4s.jackson.Serialization.writePretty
+import scala.collection.JavaConverters._
 
 import com.typesafe.scalalogging.LazyLogging
 
 import com.xiaomi.duckling.{Resources, Rules}
-import com.xiaomi.duckling.JsonSerde._
 import com.xiaomi.duckling.Types.{conf, Answer, Rule}
-import com.xiaomi.duckling.dimension.CorpusSets
-import com.xiaomi.duckling.dimension.CorpusSets.CorpusSet
-import com.xiaomi.duckling.ranking.NaiveBayesLearning._
-import com.xiaomi.duckling.ranking.Testing.Corpus
+import com.xiaomi.duckling.dimension.RuleSets
+import com.xiaomi.duckling.ranking.Bayes.Classifier
+import com.xiaomi.duckling.ranking.Types.BagOfFeatures
 import com.xiaomi.duckling.types.Node
 
 object NaiveBayesRank extends LazyLogging {
+
+  type Classifiers = JMap[String, Classifier]
 
   private val dimPath = "model.bayes.dims"
   private val modelPath = "model.bayes.file"
 
   private val dims =
     if (conf.hasPath(dimPath)) {
-      conf.getStringList(dimPath).asScala.map(s => CorpusSets.namedDimensions(s.toLowerCase)).toList
+      conf.getStringList(dimPath).asScala.map(s => RuleSets.namedDimensions(s.toLowerCase)).toList
     } else {
       throw new IllegalArgumentException("no dimension specified, ignore")
     }
 
-  // naive bayes支持的dimension
-  private val namedCorpus: List[CorpusSet] = dims.map { dim =>
-    (dim, dim.corpus, Rules.rulesFor(null, Set(dim)))
-  }
+  val rules: List[Rule] = Rules.rulesFor(null, dims.toSet)
 
-  private val rules: List[Rule] =
-    namedCorpus.flatMap(_._3).groupBy(_.name).values.map(_.head).toList
-
-  private val classifiers: Classifiers = {
+  lazy val classifiers: Classifiers = {
     try {
       val path =
         if (conf.hasPathOrNull(modelPath)) conf.getString(modelPath)
@@ -60,13 +54,8 @@ object NaiveBayesRank extends LazyLogging {
       Resources.inputStream(path)(in => KryoSerde.loadSerializedResource(in, classOf[Classifiers]))
     } catch {
       case t: Throwable =>
-        logger.warn(s"load model failed, now training from corpus: ${t.getMessage}", t.getCause)
-        makeClassifiers(
-          rules,
-          namedCorpus
-            .map { case (_, corpus: Corpus, _) => corpus }
-            .reduce((a, b) => (a._1, a._2, a._3 ++ b._3))
-        )
+        logger.warn(s"load model failed ${t.getMessage}", t.getCause)
+        throw t
     }
   }
 
@@ -89,18 +78,17 @@ object NaiveBayesRank extends LazyLogging {
     }
   }
 
-  def main(args: Array[String]): Unit = {
-    if (args.length != 0) {
-
-      val file = args(0)
-
-      val origin = writePretty(classifiers)
-
-      KryoSerde.makeSerializedFile(classifiers, file)
-      val out = KryoSerde.loadSerializedFile(file, classOf[Classifiers])
-
-      val after = writePretty(out)
-      assert(origin == after)
-    }
+  /**
+   * -- | Feature extraction
+   * -- | Features:
+   * -- | 1) Concatenation of the names of the rules involved in parsing `Node`
+   * -- | 2) Concatenation of the grains for time-like dimensions
+   *
+   * @param node
+   * @return
+   */
+  def extractFeatures(node: Node): BagOfFeatures = {
+    val rules = node.children.flatMap(_.rule)
+    Map(rules.mkString("/") -> 1)
   }
 }

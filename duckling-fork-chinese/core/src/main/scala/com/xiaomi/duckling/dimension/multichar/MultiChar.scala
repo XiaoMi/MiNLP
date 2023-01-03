@@ -23,7 +23,7 @@ import com.xiaomi.duckling.dimension.implicits._
 /**
   * 包括emoji和更多的双Char字符
   */
-case object MultiChar extends Dimension with Rules with Examples {
+case object MultiChar extends Dimension with Rules {
   override val name: String = "MultiChar"
 }
 

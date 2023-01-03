@@ -37,7 +37,6 @@ import com.xiaomi.duckling.dimension.Dimension
 import com.xiaomi.duckling.dimension.ordinal.OrdinalData
 import com.xiaomi.duckling.dimension.place.PlaceData
 import com.xiaomi.duckling.dimension.time.predicates.SeriesPredicate
-import com.xiaomi.duckling.ranking.Testing
 import com.xiaomi.duckling.types.Node
 
 object JsonSerde extends LazyLogging {
@@ -168,7 +167,7 @@ object JsonSerde extends LazyLogging {
     val expected = write(value)
     val actual = write(resolvedToken.value)
     val equals = expected == actual
-    if (!equals && Testing.testOptions.debug) {
+    if (!equals) {
       logger.debug(s"checking: ${doc.rawInput}")
       logger.debug(s"expected ${if (expected == actual) "=" else "!="} actual")
       logger.debug(s"expected: $expected")

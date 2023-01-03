@@ -21,7 +21,7 @@ import com.xiaomi.duckling.dimension.Dimension
 import com.xiaomi.duckling.dimension.implicits._
 import com.xiaomi.duckling.dimension.place.Types.PlaceOne
 
-case object Place extends Dimension with Rules with Examples {
+case object Place extends Dimension with Rules {
   override val name: String = "Place"
 
   override val enableAnalyzer: Boolean = true

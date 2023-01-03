@@ -17,9 +17,9 @@
 package com.xiaomi.duckling.dimension.matcher
 
 import com.xiaomi.duckling.Types._
-import com.xiaomi.duckling.dimension.{Dimension, NilExamples, NilRules}
+import com.xiaomi.duckling.dimension.{Dimension, NilRules}
 
-case object PhraseMatch extends Dimension with NilExamples with NilRules {
+case object PhraseMatch extends Dimension with NilRules {
   override val name: String = "PhraseMatch"
 }
 

@@ -26,7 +26,7 @@ import com.xiaomi.duckling.dimension.time.enums.Grain
 import com.xiaomi.duckling.dimension.time.grain.TimeGrain
 import com.xiaomi.duckling.dimension.time.unitNumber.UnitNumber
 
-case object Duration extends Dimension with Rules with Examples {
+case object Duration extends Dimension with Rules {
   override val name: String = "Duration"
 
   override val dimDependents: List[Dimension] = List(TimeGrain, Numeral, UnitNumber)

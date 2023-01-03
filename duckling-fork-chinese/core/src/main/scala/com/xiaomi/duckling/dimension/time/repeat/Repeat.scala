@@ -25,7 +25,7 @@ import com.xiaomi.duckling.dimension.time.grain.TimeGrain
 import com.xiaomi.duckling.dimension.time.Types._
 import com.xiaomi.duckling.dimension.time.enums.Grain
 
-case object Repeat extends Dimension with Rules with Examples {
+case object Repeat extends Dimension with Rules {
   override val name: String = "Repeat"
 
   override val dimDependents: List[Dimension] = List(TimeGrain, Duration, Time)

@@ -19,7 +19,7 @@ package com.xiaomi.duckling.dimension.episode
 import com.xiaomi.duckling.dimension.Dimension
 import com.xiaomi.duckling.dimension.ordinal.Ordinal
 
-case object Episode extends Dimension with Examples with Rules {
+case object Episode extends Dimension with Rules {
   override val name: String = "Episode"
   override val dimDependents: List[Dimension] = List(Ordinal)
 }

@@ -19,7 +19,7 @@ package com.xiaomi.duckling.dimension.quantity.velocity
 import com.xiaomi.duckling.dimension.Dimension
 import com.xiaomi.duckling.dimension.numeral.Numeral
 
-case object Velocity extends Dimension with Rules with Examples {
+case object Velocity extends Dimension with Rules {
   override val name: String = "Velocity"
 
   override val dimDependents: List[Dimension] = List(Numeral)

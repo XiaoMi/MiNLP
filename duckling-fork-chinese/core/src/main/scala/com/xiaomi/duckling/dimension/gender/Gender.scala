@@ -18,9 +18,9 @@ package com.xiaomi.duckling.dimension.gender
 
 import com.xiaomi.duckling.Types._
 import com.xiaomi.duckling.dimension.implicits._
-import com.xiaomi.duckling.dimension.{Dimension, NilExamples}
+import com.xiaomi.duckling.dimension.Dimension
 
-case object Gender extends Dimension with Rules with NilExamples {
+case object Gender extends Dimension with Rules {
   override val name: String = "Gender"
 }
 

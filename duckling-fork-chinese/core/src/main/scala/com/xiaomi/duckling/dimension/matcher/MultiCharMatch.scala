@@ -17,12 +17,12 @@
 package com.xiaomi.duckling.dimension.matcher
 
 import com.xiaomi.duckling.Types._
-import com.xiaomi.duckling.dimension.{Dimension, NilExamples, NilRules}
+import com.xiaomi.duckling.dimension.{Dimension, NilRules}
 
 /**
   * 多字符匹配，比如emoji 😄️ 之类
   */
-case object MultiCharMatch extends Dimension with NilRules with NilExamples {
+case object MultiCharMatch extends Dimension with NilRules {
   override val name: String = "MultiCharMatch"
 }
 

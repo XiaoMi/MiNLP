@@ -17,12 +17,12 @@
 package com.xiaomi.duckling.dimension.matcher
 
 import com.xiaomi.duckling.Types._
-import com.xiaomi.duckling.dimension.{Dimension, NilExamples, NilRules}
+import com.xiaomi.duckling.dimension.{Dimension, NilRules}
 
 /**
   * 词典匹配
   */
-case object LexiconMatch extends Dimension with NilRules with NilExamples {
+case object LexiconMatch extends Dimension with NilRules {
   override val name: String = "LexiconMatch"
 }
 

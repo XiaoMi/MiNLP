@@ -17,11 +17,11 @@
 package com.xiaomi.duckling.dimension.time.unitNumber
 
 import com.xiaomi.duckling.Types._
+import com.xiaomi.duckling.dimension.{Dimension, DimRules}
 import com.xiaomi.duckling.dimension.implicits._
 import com.xiaomi.duckling.dimension.numeral.{Numeral, NumeralData}
-import com.xiaomi.duckling.dimension.{DimRules, Dimension, NilExamples}
 
-case object UnitNumber extends Dimension with Rules with NilExamples {
+case object UnitNumber extends Dimension with Rules {
   override val name: String = "UnitNumber"
   override val dimDependents: List[Dimension] = List(Numeral)
 }

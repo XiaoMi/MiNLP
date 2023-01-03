@@ -38,7 +38,7 @@ import com.xiaomi.duckling.exceptions.LunarOutOfRangeException
 import com.xiaomi.duckling.ranking.Types.{DiscreteFeature, Feature}
 import com.xiaomi.duckling.types.Node
 
-case object Time extends Dimension with Rules with Examples {
+case object Time extends Dimension with Rules {
   override val name: String = "Time"
 
   override val dimDependents: List[Dimension] =

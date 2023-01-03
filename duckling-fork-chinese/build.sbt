@@ -51,7 +51,7 @@ publish / skip := true // don't publish the root project
 
 lazy val `duckling-fork-chinese` = project.in(file("."))
   .settings(sharedSettings)
-  .aggregate(core, lite, test, server, benchmark)
+  .aggregate(core, learning, test, lite, server, benchmark)
 
 lazy val core = project
   .settings(
@@ -66,6 +66,13 @@ lazy val test = project
     sharedSettings,
     libraryDependencies ++= testDependencies
   )
+
+lazy val learning = project
+  .settings(
+    name := "duckling-learning",
+    sharedSettings,
+    libraryDependencies ++= learningDependencies
+  ).dependsOn(core % "compile->compile", test % "test->test")
 
 lazy val lite = project
   .settings(
@@ -104,8 +111,9 @@ lazy val benchmark = project
   .dependsOn(core)
 
 // 不能正常工作，jline不能正常初始化，先留着
+// 可以使用 sbt learning/console ，然后输入 com.xiaomi.duckling.task.NaiveBayesConsole.run() 来代替
 lazy val duckConsole = taskKey[Unit]("duck console task")
-duckConsole := (core / Runtime / runMain).toTask(" com.xiaomi.duckling.task.NaiveBayesConsole").value
+duckConsole := (learning / Runtime / runMain).toTask(" com.xiaomi.duckling.task.NaiveBayesConsole").value
 
 lazy val duckModel = taskKey[Unit]("duck naive bayes training task")
-duckModel := (core / Runtime / runMain).toTask(" com.xiaomi.duckling.task.Training").value
+duckModel := (learning / Runtime / runMain).toTask(" com.xiaomi.duckling.task.Training").value

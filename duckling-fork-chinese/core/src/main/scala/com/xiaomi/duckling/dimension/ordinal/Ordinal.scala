@@ -21,7 +21,7 @@ import com.xiaomi.duckling.dimension.Dimension
 import com.xiaomi.duckling.dimension.implicits._
 import com.xiaomi.duckling.dimension.numeral.Numeral
 
-case object Ordinal extends Dimension with Rules with Examples {
+case object Ordinal extends Dimension with Rules {
   override val name: String = "Ordinal"
   override val dimDependents: List[Dimension] = List(Numeral)
 }

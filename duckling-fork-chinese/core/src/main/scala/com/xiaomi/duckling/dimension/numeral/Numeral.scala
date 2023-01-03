@@ -22,7 +22,7 @@ import com.xiaomi.duckling.dimension.implicits._
 import com.xiaomi.duckling.dimension.numeral.seq.DigitSequence
 import com.xiaomi.duckling.dimension.time.enums.{IntervalDirection, IntervalType}
 
-case object Numeral extends Dimension with Rules with Examples {
+case object Numeral extends Dimension with Rules {
   override val name: String = "Numeral"
 
   override val dimDependents: List[Dimension] = List(DigitSequence)

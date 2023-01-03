@@ -19,7 +19,7 @@ package com.xiaomi.duckling.dimension.season
 import com.xiaomi.duckling.dimension.Dimension
 import com.xiaomi.duckling.dimension.ordinal.Ordinal
 
-case object Season extends Dimension with Examples with Rules {
+case object Season extends Dimension with Rules {
   override val name: String = "Season"
   override val dimDependents: List[Dimension] = List(Ordinal)
 }
