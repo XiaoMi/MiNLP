@@ -346,7 +346,7 @@ trait Rules extends DimRules {
     */
   val ruleFromToInterval = Rule(
     name = "<from> 到 <to>",
-    pattern = List(isNotLatent.predicate, "(至|到)".regex, isNotLatent.predicate),
+    pattern = List(isNotLatent.predicate, "(至|到|~)".regex, isNotLatent.predicate),
     prod = tokens {
       case Token(Time, td1 @ TimeData(pred1, _, g1, _, _, _, _, _, _, _, _, _)) :: _ ::
             Token(Time, td2 @ TimeData(pred2, _, g2, _, _, _, _, _, _, _, _, _)) :: _ =>
