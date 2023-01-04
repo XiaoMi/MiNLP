@@ -13,5 +13,9 @@ object Testing {
       referenceTime = ZonedDateTime.of(LocalDateTime.of(2013, 2, 12, 4, 30, 0), ZoneCN)
     )
 
-  val testOptions: Options = Options(full = true, debug = true, timeOptions = TimeOptions(parseFourSeasons = true))
+  val testOptions: Options = {
+    val timeOpts = new TimeOptions()
+    timeOpts.setParseFourSeasons(true)
+    Options(full = true, debug = true, timeOptions = timeOpts)
+  }
 }

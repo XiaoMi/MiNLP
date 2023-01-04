@@ -17,7 +17,6 @@
 package com.xiaomi.duckling.dimension.numeral
 
 import com.xiaomi.duckling.Api.analyze
-import com.xiaomi.duckling.Types.RankOptions
 import com.xiaomi.duckling.dimension.numeral.Predicates._
 import com.xiaomi.duckling.dimension.numeral.fraction.{Fraction, FractionData}
 import com.xiaomi.duckling.dimension.ordinal.{Ordinal, OrdinalData}
@@ -26,11 +25,11 @@ import com.xiaomi.duckling.UnitSpec
 
 class NumeralTest extends UnitSpec {
 
-  val options = testOptions.copy(
-    targets = Set(Numeral),
-    full = false,
-    rankOptions = RankOptions(combinationRank = true)
-  )
+  val options = {
+    val opts = testOptions.copy(targets = Set(Numeral), full = false)
+    opts.rankOptions.setCombinationRank(true)
+    opts
+  }
 
   describe("NumeralTest") {
     val cases = Table(
@@ -153,7 +152,9 @@ class NumeralTest extends UnitSpec {
 
   describe("NumeralOptionsTest") {
     it("KMG Support") {
-      val opts0 = testOptions.copy(targets = Set(Numeral), full = false, numeralOptions = NumeralOptions(KMG_Support = false))
+      val numeralOptions = new NumeralOptions()
+      numeralOptions.setKMG_Support(false)
+      val opts0 = testOptions.copy(targets = Set(Numeral), full = false, numeralOptions = numeralOptions)
       val answers0 = analyze("1.2G", testContext, opts0)
       answers0(0).token.value match {
         case data: NumeralValue => data.n should be
@@ -161,7 +162,8 @@ class NumeralTest extends UnitSpec {
         case _ => true shouldBe (false)
       }
 
-      val opts1 = testOptions.copy(targets = Set(Numeral), full = false, numeralOptions = NumeralOptions(KMG_Support = true))
+      numeralOptions.setKMG_Support(true)
+      val opts1 = testOptions.copy(targets = Set(Numeral), full = false, numeralOptions = numeralOptions)
       val answers1 = analyze("1.2G", testContext, opts1)
       answers1(0).token.value match {
         case data: NumeralValue => data.n should be

@@ -16,13 +16,16 @@
 
 package com.xiaomi.duckling
 
-import java.time.{ZoneId, ZonedDateTime}
+import java.time.{ZonedDateTime, ZoneId}
 import java.util.Locale
+
+import scala.beans.{BeanProperty, BooleanBeanProperty}
 import scala.collection.JavaConverters._
 import scala.util.matching.Regex
+
 import com.typesafe.config.ConfigFactory
 
-import com.xiaomi.duckling.dimension.{RuleSets, Dimension, EnumeratedDimension}
+import com.xiaomi.duckling.dimension.{Dimension, EnumeratedDimension, RuleSets}
 import com.xiaomi.duckling.dimension.numeral.NumeralOptions
 import com.xiaomi.duckling.dimension.time.TimeOptions
 import com.xiaomi.duckling.dimension.time.Types.DuckDateTime
@@ -193,10 +196,9 @@ object Types {
                      targets: Set[Dimension] = Set(),
                      varcharExpand: Boolean = false,
                      entityWithNode: Boolean = false,
-                     rankOptions: RankOptions = RankOptions(),
-                     timeOptions: TimeOptions = TimeOptions(),
-                     numeralOptions: NumeralOptions = NumeralOptions(),
-                     timeout: Option[Int] = Some(50)) {
+                     rankOptions: RankOptions = new RankOptions(),
+                     timeOptions: TimeOptions = new TimeOptions(),
+                     numeralOptions: NumeralOptions = new NumeralOptions()) {
 
     def enableAnalyzer: Boolean = {
       targets.flatMap(Dimension.dimDependents).exists(_.enableAnalyzer)
@@ -208,7 +210,6 @@ object Types {
     def this(targets: java.util.Set[String], withLatent: Boolean) = {
       this(
         withLatent = withLatent,
-        rankOptions = RankOptions(ranker = Some(Ranker.NaiveBayes), combinationRank = true),
         full = false,
         debug = false,
         targets = targets.asScala.map(RuleSets.namedDimensions).toSet,
@@ -221,7 +222,7 @@ object Types {
     def this(targets: java.util.List[EnumeratedDimension], withLatent: Boolean) = {
       this(
         withLatent = withLatent,
-        rankOptions = RankOptions(ranker = Some(Ranker.NaiveBayes)),
+        rankOptions = new RankOptions(),
         full = false,
         debug = false,
         targets = targets.asScala.map(_.getDimension).toSet,
@@ -241,24 +242,29 @@ object Types {
     def withRankOptions(rankOptions: RankOptions): Options = {
       copy(rankOptions = rankOptions)
     }
-
-    def withTimeout(timeout: Int): Options = {
-      copy(timeout = Some(timeout))
-    }
   }
 
   /**
-    * 排序的选项
-    *
-    * @param winnerOnly      是否只保留分数最高的结果
-    * @param ranker          排序使用的分类器
-    * @param combinationRank 组合排序
-    * @param rangeRankAhead  先进行范围排序，再做打分。可以减少节点进入 resolved 阶段，提升效率
-    */
-  case class RankOptions(winnerOnly: Boolean = true,
-                         ranker: Option[Ranker] = Some(Ranker.NaiveBayes),
-                         combinationRank: Boolean = false,
-                         rangeRankAhead: Boolean = false)
+   * 排序的选项
+   */
+  class RankOptions {
+    /**
+     * 是否只保留分数最高的结果
+     */
+    @BooleanBeanProperty var winnerOnly: Boolean = true
+    /**
+     * 排序使用的分类器
+     */
+    @BeanProperty var ranker: Option[Ranker] = Some(Ranker.NaiveBayes)
+    /**
+     * 使用组合排序
+     */
+    @BooleanBeanProperty var combinationRank: Boolean = true
+    /**
+     * 先进行范围排序，再做打分。可以减少节点进入 resolved 阶段，提升效率
+     */
+    @BooleanBeanProperty var rangeRankAhead: Boolean = false
+  }
 
   case class Rule(name: String,
                   pattern: Pattern,

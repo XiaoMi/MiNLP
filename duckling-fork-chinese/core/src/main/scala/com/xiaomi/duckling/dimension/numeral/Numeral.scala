@@ -16,6 +16,8 @@
 
 package com.xiaomi.duckling.dimension.numeral
 
+import scala.beans.BooleanBeanProperty
+
 import com.xiaomi.duckling.Types._
 import com.xiaomi.duckling.dimension.Dimension
 import com.xiaomi.duckling.dimension.implicits._
@@ -53,16 +55,26 @@ case class NumeralData(value: Double,
 }
 
 /**
- *
- * @param allowZeroLeadingDigits 允许000318解析为318
- * @param cnSequenceAsNumber     允许一二三四解析出1234
- * @param dialectSupport         允许识别方言中的"俩仨"
- * @param KMG_Support            允许识别类似"10k"为"10,000"
+ * 数字解析的额外参数，控制一些可选行为
  */
-case class NumeralOptions(allowZeroLeadingDigits: Boolean = false,
-                          cnSequenceAsNumber: Boolean = false,
-                          dialectSupport: Boolean = false,
-                          KMG_Support: Boolean = true)
+class NumeralOptions {
+  /**
+   * 允许000318解析为318
+   */
+  @BooleanBeanProperty var allowZeroLeadingDigits: Boolean = false
+  /**
+   * 允许一二三四解析出1234
+   */
+  @BooleanBeanProperty var cnSequenceAsNumber: Boolean = false
+  /**
+   * 允许识别方言中的"俩仨"
+   */
+  @BooleanBeanProperty var dialectSupport: Boolean = false
+  /**
+   * 允许识别类似"10k"为"10,000"
+   */
+  @BooleanBeanProperty var KMG_Support: Boolean = true
+}
 
 trait IntervalValue extends ResolvedValue
 

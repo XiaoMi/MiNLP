@@ -24,7 +24,7 @@ import org.json4s.jackson.Serialization.write
 import com.xiaomi.duckling.Api
 import com.xiaomi.duckling.Api.formatToken
 import com.xiaomi.duckling.JsonSerde._
-import com.xiaomi.duckling.Types.{Context, Options, RankOptions}
+import com.xiaomi.duckling.Types.{Context, Options}
 import com.xiaomi.duckling.dimension.RuleSets
 
 object AnswerSizeDetector {
@@ -32,8 +32,8 @@ object AnswerSizeDetector {
     val Array(dims, query) = args
     val targets = dims.split(",").map(RuleSets.namedDimensions).toSet
 
-    val options = Options(withLatent = false, full = false,
-      rankOptions = RankOptions(winnerOnly = false), targets = targets)
+    val options = Options(withLatent = false, targets = targets)
+    options.rankOptions.setWinnerOnly(false)
     val context = Context(ZonedDateTime.now(), Locale.CHINA)
 
     Api.analyze("123", context, options)

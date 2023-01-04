@@ -56,7 +56,8 @@ class TimeDataTest extends UnitSpec with LazyLogging {
     )
 
     it("not InFuture eq") {
-      val timeOptions = TimeOptions(alwaysInFuture = false)
+      val timeOptions = new TimeOptions()
+      timeOptions.setAlwaysInFuture(false)
       val options = testOptions.copy(targets = Set(Time), timeOptions = timeOptions)
 
       testCases.foreach {
@@ -88,13 +89,14 @@ class TimeDataTest extends UnitSpec with LazyLogging {
           .asInstanceOf[SimpleValue].instant
       }
 
-      val options1 = options.withTimeOptions(new TimeOptions(inheritGrainOfDuration = false))
-      val t1 = parse("三分钟后", options1)
+      options.timeOptions.setInheritGrainOfDuration(false)
+      val t1 = parse("三分钟后", options)
       t1.grain should (be(Grain.NoGrain) or be(Grain.Second))
       t1.datetime.toString should be ("2022-10-01 00:03:05 [+08:00]")
 
-      val options2 = options.withTimeOptions(new TimeOptions(inheritGrainOfDuration = true))
-      val t2 = parse("三分钟后", options2)
+
+      options.timeOptions.setInheritGrainOfDuration(true)
+      val t2 = parse("三分钟后", options)
       t2.grain shouldBe Grain.Minute
       t2.datetime.toString should be ("2022-10-01 00:03:00 [+08:00]")
     }

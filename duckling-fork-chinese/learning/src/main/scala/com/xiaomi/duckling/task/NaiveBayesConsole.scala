@@ -35,21 +35,20 @@ import com.xiaomi.duckling.Types._
 import com.xiaomi.duckling.dimension.RuleSets
 import com.xiaomi.duckling.dimension.implicits._
 import com.xiaomi.duckling.dimension.matcher._
-import com.xiaomi.duckling.dimension.numeral.NumeralOptions
-import com.xiaomi.duckling.dimension.time.TimeOptions
 import com.xiaomi.duckling.ranking.Ranker
 import com.xiaomi.duckling.ranking.Testing.testContext
 import com.xiaomi.duckling.types.Node
 
 /**
-  * sbt duckConsole的jline启动有点问题，可以使用sbt console
-  * @example <p>sbt core/console
-  *          <p>> com.xiaomi.duckling.task.NaiveBayesConsole.run()
-  *          <p>> dimension time duration
-  *          <p>> 今天的天气
-  *          <p>> option with-latent false
-  *          <p>...
-  */
+ * sbt duckConsole的jline启动有点问题，可以使用sbt console
+ *
+ * @example <p>sbt core/console
+ *          <p>> com.xiaomi.duckling.task.NaiveBayesConsole.run()
+ *          <p>> dimension time duration
+ *          <p>> 今天的天气
+ *          <p>> option with-latent false
+ *          <p>...
+ */
 object NaiveBayesConsole extends LazyLogging {
   private val context = testContext.copy(referenceTime = ZonedDateTime.now(ZoneCN))
 
@@ -113,20 +112,13 @@ object NaiveBayesConsole extends LazyLogging {
       } else if (line.startsWith("option ")) {
         val opt =
           if (cols.length >= 3 && Set("true", "false")
-                .contains(cols(2).toLowerCase)) {
+            .contains(cols(2).toLowerCase)) {
             val value = cols(2).toBoolean
             val opt = cols(1) match {
-              case "winner-only" =>
-                options.withRankOptions(
-                  options.rankOptions.copy(winnerOnly = value)
-                )
+              case "winner-only" => options.rankOptions.setWinnerOnly(value); options
               case "with-latent" => options.copy(withLatent = value)
-              case "full"        => options.copy(full = value)
-              case "inherit-duration-grain" =>
-                options.withTimeOptions(
-                  timeOptions =
-                    options.timeOptions.copy(inheritGrainOfDuration = value)
-                )
+              case "full" => options.copy(full = value)
+              case "inherit-duration-grain" => options.timeOptions.setInheritGrainOfDuration(value); options
               case _ => options
             }
             opt
@@ -175,20 +167,16 @@ object NaiveBayesConsole extends LazyLogging {
   }
 
   def run(): Unit = {
-    var options = Options(
-      targets = Set(),
-      withLatent = false,
-      rankOptions = RankOptions(
-        ranker = Ranker.NaiveBayes,
-        winnerOnly = true,
-        combinationRank = false
-      ),
-      timeOptions = TimeOptions(resetTimeOfDay = false, recentInFuture = true),
-      numeralOptions = NumeralOptions(
-        allowZeroLeadingDigits = false,
-        cnSequenceAsNumber = false
-      )
-    )
+    var options = Options(targets = Set(), withLatent = false)
+    options.rankOptions.setRanker(Ranker.NaiveBayes)
+    options.rankOptions.setWinnerOnly(true)
+    options.rankOptions.setCombinationRank(false)
+
+    options.timeOptions.setResetTimeOfDay(false)
+    options.timeOptions.setRecentInFuture(true)
+
+    options.numeralOptions.setAllowZeroLeadingDigits(false)
+    options.numeralOptions.setCnSequenceAsNumber(false)
 
     // 初始化分类器
     Api.analyze("今天123", context, options)

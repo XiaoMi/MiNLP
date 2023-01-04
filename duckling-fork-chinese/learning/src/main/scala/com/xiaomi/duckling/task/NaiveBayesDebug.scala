@@ -24,9 +24,6 @@ import com.xiaomi.duckling.Api.formatToken
 import com.xiaomi.duckling.JsonSerde._
 import com.xiaomi.duckling.Types._
 import com.xiaomi.duckling.dimension.RuleSets
-import com.xiaomi.duckling.dimension.implicits._
-import com.xiaomi.duckling.dimension.numeral.NumeralOptions
-import com.xiaomi.duckling.dimension.time.TimeOptions
 import com.xiaomi.duckling.ranking.Ranker
 import com.xiaomi.duckling.ranking.Testing.testContext
 
@@ -50,15 +47,16 @@ object NaiveBayesDebug {
   def main(args: Array[String]): Unit = {
     val Array(dim, sentence) = args
     val targets = dim.split(",").map(s => RuleSets.namedDimensions(s.toLowerCase())).toSet
-    val options = Options(
-      targets = targets,
-      withLatent = false,
-      full = true,
-      rankOptions =
-        RankOptions(ranker = Ranker.NaiveBayes, winnerOnly = true, combinationRank = false, rangeRankAhead = false),
-      timeOptions = TimeOptions(resetTimeOfDay = false, recentInFuture = true, alwaysInFuture = true),
-      numeralOptions = NumeralOptions(allowZeroLeadingDigits = false, cnSequenceAsNumber = false)
-    )
+    val options = Options(targets = targets, withLatent = false, full = true)
+    options.rankOptions.setRanker(Some(Ranker.NaiveBayes))
+    options.rankOptions.setWinnerOnly(true)
+    options.rankOptions.setCombinationRank(false)
+    options.rankOptions.setRangeRankAhead(false)
+    options.timeOptions.setResetTimeOfDay(false)
+    options.timeOptions.setRecentInFuture(true)
+    options.timeOptions.setAlwaysInFuture(true)
+    options.numeralOptions.setAllowZeroLeadingDigits(false)
+    options.numeralOptions.setCnSequenceAsNumber(false)
 
     // 初始化分类器
     if (options.rankOptions.ranker.nonEmpty) Api.analyze("今天123", context, options)
