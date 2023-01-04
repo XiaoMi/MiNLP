@@ -24,7 +24,11 @@ import com.xiaomi.duckling.types.Node
 package object dimension {
   def blankNode(s: Int, e: Int) = Node(Range(s, e), null, null, null, null)
 
-  private val rankOptions = RankOptions(winnerOnly = false)
+  private val rankOptions = {
+    val opts = new RankOptions()
+    opts.setWinnerOnly(false)
+    opts
+  }
 
   def answerSize(sentence: String, targets: Set[Dimension]): Int = {
     val options = testOptions.copy(rankOptions = rankOptions, targets = targets)

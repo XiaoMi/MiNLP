@@ -16,6 +16,8 @@
 
 package com.xiaomi.duckling.dimension.time
 
+import scala.beans.BooleanBeanProperty
+
 import com.typesafe.scalalogging.LazyLogging
 
 import com.xiaomi.duckling.Types._
@@ -63,20 +65,30 @@ case object Time extends Dimension with Rules {
 }
 
 /**
-  * 时间解析的额外参数，适应一些语义模糊的情况
-  *
-  * @param resetTimeOfDay 上午是否总是需要指今天的上午，默认是未来一个上午
-  * @param recentInFuture 最近是向前计算还是向后计算，默认是未来
-  * @param alwaysInFuture 对于过去的日期是否取未来一年的日期
-  * @param inheritGrainOfDuration 继承来自持续时间的粒度，比如"三天后"，返回天级
-  * @param parseFourSeasons 解析春夏秋冬四季/输出结果以节气为参照
-  *
-  */
-case class TimeOptions(resetTimeOfDay: Boolean = false,
-                       recentInFuture: Boolean = true,
-                       alwaysInFuture: Boolean = true,
-                       inheritGrainOfDuration: Boolean = false,
-                       parseFourSeasons: Boolean = false)
+ * 时间解析的额外参数，适应一些语义模糊的情况
+ */
+class TimeOptions {
+  /**
+   * 上午是否总是需要指今天的上午，默认是未来一个上午
+   */
+  @BooleanBeanProperty var resetTimeOfDay: Boolean = false
+  /**
+   * 最近是向前计算还是向后计算，默认是未来
+   */
+  @BooleanBeanProperty var recentInFuture: Boolean = true
+  /**
+   * 对于过去的日期是否取未来一年的日期
+   */
+  @BooleanBeanProperty var alwaysInFuture: Boolean = true
+  /**
+   * 继承来自持续时间的粒度，比如"三天后"，返回天级
+   */
+  @BooleanBeanProperty var inheritGrainOfDuration: Boolean = false
+  /**
+   * 解析春夏秋冬四季/输出结果以节气为参照
+   */
+  @BooleanBeanProperty var parseFourSeasons: Boolean = false
+}
 
 case class TimeData(timePred: TimePredicate,
                     latent: Boolean = false,

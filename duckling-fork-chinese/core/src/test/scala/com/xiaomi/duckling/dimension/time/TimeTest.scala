@@ -31,8 +31,11 @@ import com.xiaomi.duckling.UnitSpec
 class TimeTest extends UnitSpec {
 
   private val options = testOptions.copy(targets = Set(Time))
-  private val combinationOptions =
-    options.copy(rankOptions = RankOptions(combinationRank = true), full = false)
+  private val combinationOptions = {
+    val rankOptions = new RankOptions()
+    rankOptions.setCombinationRank(true)
+    options.copy(rankOptions = rankOptions, full = false)
+  }
 
   describe("single case") {
     val opt = options.copy(full = false)

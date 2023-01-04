@@ -120,8 +120,8 @@ object AnswersSelection extends LazyLogging {
   }
 
   def makeDataset1(sentence: String, target: String, dim: Dimension): List[Datum] = {
-    val options =
-      Options(withLatent = false, targets = Set(dim), rankOptions = RankOptions(winnerOnly = false))
+    val options = Options(withLatent = false, targets = Set(dim))
+    options.rankOptions.setWinnerOnly(false)
     val answers = Api.analyze(sentence, testContext, options)
 
     // 寻找可能的组合
@@ -153,8 +153,7 @@ object AnswersSelection extends LazyLogging {
   }
 
   def parse(sentence: String, dim: Dimension) = {
-    val options =
-      Options(withLatent = false, rankOptions = RankOptions(), targets = Set(dim))
+    val options = Options(withLatent = false, targets = Set(dim))
     val answers = Api.analyze(sentence, testContext, options)
 
     // 寻找可能的组合
