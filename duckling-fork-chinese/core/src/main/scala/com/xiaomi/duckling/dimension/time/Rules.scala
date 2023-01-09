@@ -17,7 +17,6 @@
 package com.xiaomi.duckling.dimension.time
 
 import scalaz.Scalaz._
-
 import com.xiaomi.duckling.Types._
 import com.xiaomi.duckling.dimension.DimRules
 import com.xiaomi.duckling.dimension.implicits._
@@ -25,7 +24,8 @@ import com.xiaomi.duckling.dimension.matcher.{GroupMatch, RegexMatch}
 import com.xiaomi.duckling.dimension.ordinal.{Ordinal, OrdinalData}
 import com.xiaomi.duckling.dimension.time.Helpers._
 import com.xiaomi.duckling.dimension.time.Prods._
-import com.xiaomi.duckling.dimension.time.duration.{isFuzzyNotLatentDuration, isNotLatentDuration, Duration, DurationData}
+import com.xiaomi.duckling.dimension.time.date.Date
+import com.xiaomi.duckling.dimension.time.duration.{Duration, DurationData, isFuzzyNotLatentDuration, isNotLatentDuration}
 import com.xiaomi.duckling.dimension.time.enums.{Grain, Hint, IntervalDirection}
 import com.xiaomi.duckling.dimension.time.enums.Grain._
 import com.xiaomi.duckling.dimension.time.enums.Hint._
@@ -342,6 +342,22 @@ trait Rules extends DimRules {
   )
 
   /**
+    * 3月5号的八天前/3月5号的两个星期后
+    */
+  val ruleTimeBeforeOfAfter2 = Rule(
+    name = "<time> before/after 2",
+    pattern = List(isADayOfMonth.predicate, "的".regex, isNotLatentDuration.predicate, "[之以]?([前后])".regex),
+    prod = tokens {
+      case Token(Time, td: TimeData) :: _ :: Token(Duration, DurationData(v, g, _, _, _)) :: Token(_, GroupMatch(_ :: d :: _)) :: _ =>
+        val dv = if (d == "前") -v else v
+        val dg = if (g <= Day) g else Day
+        
+        val predicate = SequencePredicate(List(td, cycleNth(g, dv, dg)))
+        tt(TimeData(timePred = predicate, timeGrain = td.timeGrain))
+    }
+  )
+
+  /**
     * 时间区间
     */
   val ruleFromToInterval = Rule(
@@ -513,7 +529,8 @@ trait Rules extends DimRules {
     ruleSequence2,
     ruleSequence3,
     ruleEndOfGrain,
-    ruleTimeBeforeOfAfter
+    ruleTimeBeforeOfAfter,
+    ruleTimeBeforeOfAfter2
   )
 
   override def dimRules: List[Rule] =
