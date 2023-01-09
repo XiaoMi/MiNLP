@@ -157,7 +157,7 @@ trait Rules extends DimRules {
   val ruleIntersect2 = Rule(
     name = "intersect: <x> 的 <y>",
     // "一日"单独是latent，但是可以参与组合
-    pattern = List(isNotLatent.predicate, "的".regex, or(isNotLatent, isADayOfMonth).predicate),
+    pattern = List(isNotLatent.predicate, "的".regex, or(or(isNotLatent, isLatent0oClockOfDay), isADayOfMonth).predicate),
     prod = tokens {
       case Token(Time, td1: TimeData) :: _ :: Token(Time, td2: TimeData) :: _
           if td1.timeGrain > td2.timeGrain =>
