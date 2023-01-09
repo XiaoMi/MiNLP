@@ -133,7 +133,7 @@ object FuzzyDayIntervals {
       // 避免[2017年三月2号早上][10点半] 与 [2017年三月2号][早上10点半] 同时出现，只保留后者
       and(isAPartOfDay, not(isHint(PartOfDayAtLast))).predicate,
       "的".regex,
-      and(isNotLatent, or(isATimeOfDay, isIntervalOfDay)).predicate
+      and(or(isNotLatent, isLatent0oClockOfDay), or(isATimeOfDay, isIntervalOfDay)).predicate
     ),
     prod = tokens {
       case Token(Time, td0: TimeData) :: _ :: Token(Time, td: TimeData) :: _ =>
