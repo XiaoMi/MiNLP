@@ -86,7 +86,7 @@ trait Rules extends DimRules with LazyLogging {
     }
   )
 
-  val ruleWordDays = Rule(
+  val ruleWorkDays = Rule(
     name = "<work/non-workday>",
     pattern = List("(每一?个)?(工作日|非工作日|节假日)".regex),
     prod = regexMatch { case _ :: _ :: t :: _ =>
@@ -98,7 +98,7 @@ trait Rules extends DimRules with LazyLogging {
     }
   )
 
-  val ruleWordDaysTime = Rule(
+  val ruleWorkDaysTime = Rule(
     name = "<work/non-workday> <time>",
     pattern = List(isOnlyWorkdaysType.predicate, isHourTimes.predicate),
     prod = tokens { case Token(Repeat, rd: RepeatData) :: Token(Time, td: TimeData) :: _ =>
