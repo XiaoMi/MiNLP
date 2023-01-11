@@ -31,9 +31,10 @@ case object Repeat extends Dimension with Rules {
   override val dimDependents: List[Dimension] = List(TimeGrain, Duration, Time)
 }
 
-case class RepeatData(interval: DurationData,
+case class RepeatData(interval: Option[DurationData] = None,
                       n: Option[Int] = None,
-                      start: Option[TimeData] = None)
+                      start: Option[TimeData] = None,
+                      workdayType: Option[WorkdayType] = None)
     extends Resolvable {
 
   override def resolve(context: Context,
@@ -47,34 +48,53 @@ case class RepeatData(interval: DurationData,
         }
       case None => None
     }
-    Some(RepeatValue(interval, n, instant), false)
+    Some(RepeatValue(interval, n, instant, workdayType), false)
   }
 }
 
-case class RepeatValue(interval: DurationData,
+/**
+ * repeat bean
+ * @param interval 重复间隔，来自"每天/周"这部分
+ * @param n 重复次数，"接下来三天"
+ * @param start 初始时间或区间，比如 8点或者8-10点，在workdayType生效时，date部分需要忽略
+ * @param workdayType 工作日/非工作日，是一种重复类型
+ */
+case class RepeatValue(interval: Option[DurationData] = None,
                        n: Option[Int] = None,
-                       start: Option[SingleTimeValue] = None)
+                       start: Option[SingleTimeValue] = None,
+                       workdayType: Option[WorkdayType] = None)
     extends ResolvedValue {
 
   /**
-   * 根据 ISO 8601, Repeat = R[n]/[interval form]/Duration
+   * 参考了 ISO 8601, Repeat = R[n]/[interval form]/Duration
    * 其中 interval form = a/b, /b, a/,
    * @return
    */
   override def schema: Option[String] = {
     val duration =
-      if (interval.schema.isEmpty) durationSchema(interval.value.toString, interval.grain).get
-      else interval.schema.get
+    if (interval.nonEmpty) {
+      val _interval = interval.get
+      if (_interval.schema.isEmpty) durationSchema(_interval.value.toString, _interval.grain).get
+      else _interval.schema.get
+    } else if (workdayType.nonEmpty) {
+      workdayType.get.toString
+    } else "undefined"
+    val isWorkdayType = workdayType.nonEmpty
     start match {
       case Some(x) =>
         val (repr, grain) = x match {
-          case IntervalValue(start, end) => (s"${start.datetime.toZonedDateTime()}/${end.datetime.toZonedDateTime()}", start.grain)
-          case OpenIntervalValue(start, _) => (s"${start.datetime.toZonedDateTime()}", start.grain)
-          case SimpleValue(instant) => (s"${instant.datetime.toZonedDateTime()}", instant.grain)
+          case IntervalValue(start, end) => (s"${format(start.datetime, isWorkdayType)}/${format(end.datetime, isWorkdayType)}", start.grain)
+          case OpenIntervalValue(start, _) => (s"${format(start.datetime, isWorkdayType)}", start.grain)
+          case SimpleValue(instant) => (s"${format(instant.datetime, isWorkdayType)}", instant.grain)
           case _ => ("undefined", Grain.NoGrain)
         }
         s"Repeat_${grain}_${repr}_$duration"
       case None => s"Repeat_$duration"
     }
+  }
+
+  private def format(dt: DuckDateTime, isTime: Boolean) : String = {
+    if (!isTime) dt.toLocalDatetime.toString
+    else dt.time.toString
   }
 }

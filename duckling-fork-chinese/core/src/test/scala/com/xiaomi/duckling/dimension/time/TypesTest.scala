@@ -86,8 +86,8 @@ class TypesTest extends UnitSpec {
       val db = DuckDateTime(SolarDate(LocalDate.of(2013, 2, 28)), LocalTime.of(0, 0), ZoneCN)
       val zb = ZonedDateTime.of(2013, 2, 28, 0, 0, 0, 0, ZoneCN)
 
-      da.toZonedDateTime() shouldBe za
-      db.toZonedDateTime() shouldBe zb
+      da.toZonedDateTime shouldBe za
+      db.toZonedDateTime shouldBe zb
     }
   }
 }
