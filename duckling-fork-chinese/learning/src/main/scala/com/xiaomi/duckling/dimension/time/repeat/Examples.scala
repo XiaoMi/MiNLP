@@ -26,6 +26,7 @@ import com.xiaomi.duckling.dimension.time.enums.Grain._
 import com.xiaomi.duckling.dimension.time.Types.DuckDateTime
 import com.xiaomi.duckling.dimension.time.helper.TimeValueHelpers.{datetimeInterval, h, ymd}
 import com.xiaomi.duckling.dimension.time.TimeValue
+import com.xiaomi.duckling.dimension.time.repeat.WorkdayType.Workday
 
 object Examples extends DimExamples {
 
@@ -41,7 +42,13 @@ object Examples extends DimExamples {
         Hour)), List("每个月五号的早上")),
     (RepeatValue(DurationData(1, Month), start = ymd(2013, 3, 5)), List("每个月的五号")),
     (RepeatValue(DurationData(1, Week), start = ymd(2013, 2, 13)), List("每周三", "每个星期三")),
-    (RepeatValue(DurationData(1, Day), start = h(8)), List("每天上午八点", "每个上午八点"))
+    (RepeatValue(DurationData(1, Day), start = h(8)), List("每天上午八点", "每个上午八点")),
+    (RepeatValue(workdayType = Workday), List("非工作日", "节假日")),
+    (RepeatValue(workdayType = Workday, start = h(8)), List("工作日八点", "每个工作日八点")),
+    (RepeatValue(workdayType = Workday, start = datetimeInterval(
+      new DuckDateTime(LocalDateTime.of(2013, 2, 12, 8, 0, 0)),
+      new DuckDateTime(LocalDateTime.of(2013, 2, 12, 12, 0, 0)),
+      Hour)), List("每个工作日上午"))
   )
 
   override val dimension: Dimension = Repeat

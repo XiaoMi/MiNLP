@@ -22,6 +22,7 @@ import com.xiaomi.duckling.Types._
 import com.xiaomi.duckling.dimension.DimRules
 import com.xiaomi.duckling.dimension.implicits._
 import com.xiaomi.duckling.dimension.matcher.GroupMatch
+import com.xiaomi.duckling.dimension.matcher.Prods.{regexMatch, singleRegexMatch}
 import com.xiaomi.duckling.dimension.time.{Time, TimeData}
 import com.xiaomi.duckling.dimension.time.duration.{Duration, DurationData}
 import com.xiaomi.duckling.dimension.time.enums.Grain
@@ -82,6 +83,26 @@ trait Rules extends DimRules with LazyLogging {
           logger.warn(s"unmatched grain found: ${grainToken}, please feedback to fix it")
           None
         }
+    }
+  )
+
+  val ruleWordDays = Rule(
+    name = "<work/non-workday>",
+    pattern = List("(每一?个)?(工作日|非工作日|节假日)".regex),
+    prod = regexMatch { case _ :: _ :: t :: _ =>
+    val workdayType = t match {
+        case "工作日" => WorkdayType.Workday
+        case "非工作日" | "节假日" => WorkdayType.NonWorkday
+      }
+      Token(Repeat, RepeatData(workdayType = Some(workdayType)))
+    }
+  )
+
+  val ruleWordDaysTime = Rule(
+    name = "<work/non-workday> <time>",
+    pattern = List(isOnlyWorkdaysType.predicate, isHourTimes.predicate),
+    prod = tokens { case Token(Repeat, rd: RepeatData) :: Token(Time, td: TimeData) :: _ =>
+      Token(Repeat, RepeatData(workdayType = rd.workdayType, start = td))
     }
   )
 }

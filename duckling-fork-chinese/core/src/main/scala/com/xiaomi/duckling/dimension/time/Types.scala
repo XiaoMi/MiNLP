@@ -367,10 +367,11 @@ object Types {
       }
     }
 
-    def toZonedDateTime(): ZonedDateTime = {
-      val ldt = LocalDateTime.of(date.toSolar.date, time)
-      ZonedDateTime.of(ldt, zone)
+    def toZonedDateTime: ZonedDateTime = {
+      ZonedDateTime.of(toLocalDatetime, zone)
     }
+
+    def toLocalDatetime: LocalDateTime = LocalDateTime.of(date.toSolar.date, time)
 
     override def toString: String = {
       "%s %s [%s]".format(date, time.format(TimeFormatter), zone.getId)
