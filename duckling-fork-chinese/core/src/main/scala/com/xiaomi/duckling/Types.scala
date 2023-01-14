@@ -264,6 +264,10 @@ object Types {
      * 先进行范围排序，再做打分。可以减少节点进入 resolved 阶段，提升效率
      */
     @BooleanBeanProperty var rangeRankAhead: Boolean = false
+    /**
+     * 解析中间节点的数量限制，在超出时会返回空的解析结果
+     */
+    @BeanProperty var nodesLimit: Int = 250
   }
 
   case class Rule(name: String,

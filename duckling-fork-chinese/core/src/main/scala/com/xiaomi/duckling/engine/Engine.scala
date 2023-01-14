@@ -107,7 +107,7 @@ object Engine extends LazyLogging {
     val newMatches = rules.flatMap(matchFirstAnywhere(doc, new_))
 
     val (full, partial) =
-      matchAll(doc, stash, newPartial ++ newMatches).partition {
+      matchAll(doc, stash, newPartial ++ newMatches, options.rankOptions.nodesLimit).partition {
         case (Rule(_, pattern, _, _), _, _) => pattern.isEmpty
       }
     if (verboseParse) {
@@ -263,13 +263,13 @@ object Engine extends LazyLogging {
     * @param matches
     * @return
     */
-  def matchAll(doc: Document, stash: Stash, matches: List[Match]): List[Match] = {
+  def matchAll(doc: Document, stash: Stash, matches: List[Match], limit: Int): List[Match] = {
     def mkNextMatches(`match`: Match): List[Match] = {
       `match` match {
         case (Rule(_, Nil, _, _), _, _) => List(`match`)
         case (Rule(_, p :: _, _, _), _, _) =>
           val firstMatches = matchFirst(doc, stash)(`match`)
-          val nextMatches = matchAll(doc, stash, firstMatches)
+          val nextMatches = matchAll(doc, stash, firstMatches, limit)
           p match {
             case _: ItemPredicate => `match` :: nextMatches
             case _                => nextMatches
@@ -277,11 +277,17 @@ object Engine extends LazyLogging {
       }
     }
 
-    matches.flatMap(mkNextMatches).flatMap {
-      case (rule, n, nodes) =>
-        val validNodes = nodes.filter(_.isValid(doc))
-        if (validNodes.isEmpty) None
-        else Some(rule, n, validNodes.toSet.toList)
+    val nodes = stash.getSet.map(_._2.size).sum
+    if (nodes > limit) {
+      logger.warn(s"${doc.rawInput} parsed node size exceed $limit($nodes)")
+      Nil
+    } else {
+      matches.flatMap(mkNextMatches).flatMap {
+        case (rule, n, nodes) =>
+          val validNodes = nodes.filter(_.isValid(doc))
+          if (validNodes.isEmpty) None
+          else Some(rule, n, validNodes.toSet.toList)
+      }
     }
   }
 
