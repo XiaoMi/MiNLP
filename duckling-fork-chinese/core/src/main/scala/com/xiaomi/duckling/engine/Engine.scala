@@ -21,6 +21,7 @@ import com.typesafe.scalalogging.LazyLogging
 import com.xiaomi.duckling.Document
 import com.xiaomi.duckling.Types._
 import com.xiaomi.duckling.dimension.implicits._
+import com.xiaomi.duckling.dimension.time.Prods.limitedSequenceByRange
 import com.xiaomi.duckling.engine.LexiconLookup.{lookupLexicon, lookupLexiconAnywhere}
 import com.xiaomi.duckling.engine.MultiCharLookup.{lookupMultiChar, lookupMultiCharAnywhere}
 import com.xiaomi.duckling.engine.PhraseLookup._
@@ -125,8 +126,10 @@ object Engine extends LazyLogging {
         logger.info("partial: ]")
       }
     }
-    // 观察到在极端case下 .toSet.toList 比 .distinct 更快
-    (Stash.fromList(full.flatMap(produce(options)).toSet.toList), partial ++ matches)
+    val _matches =
+      if (options.rankOptions.sequence1EndsPrune) limitedSequenceByRange(full, doc.validSequenceHeads, options)
+      else full.flatMap(produce(options)).distinct
+    (Stash.fromList(_matches), partial ++ matches)
   }
 
   /**

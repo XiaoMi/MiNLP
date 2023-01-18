@@ -16,6 +16,7 @@
 
 package com.xiaomi.duckling
 
+import com.google.common.collect.Sets
 import com.typesafe.scalalogging.LazyLogging
 
 import com.xiaomi.duckling.Types._
@@ -36,6 +37,11 @@ import com.xiaomi.duckling.types._
 case class Document(rawInput: String,
                     firstNonAdjacent: Array[Int],
                     lang: LanguageInfo) {
+
+  /**
+   * sequence优化，不是该起始点的均会被丢弃
+   */
+  val validSequenceHeads: java.util.Set[Int] = Sets.newHashSet()
 
   def isPositionValid(position: Int)(node: Node): Boolean = {
     isAdjacent(position, node.range.start)

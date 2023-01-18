@@ -267,7 +267,12 @@ object Types {
     /**
      * 解析中间节点的数量限制，在超出时会返回空的解析结果
      */
-    @BeanProperty var nodesLimit: Int = 250
+    @BeanProperty var nodesLimit: Int = 800
+
+    /**
+     * sequence优化，减少 明天的明天.....x50 这一类的中间节点生成
+     */
+    @BooleanBeanProperty var sequence1EndsPrune: Boolean = true
   }
 
   case class Rule(name: String,
