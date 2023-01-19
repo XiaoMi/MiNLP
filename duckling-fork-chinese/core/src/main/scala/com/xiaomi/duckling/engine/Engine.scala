@@ -21,6 +21,7 @@ import com.typesafe.scalalogging.LazyLogging
 import com.xiaomi.duckling.Document
 import com.xiaomi.duckling.Types._
 import com.xiaomi.duckling.dimension.implicits._
+import com.xiaomi.duckling.dimension.time.Prods.limitedSequenceByRange
 import com.xiaomi.duckling.engine.LexiconLookup.{lookupLexicon, lookupLexiconAnywhere}
 import com.xiaomi.duckling.engine.MultiCharLookup.{lookupMultiChar, lookupMultiCharAnywhere}
 import com.xiaomi.duckling.engine.PhraseLookup._
@@ -107,7 +108,7 @@ object Engine extends LazyLogging {
     val newMatches = rules.flatMap(matchFirstAnywhere(doc, new_))
 
     val (full, partial) =
-      matchAll(doc, stash, newPartial ++ newMatches).partition {
+      matchAll(doc, stash, newPartial ++ newMatches, options.rankOptions.nodesLimit).partition {
         case (Rule(_, pattern, _, _), _, _) => pattern.isEmpty
       }
     if (verboseParse) {
@@ -125,8 +126,10 @@ object Engine extends LazyLogging {
         logger.info("partial: ]")
       }
     }
-    // 观察到在极端case下 .toSet.toList 比 .distinct 更快
-    (Stash.fromList(full.flatMap(produce(options)).toSet.toList), partial ++ matches)
+    val _matches =
+      if (options.rankOptions.sequence1EndsPrune) limitedSequenceByRange(full, doc.validSequenceHeads, options)
+      else full.flatMap(produce(options)).distinct
+    (Stash.fromList(_matches), partial ++ matches)
   }
 
   /**
@@ -263,13 +266,13 @@ object Engine extends LazyLogging {
     * @param matches
     * @return
     */
-  def matchAll(doc: Document, stash: Stash, matches: List[Match]): List[Match] = {
+  def matchAll(doc: Document, stash: Stash, matches: List[Match], limit: Int): List[Match] = {
     def mkNextMatches(`match`: Match): List[Match] = {
       `match` match {
         case (Rule(_, Nil, _, _), _, _) => List(`match`)
         case (Rule(_, p :: _, _, _), _, _) =>
           val firstMatches = matchFirst(doc, stash)(`match`)
-          val nextMatches = matchAll(doc, stash, firstMatches)
+          val nextMatches = matchAll(doc, stash, firstMatches, limit)
           p match {
             case _: ItemPredicate => `match` :: nextMatches
             case _                => nextMatches
@@ -277,11 +280,17 @@ object Engine extends LazyLogging {
       }
     }
 
-    matches.flatMap(mkNextMatches).flatMap {
-      case (rule, n, nodes) =>
-        val validNodes = nodes.filter(_.isValid(doc))
-        if (validNodes.isEmpty) None
-        else Some(rule, n, validNodes.toSet.toList)
+    val nodes = stash.getSet.map(_._2.size).sum
+    if (nodes > limit) {
+      logger.warn(s"${doc.rawInput} parsed node size exceed $limit($nodes)")
+      Nil
+    } else {
+      matches.flatMap(mkNextMatches).flatMap {
+        case (rule, n, nodes) =>
+          val validNodes = nodes.filter(_.isValid(doc))
+          if (validNodes.isEmpty) None
+          else Some(rule, n, validNodes.toSet.toList)
+      }
     }
   }
 

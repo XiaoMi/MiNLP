@@ -58,9 +58,6 @@ object NaiveBayesDebug {
     options.numeralOptions.setAllowZeroLeadingDigits(false)
     options.numeralOptions.setCnSequenceAsNumber(false)
 
-    // 初始化分类器
-    if (options.rankOptions.ranker.nonEmpty) Api.analyze("今天123", context, options)
-
     debug = true
 
     val watch = new StopWatch()
