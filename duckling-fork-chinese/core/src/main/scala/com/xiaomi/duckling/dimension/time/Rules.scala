@@ -356,6 +356,45 @@ trait Rules extends DimRules {
         tt(TimeData(timePred = predicate, timeGrain = td.timeGrain))
     }
   )
+  
+  val ruleTimeBeforeOfAfter3 = Rule(
+    name = "<time> before/after 3",
+    pattern = List(isADayOfMonth.predicate, isNotLatentDuration.predicate, "[之以]?([前后])".regex),
+    prod = tokens {
+      case Token(Time, td: TimeData) :: Token(Duration, DurationData(v, g, _, _, _)) :: Token(_, GroupMatch(_ :: d :: _)) :: _ =>
+        val dv = if (d == "前") -v else v
+        val dg = if (g <= Day) g else Day
+        
+        val predicate = SequencePredicate(List(td, cycleNth(g, dv, dg)))
+        tt(TimeData(timePred = predicate, timeGrain = td.timeGrain))
+    }
+  )
+  
+  val ruleTimeAfterDuration = Rule(
+    name = "<time> after duration",
+    pattern = List(isADayOfMonth.predicate, "(再?过|往后(数|推)|后面?的第?)".regex, isNotLatentDuration.predicate),
+    prod = tokens {
+      case Token(Time, td: TimeData) :: _ :: Token(Duration, DurationData(v, g, _, _, _)) :: _ =>
+        val dv = v
+        val dg = if (g <= Day) g else Day
+        
+        val predicate = SequencePredicate(List(td, cycleNth(g, dv, dg)))
+        tt(TimeData(timePred = predicate, timeGrain = td.timeGrain))
+    }
+  )
+  
+  val ruleTimeBeforeDuration = Rule(
+    name = "<time> before duration",
+    pattern = List(isADayOfMonth.predicate, "(往前(数|推)|前面?的第?)".regex, isNotLatentDuration.predicate),
+    prod = tokens {
+      case Token(Time, td: TimeData) :: _ :: Token(Duration, DurationData(v, g, _, _, _)) :: _ =>
+        val dv = -v
+        val dg = if (g <= Day) g else Day
+      
+        val predicate = SequencePredicate(List(td, cycleNth(g, dv, dg)))
+        tt(TimeData(timePred = predicate, timeGrain = td.timeGrain))
+    }
+  )
 
   /**
     * 时间区间
@@ -530,7 +569,10 @@ trait Rules extends DimRules {
     ruleSequence3,
     ruleEndOfGrain,
     ruleTimeBeforeOfAfter,
-    ruleTimeBeforeOfAfter2
+    ruleTimeBeforeOfAfter2,
+    ruleTimeBeforeOfAfter3,
+    ruleTimeAfterDuration,
+    ruleTimeBeforeDuration
   )
 
   override def dimRules: List[Rule] =
