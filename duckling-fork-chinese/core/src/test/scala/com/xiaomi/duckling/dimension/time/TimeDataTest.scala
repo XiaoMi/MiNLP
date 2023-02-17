@@ -16,7 +16,7 @@
 
 package com.xiaomi.duckling.dimension.time
 
-import java.time.{LocalDate, LocalTime, ZonedDateTime}
+import java.time.{LocalDate, LocalDateTime, LocalTime, ZonedDateTime}
 
 import com.typesafe.scalalogging.LazyLogging
 
@@ -99,6 +99,22 @@ class TimeDataTest extends UnitSpec with LazyLogging {
       val t2 = parse("三分钟后", options)
       t2.grain shouldBe Grain.Minute
       t2.datetime.toString should be ("2022-10-01 00:03:00 [+08:00]")
+    }
+
+    it("hour/minute always in future: 2013/02/12 4:30") {
+      val options = testOptions.copy(targets = Set(Time))
+
+      def parse(query: String): String = {
+        analyze(query, testContext, options).get.head.token.value
+          .asInstanceOf[TimeValue].timeValue
+          .asInstanceOf[SimpleValue].instant
+          .datetime.toLocalDatetime
+          .toString
+      }
+
+      parse("4点") shouldBe "2013-02-12T16:00"
+      parse("12号") shouldBe "2013-02-12T00:00"
+      parse("2月") shouldBe "2013-02-01T00:00"
     }
   }
 }
