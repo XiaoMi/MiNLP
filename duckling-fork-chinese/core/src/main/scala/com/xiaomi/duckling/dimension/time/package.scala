@@ -110,10 +110,15 @@ package object time {
       future match {
         case Stream.Empty => past.headOption
         case ahead #:: nextAhead #:: _ =>
+          // 逻辑比较混乱，待收集到问题再处理
           val happened =
             td.timePred match {
               case _: TimeDatePredicate | _: TimeIntervalsPredicate | _: IntersectTimePredicate =>
-                timeBefore(ahead, refTime, td.timeGrain)
+                // 若参考时间是2013/2/12 04:30，在alwaysInFuture情况下
+                // 1. 过了一部分还需要再出的，12号 => 2/12，2月 => 2013/2
+                // 2. 问4点，需要给出 16:00
+                val g = if (td.timeGrain >= Grain.Day) td.timeGrain else Grain.NoGrain
+                timeBefore(ahead, refTime, g)
               case _ => false
             }
           if (happened || td.notImmediate && timeIntersect(ahead)(refTime).nonEmpty) {
