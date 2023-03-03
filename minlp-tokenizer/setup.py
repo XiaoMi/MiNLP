@@ -21,7 +21,7 @@ install_requires = ['pyahocorasick', 'regex']
 try:
     import onnxruntime
 except ImportError:
-    install_requires.append('onnxruntime')
+    install_requires.append('onnxruntime-gpu')
 
 setup(
     name='minlp-tokenizer',

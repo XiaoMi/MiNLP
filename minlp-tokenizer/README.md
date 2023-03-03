@@ -17,7 +17,7 @@ pip全自动安装：
 ```
 pip install minlp-tokenizer
 ```
-适用环境：Python 3.5~3.8，TensorFlow>=1.14
+适用环境：Python 3.5~3.8
 
 ## 3. 使用API
 
