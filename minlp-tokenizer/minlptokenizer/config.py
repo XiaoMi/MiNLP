@@ -24,7 +24,7 @@ configs = {
         }
     },
     'tokenizer_limit': {
-        'max_batch_size': 128,
+        'max_batch_size': 2**15,
         'max_string_length': 1024
     },
     'lexicon_files': [
