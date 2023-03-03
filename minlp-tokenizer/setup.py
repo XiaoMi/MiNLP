@@ -19,17 +19,9 @@ with open('README.md', 'r', encoding='utf-8') as fh:
     long_description = fh.read()
 install_requires = ['pyahocorasick', 'regex']
 try:
-    import tensorflow
-
-    # 若版本过低，则进行版本更新
-    installed_packages = pkg_resources.working_set
-    tensorflow_pkgs = [i.key for i in installed_packages if 'tensorflow' in i.key]
-    if 'tensorflow-gpu' in tensorflow_pkgs:
-        install_requires.append('tensorflow-gpu>=1.14')
-    else:
-        install_requires.append('tensorflow>=1.14')
+    import onnxruntime
 except ImportError:
-    install_requires.append('tensorflow>=1.14')
+    install_requires.append('onnxruntime')
 
 setup(
     name='minlp-tokenizer',

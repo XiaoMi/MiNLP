@@ -17,10 +17,10 @@ configs = {
     'vocab_path': 'vocab/b.14067n.300d.vocab',
     'tokenizer_granularity': {
         'fine': {
-            'model': 'model/zh/b-fine-cnn-crf-an2cn.pb',
+            'model': 'model/zh/b-fine-cnn-crf-an2cn.onnx',
         },
         'coarse': {
-            'model': 'model/zh/b-coarse-cnn-crf-an2cn.pb',
+            'model': 'model/zh/b-coarse-cnn-crf-an2cn.onnx',
         }
     },
     'tokenizer_limit': {

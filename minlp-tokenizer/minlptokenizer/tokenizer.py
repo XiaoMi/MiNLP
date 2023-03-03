@@ -14,7 +14,7 @@
 
 import regex
 import os
-import tensorflow as tf
+import onnxruntime
 import math
 from minlptokenizer.lexicon import Lexicon
 from minlptokenizer.vocab import Vocab
@@ -101,29 +101,18 @@ class MiNLPTokenizer:
         """
         # pb模型加载
         if not MiNLPTokenizer.sess_dict[self.__granularity]:
-            with tf.io.gfile.GFile(self.__pb_model_path, 'rb') as f:
-                graph_def = tf.compat.v1.GraphDef()
-                graph_def.ParseFromString(f.read())
-            g = tf.Graph()
-            with g.as_default():
-                tf.import_graph_def(graph_def, name='')
-            tf_config = tf.compat.v1.ConfigProto()
-            tf_config.gpu_options.allow_growth = True  # 使用过程中动态申请显存，按需分配
-            MiNLPTokenizer.sess_dict[self.__granularity] = tf.compat.v1.Session(graph=g, config=tf_config)
+            MiNLPTokenizer.sess_dict[self.__granularity] = onnxruntime.InferenceSession(self.__pb_model_path, providers=['CUDAExecutionProvider'])
         sess = MiNLPTokenizer.sess_dict[self.__granularity]
-        char_ids_input = sess.graph.get_tensor_by_name('char_ids_batch:0')
-        factor_input = sess.graph.get_tensor_by_name('factor_batch:0')
-        tag_ids = sess.graph.get_tensor_by_name('tag_ids:0')
-        # 模型预测
         texts = list(map(format_string, text_batch))
         factor = self.__lexicon.get_factor(texts)
         input_char_id = self.__vocab.get_char_ids(texts)
         feed_dict = {
-            char_ids_input: input_char_id,
-            factor_input: factor
+            sess.get_inputs()[0].name: input_char_id,
+            sess.get_inputs()[1].name: factor.astype('float32')
         }
-        predict_results = sess.run(tag_ids, feed_dict=feed_dict)
-        return list(map(lambda x, y: tag2words(x, y), texts, predict_results))
+        # 模型预测
+        predict_results = sess.run(None, feed_dict)
+        return list(map(lambda x, y: tag2words(x, y), texts, predict_results[0]))
 
     def cut(self, text_or_list, n_jobs=1):
         """
