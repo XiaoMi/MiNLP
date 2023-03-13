@@ -27,7 +27,7 @@ trait Rules extends DimRules {
   val grains = List(
     ("second (grain)", "秒钟?", Second),
     ("minute (grain)", "分(?!贝)钟?", Minute),
-    ("hour (grain)", "(小时|钟头)", Hour),
+    ("hour (grain)", "(小时|钟头|个钟|个点)", Hour),
     ("day (grain)", "(天(?!气(?!温))|日(?![元本]))", Day),
     ("week (grain)", WeekPattern, Week),
     ("month (grain)", "月", Month),
@@ -35,12 +35,13 @@ trait Rules extends DimRules {
     ("year (grain)", "年", Year)
   )
 
+  val latentExpr = Set("分", "钟", "点")
+
   override def dimRules: List[Rule] = grains.map {
     case (name, regexPattern, grain) =>
       Rule(name = name, pattern = List(regexPattern.regex), prod = singleRegexMatch {
         case s =>
-          val latent = s == "分"
-          Token(TimeGrain, GrainData(grain, latent))
+          Token(TimeGrain, GrainData(grain, latentExpr.contains(s)))
       })
   }
 }
