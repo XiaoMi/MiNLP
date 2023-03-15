@@ -27,7 +27,7 @@ trait Rules extends DimRules {
   val grains = List(
     ("second (grain)", "秒钟?", Second),
     ("minute (grain)", "分(?!贝)钟?", Minute),
-    ("hour (grain)", "(小时|钟头|个钟|个点)", Hour),
+    ("hour (grain)", "(小时|钟头|钟|点)", Hour),
     ("day (grain)", "(天(?!气(?!温))|日(?![元本]))", Day),
     ("week (grain)", WeekPattern, Week),
     ("month (grain)", "月", Month),
