@@ -16,9 +16,11 @@
 
 package com.xiaomi.duckling.dimension.time.date
 
+import java.time.LocalDateTime
+
 import com.xiaomi.duckling.Types._
 import com.xiaomi.duckling.dimension.{Dimension, DimExamples}
-import com.xiaomi.duckling.dimension.time.enums.Lunar
+import com.xiaomi.duckling.dimension.time.enums.{Grain, Lunar}
 import com.xiaomi.duckling.dimension.time.helper.TimeValueHelpers._
 
 object Examples extends DimExamples {
@@ -58,7 +60,8 @@ object Examples extends DimExamples {
     (ymd(2013, 11, 22, calendar = Lunar(false)), List("农历十一月二十二", "冬月二十二")),
     (ymd(2013, 12, 10, calendar = Lunar(false)), List("农历十二月初十", "腊月初十")),
     (ymd(2013, 12, 13, calendar = Lunar(false)), List("农历十二月十三", "腊月十三")),
-    (ymd(2013, 8, 8, calendar = Lunar(false)), List("农历八月初八", "农历2013年八月八日", "八月初八"))
+    (ymd(2013, 8, 8, calendar = Lunar(false)), List("农历八月初八", "农历2013年八月八日", "八月初八")),
+    (localDateTimeInterval(LocalDateTime.of(2013, 2, 12, 0, 0), LocalDateTime.of(2013, 2, 15, 0, 0), Grain.Day), List("今明后三天", "今天明天后天三天"))
   )
 
   override val dimension: Dimension = Date
