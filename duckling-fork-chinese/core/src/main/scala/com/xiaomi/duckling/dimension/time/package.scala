@@ -378,10 +378,10 @@ package object time {
       val (past1, future1) = (applyF(firstPast), applyF(firstFuture))
 
       // Separate what's before and after now from the past's series
-      val (newFuture, stillPast) = past1.span(timeStartsBeforeTheEndOf(nowTime))
+      val (newFuture, stillPast) = past1.partition(timeStartsBeforeTheEndOf(nowTime))
       // A series that ends at the earliest time
       val oldPast = stillPast.takeWhile(timeStartsBeforeTheEndOf(context.minTime))
-      val (newPast, stillFuture) = future1.span(t => !timeStartsBeforeTheEndOf(nowTime)(t))
+      val (newPast, stillFuture) = future1.partition(t => !timeStartsBeforeTheEndOf(nowTime)(t))
       // A series that ends at the furthest future time
       val oldFuture = stillFuture.takeWhile(timeStartsBeforeTheEndOf(_)(context.maxTime))
 
@@ -395,7 +395,7 @@ package object time {
       val past = sortedPast ++ oldPast
       // Future is the future from the past's series with the
       // future from the future's series tacked on
-      val future = sortedFuture ++ oldFuture
+      val future = oldFuture ++ sortedFuture
       (past, future)
     }
 

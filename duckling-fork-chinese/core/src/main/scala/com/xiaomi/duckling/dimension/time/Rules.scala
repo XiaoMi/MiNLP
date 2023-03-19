@@ -405,13 +405,9 @@ trait Rules extends DimRules {
     prod = tokens {
       case Token(Time, td1 @ TimeData(pred1, _, g1, _, _, _, _, _, _, _, _, _)) :: _ ::
             Token(Time, td2 @ TimeData(pred2, _, g2, _, _, _, _, _, _, _, _, _)) :: _ =>
-        val grainCompare = for {
-          pg1 <- maxPredicateGrain(pred1)
-          pg2 <- maxPredicateGrain(pred2)
-        } yield pg1 >= pg2
         // 限定求交的Grain，避免日交月
         val isValid =
-          grainCompare.nonEmpty && grainCompare.get && (g1 < Day && g2 < Day || g1 >= Day && g2 >= Day) ||
+           (g1 < Day && g2 < Day || g1 >= Day && g2 >= Day) ||
             g1 >= g2 ||
             td1.hint == RecentNominal || td2.hint == RecentNominal
         if (isValid) {

@@ -383,6 +383,14 @@ object Examples extends DimExamples {
       ),
       List("明天下午三点到6点")
     ),
+    (
+      localDateTimeInterval(
+        LocalDateTime.of(2013, 2, 12, 11, 30, 0),
+        LocalDateTime.of(2013, 2, 13, 8, 0, 0),
+        Minute
+      ),
+      List("十一点半到明天早上八点")
+    ),
     (datetime(LocalDateTime.of(2013, 3, 12, 19, 0, 0), Hour), List("一个月后下午19点")),
     (datetime(LocalDateTime.of(2018, 3, 30, 10, 10, 0), Minute), List("五年后3月三十号10点十分")),
     (
