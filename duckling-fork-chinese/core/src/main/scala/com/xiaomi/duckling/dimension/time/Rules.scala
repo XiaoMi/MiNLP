@@ -126,13 +126,13 @@ trait Rules extends DimRules {
       name = "intersect",
       // 左右边均不能是中午/下午，避免与<dim time> <part-of-day>冲突
       pattern = List(
-        and(isDimension(Time), isNotLatent, not(isAPartOfDay)).predicate,
+        and(isDimension(Time), isNotLatent, not(isAPartOfDay), isNotHint(Hint.Season)).predicate,
         // "一日"单独是latent，但是可以参与组合
         and(isDimension(Time), or(and(or(isNotLatent, isLatent0oClockOfDay), not(isAPartOfDay)), isADayOfMonth)).predicate
       ),
       prod = tokens {
         case Token(Time, td1: TimeData) :: Token(Time, td2: TimeData) :: _
-            if td1.timeGrain > td2.timeGrain && !(td1.hint == Date && td2.hint == Date) =>
+            if td1.timeGrain > td2.timeGrain && !(td1.hint == Hint.Date && td2.hint == Hint.Date) =>
           // 破除(y-m)-d和y-(m-d)均构造出来的问题
           if (td1.hint == YearMonth && td2.hint == DayOnly) None
           // 固定顺序，避免(y-m)-(d H-M-S) 以及(y)-(m-d H-M-S)出现
@@ -407,7 +407,7 @@ trait Rules extends DimRules {
             Token(Time, td2 @ TimeData(pred2, _, g2, _, _, _, _, _, _, _, _, _)) :: _ =>
         // 限定求交的Grain，避免日交月
         val isValid =
-           (g1 < Day && g2 < Day || g1 >= Day && g2 >= Day) ||
+           (g1 < Day && g2 < Day || g1 >= Day && g1 == g2) ||
             g1 >= g2 ||
             td1.hint == RecentNominal || td2.hint == RecentNominal
         if (isValid) {

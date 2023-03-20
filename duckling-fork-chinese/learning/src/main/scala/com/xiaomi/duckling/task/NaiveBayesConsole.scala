@@ -73,7 +73,8 @@ object NaiveBayesConsole extends LazyLogging {
         "winner-only",
         "with-latent",
         "full",
-        "inherit-duration-grain"
+        "inherit-duration-grain",
+        "seasons"
       ),
       NullCompleter.INSTANCE
     )
@@ -119,6 +120,7 @@ object NaiveBayesConsole extends LazyLogging {
               case "with-latent" => options.copy(withLatent = value)
               case "full" => options.copy(full = value)
               case "inherit-duration-grain" => options.timeOptions.setInheritGrainOfDuration(value); options
+              case "seasons" => options.timeOptions.setParseFourSeasons(true); options
               case _ => options
             }
             opt

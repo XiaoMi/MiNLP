@@ -24,7 +24,7 @@ import com.xiaomi.duckling.dimension.time.{Time, TimeData}
 
 object Dates {
   val ruleSimpleDates = Rule(name = "<date>", pattern = List(isDimension(Date).predicate), prod = tokens {
-    case Token(_, td: TimeData) :: _ => Token(Time, td.copy(hint = Hint.Date))
+    case Token(_, td: TimeData) :: _ => Token(Time, td.copy(hint = if (td.hint == Hint.Season) td.hint else Hint.Date))
   })
 
   val rules = List(ruleSimpleDates)

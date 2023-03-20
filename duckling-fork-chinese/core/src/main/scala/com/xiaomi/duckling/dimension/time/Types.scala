@@ -411,7 +411,7 @@ object Types {
           direction match {
             case Some(IntervalDirection.Before) => s"(,$start]($grain)"
             case Some(IntervalDirection.After) => s"[$start,)($grain)"
-            case None => s"$start($grain)"
+            case _ => s"$start($grain)"
           }
       }
     }

@@ -233,7 +233,8 @@ object TimeDataHelpers {
 
   def interval1(intervalType: IntervalType, td1: TimeData, td2: TimeData): TimeData = {
     val it =
-      if (td1.timeGrain == td2.timeGrain && td1.timeGrain == Day) Closed
+      if (td1.hint == Hint.Season && td2.hint == Hint.Season) intervalType
+      else if (td1.timeGrain == td2.timeGrain && td1.timeGrain == Day) Closed
       else intervalType
     TimeData(
       timePred = mkTimeIntervalsPredicate(it, td1, td2),
