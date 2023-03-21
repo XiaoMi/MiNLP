@@ -250,4 +250,6 @@ object TimeDataHelpers {
       case _ => None // 不一致的先搁置
     }
   }
+
+  def finalRule(td: TimeData): TimeData = td.copy(hint = Hint.FinalRule)
 }

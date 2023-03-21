@@ -24,7 +24,6 @@ import com.xiaomi.duckling.dimension.matcher.{GroupMatch, RegexMatch}
 import com.xiaomi.duckling.dimension.ordinal.{Ordinal, OrdinalData}
 import com.xiaomi.duckling.dimension.time.Helpers._
 import com.xiaomi.duckling.dimension.time.Prods._
-import com.xiaomi.duckling.dimension.time.date.Date
 import com.xiaomi.duckling.dimension.time.duration.{Duration, DurationData, isFuzzyNotLatentDuration, isNotLatentDuration}
 import com.xiaomi.duckling.dimension.time.enums.{Grain, Hint, IntervalDirection}
 import com.xiaomi.duckling.dimension.time.enums.Grain._
@@ -44,7 +43,7 @@ trait Rules extends DimRules {
     pattern = List(
       "((这|今|本(?!现在))一?个?|明|上+一?个?|前一个?|(?<![一|查|看|搜|记|问|写])下+一?个?)".regex,
       // ❌ 下周一早上 =>  下[周一早上]
-      and(isDimension(Time), isNotLatent, not(isHint(Intersect)), not(isAPartOfDay)).predicate
+      and(isDimension(Time), isNotLatent, not(isHint(Intersect, FinalRule)), not(isAPartOfDay)).predicate
     ),
     prod = tokens {
       case Token(RegexMatch, GroupMatch(s :: _)) :: (t @ Token(Time, td: TimeData)) :: _ =>
@@ -270,7 +269,7 @@ trait Rules extends DimRules {
       case (options: Options, Token(Duration, DurationData(v, grain, false, _, _)) :: Token(_, GroupMatch(s :: _)) :: _) =>
         val offset = if (s.endsWith("后")) v else -v
         val roundGrain = if (options.timeOptions.inheritGrainOfDuration) grain else NoGrain
-        tt(cycleNth(grain, offset, roundGrain))
+        tt(finalRule(cycleNth(grain, offset, roundGrain)))
     }
   )
 
@@ -283,7 +282,7 @@ trait Rules extends DimRules {
     prod = optTokens {
       case (options: Options, _ :: Token(Duration, DurationData(v, grain, _, _, _)) :: _ ) =>
         val roundGrain = if (options.timeOptions.inheritGrainOfDuration) grain else NoGrain
-        tt(cycleNth(grain, v, roundGrain))
+        tt(finalRule(cycleNth(grain, v, roundGrain)))
     }
   )
 
@@ -296,7 +295,7 @@ trait Rules extends DimRules {
     prod = optTokens {
       case (options: Options, _ :: Token(Duration, DurationData(v, grain, _, _, _)) :: _ ) =>
         val roundGrain = if (options.timeOptions.inheritGrainOfDuration) grain else NoGrain
-        tt(cycleNth(grain, v, roundGrain))
+        tt(finalRule(cycleNth(grain, v, roundGrain)))
     }
   )
 
@@ -328,7 +327,7 @@ trait Rules extends DimRules {
 
   val ruleTimeBeforeOfAfter = Rule(
     name = "<time> before/after",
-    pattern = List(isDimension(Time).predicate, "[之以]?([前后])".regex),
+    pattern = List(isNotHint(Hint.UncertainRecent).predicate, "[之以]?([前后])".regex),
     prod = tokens {
       case Token(Time, td: TimeData) :: Token(_, GroupMatch(_ :: direction :: _)) :: _ =>
         val intervalDirection =
