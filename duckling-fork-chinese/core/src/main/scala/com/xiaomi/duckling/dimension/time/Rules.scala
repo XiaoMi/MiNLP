@@ -233,6 +233,7 @@ trait Rules extends DimRules {
               }
               // = 1 已经在 this <cycle> 中定义过了
               else if (s == "下" && g == Day || v == 1) None
+              else if (s == "后" && (g != Day || g != Year)) None
               else {
                 val td1 = cycleN(notImmediate = false, g, v)
                 g match {
@@ -327,7 +328,7 @@ trait Rules extends DimRules {
 
   val ruleTimeBeforeOfAfter = Rule(
     name = "<time> before/after",
-    pattern = List(isNotHint(Hint.UncertainRecent).predicate, "[之以]?([前后])".regex),
+    pattern = List(and(isNotHint(Hint.UncertainRecent), isNotLatent).predicate, "[之以]?([前后])".regex),
     prod = tokens {
       case Token(Time, td: TimeData) :: Token(_, GroupMatch(_ :: direction :: _)) :: _ =>
         val intervalDirection =
@@ -345,7 +346,7 @@ trait Rules extends DimRules {
     */
   val ruleTimeBeforeOfAfter2 = Rule(
     name = "<time> before/after 2",
-    pattern = List(isADayOfMonth.predicate, "的".regex, isNotLatentDuration.predicate, "[之以]?([前后])".regex),
+    pattern = List(and(isADayOfMonth, isNotLatent).predicate, "的".regex, isNotLatentDuration.predicate, "[之以]?([前后])".regex),
     prod = tokens {
       case Token(Time, td: TimeData) :: _ :: Token(Duration, DurationData(v, g, _, _, _)) :: Token(_, GroupMatch(_ :: d :: _)) :: _ =>
         val dv = if (d == "前") -v else v
@@ -358,7 +359,7 @@ trait Rules extends DimRules {
   
   val ruleTimeBeforeOfAfter3 = Rule(
     name = "<time> before/after 3",
-    pattern = List(isADayOfMonth.predicate, isNotLatentDuration.predicate, "[之以]?([前后])".regex),
+    pattern = List(and(isADayOfMonth, isNotLatent).predicate, isNotLatentDuration.predicate, "[之以]?([前后])".regex),
     prod = tokens {
       case Token(Time, td: TimeData) :: Token(Duration, DurationData(v, g, _, _, _)) :: Token(_, GroupMatch(_ :: d :: _)) :: _ =>
         val dv = if (d == "前") -v else v
