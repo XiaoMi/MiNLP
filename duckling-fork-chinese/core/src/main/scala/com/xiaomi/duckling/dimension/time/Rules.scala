@@ -233,7 +233,6 @@ trait Rules extends DimRules {
               }
               // = 1 已经在 this <cycle> 中定义过了
               else if (s == "下" && g == Day || v == 1) None
-              else if (s == "后" && (g != Day || g != Year)) None
               else {
                 val td1 = cycleN(notImmediate = false, g, v)
                 g match {
@@ -328,7 +327,7 @@ trait Rules extends DimRules {
 
   val ruleTimeBeforeOfAfter = Rule(
     name = "<time> before/after",
-    pattern = List(and(isNotHint(Hint.UncertainRecent), isNotLatent).predicate, "[之以]?([前后])".regex),
+    pattern = List(and(not(isHint(Hint.UncertainRecent, Hint.Recent)), isNotLatent).predicate, "[之以]?([前后])".regex),
     prod = tokens {
       case Token(Time, td: TimeData) :: Token(_, GroupMatch(_ :: direction :: _)) :: _ =>
         val intervalDirection =
@@ -406,8 +405,10 @@ trait Rules extends DimRules {
       case Token(Time, td1 @ TimeData(pred1, _, g1, _, _, _, _, _, _, _, _, _)) :: _ ::
             Token(Time, td2 @ TimeData(pred2, _, g2, _, _, _, _, _, _, _, _, _)) :: _ =>
         // 限定求交的Grain，避免日交月
+        val m1 = maxPredicateGrain(pred1)
+        val m2 = maxPredicateGrain(pred2)
         val isValid =
-           (g1 < Day && g2 < Day || g1 >= Day && g1 == g2) ||
+           (g1 < Day && g2 < Day || g1 >= Day && (g1 == g2 || m1.nonEmpty && m1 == m2)) ||
             g1 >= g2 ||
             td1.hint == RecentNominal || td2.hint == RecentNominal
         if (isValid) {

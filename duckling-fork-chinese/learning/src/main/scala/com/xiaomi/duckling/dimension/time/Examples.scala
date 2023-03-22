@@ -419,6 +419,14 @@ object Examples extends DimExamples {
       List("今天上午到明天下午")
     ),
     (
+      datetimeInterval(
+        new DuckDateTime(LocalDateTime.of(1777, 10, 30, 0, 0, 0)),
+        new DuckDateTime(LocalDateTime.of(1800, 1, 1, 0, 0, 0)),
+        Day
+      ),
+      List("一七七七年十月三十日到一八零零年")
+    ),
+    (
       lunarDateTimeInterval(
         new LunarCalendar(2019, 12, 1, false),
         LocalTime.of(8, 0),
