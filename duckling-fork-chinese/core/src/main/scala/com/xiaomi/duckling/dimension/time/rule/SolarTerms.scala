@@ -74,18 +74,10 @@ object SolarTerms {
             case _    => ("冬季", "立冬", "立春")
           }
   
-          val from = TimeData(timePred = solarTermPredicate(ss), timeGrain = Day, okForThisNext = true, holiday = ss) // 开始日期
-          val to = TimeData( // 结束日期
-            SequencePredicate(List(
-              TimeData(timePred = solarTermPredicate(se), timeGrain = Day, okForThisNext = true, holiday = se),
-              cycleNth(Day, -1).at(Hint.Recent) // 后开区间，需要减去一天
-            )),
-            timeGrain = Day,
-            hint = Hint.Sequence,
-            calendar = from.calendar
-          )
+          val from = TimeData(timePred = solarTermPredicate(ss), timeGrain = Day, okForThisNext = true, holiday = ss, hint = Hint.Season)
+          val to = TimeData(timePred = solarTermPredicate(se), timeGrain = Day, okForThisNext = true, holiday = se, hint = Hint.Season)
   
-          for (td <- interval(Open, from, to)) yield Token(Date, td.copy(holiday = holiday))
+          for (td <- interval(Open, from, to)) yield Token(Date, td.copy(holiday = holiday, hint = Hint.Season))
         } else None
     })
 

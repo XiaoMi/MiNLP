@@ -57,5 +57,9 @@ public enum Hint {
     /**
      * 求交的结果
      */
-    Intersect
+    Intersect,
+    /**
+     * 春夏秋冬
+     */
+    Season
 }

@@ -383,6 +383,14 @@ object Examples extends DimExamples {
       ),
       List("明天下午三点到6点")
     ),
+    (
+      localDateTimeInterval(
+        LocalDateTime.of(2013, 2, 12, 11, 30, 0),
+        LocalDateTime.of(2013, 2, 13, 8, 0, 0),
+        Minute
+      ),
+      List("十一点半到明天早上八点")
+    ),
     (datetime(LocalDateTime.of(2013, 3, 12, 19, 0, 0), Hour), List("一个月后下午19点")),
     (datetime(LocalDateTime.of(2018, 3, 30, 10, 10, 0), Minute), List("五年后3月三十号10点十分")),
     (
@@ -409,6 +417,14 @@ object Examples extends DimExamples {
         Hour
       ),
       List("今天上午到明天下午")
+    ),
+    (
+      datetimeInterval(
+        new DuckDateTime(LocalDateTime.of(1777, 10, 30, 0, 0, 0)),
+        new DuckDateTime(LocalDateTime.of(1800, 1, 1, 0, 0, 0)),
+        Day
+      ),
+      List("一七七七年十月三十日到一八零零年")
     ),
     (
       lunarDateTimeInterval(

@@ -403,6 +403,18 @@ object Types {
         case None           => this
       }
     }
+
+    override def toString: String = {
+      end match {
+        case Some(e) => s"$start/$e($grain)"
+        case None =>
+          direction match {
+            case Some(IntervalDirection.Before) => s"(,$start]($grain)"
+            case Some(IntervalDirection.After) => s"[$start,)($grain)"
+            case _ => s"$start($grain)"
+          }
+      }
+    }
   }
 
   case class TimeContext(refTime: TimeObject,

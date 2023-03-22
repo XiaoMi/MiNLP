@@ -109,7 +109,7 @@ object TimeObjectHelpers {
   @tailrec
   def timeIntersect(t1: TimeObject)(t2: TimeObject): Option[TimeObject] = {
     (t1, t2) match {
-      case (TimeObject(start1, g1, end1, _), TimeObject(start2, g2, _, _)) =>
+      case (TimeObject(start1, g1, end1, _), TimeObject(start2, g2, end2, _)) =>
         val e1 = timeEnd(t1)
         val e2 = timeEnd(t2)
         val s1 = timeStart(t1)
@@ -117,9 +117,9 @@ object TimeObjectHelpers {
         val gg = if (g1 > g2) g2 else g1
         if (s1.isAfter(s2)) timeIntersect(t2)(t1)
         else if (!e1.isAfter(s2)) None
-        else if (e1.isBefore(e2) || s1 == s2 && e1 == e2 && end1.nonEmpty) {
-          Some(TimeObject(start = s2, end = end1, grain = gg))
-        } else Some(t2.copy(grain = gg))
+        else if (e1.isBefore(e2)) Some(TimeObject(start = s2, end = end2, grain = gg))
+        else if(s1 == s2 && e1 == e2 && end1.nonEmpty) Some(TimeObject(start = s2, end = end1, grain = gg))
+        else Some(t2.copy(grain = gg))
     }
   }
 
