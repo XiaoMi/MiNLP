@@ -33,7 +33,7 @@ object Examples extends DimExamples {
   implicit def toSingleTimeValue(tv: TimeValue) = Option(tv.timeValue)
 
   override def pairs: List[(ResolvedValue, List[String])] = List(
-    (RepeatValue(DurationData(15, Minute, schema = "PT15M")), List("每隔15分钟")),
+    (RepeatValue(DurationData(15, Minute, schema = "PT15M")), List("每隔15分钟", "隔15分钟")),
     (RepeatValue(
       DurationData(1, Month),
       start = datetimeInterval(

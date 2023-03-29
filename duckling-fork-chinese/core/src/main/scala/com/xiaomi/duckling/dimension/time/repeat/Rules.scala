@@ -34,7 +34,7 @@ trait Rules extends DimRules with LazyLogging {
    */
   val ruleEveryDuration = Rule(
     name = "<every> <duration>",
-    pattern = List("每隔?".regex, isDimension(Duration).predicate),
+    pattern = List("(每隔|每|隔)".regex, isDimension(Duration).predicate),
     prod = tokens {
       case _ :: Token(Duration, interval: DurationData) :: _ =>
         Token(Repeat, RepeatData(interval))
