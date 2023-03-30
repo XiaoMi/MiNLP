@@ -21,16 +21,17 @@ import java.time.LocalDateTime
 import com.xiaomi.duckling.Types.ResolvedValue
 import com.xiaomi.duckling.dimension.{Dimension, DimExamples}
 import com.xiaomi.duckling.dimension.implicits._
+import com.xiaomi.duckling.dimension.time.{form, TimeValue}
 import com.xiaomi.duckling.dimension.time.duration.DurationData
 import com.xiaomi.duckling.dimension.time.enums.Grain._
 import com.xiaomi.duckling.dimension.time.Types.DuckDateTime
-import com.xiaomi.duckling.dimension.time.helper.TimeValueHelpers.{datetimeInterval, h, ymd}
-import com.xiaomi.duckling.dimension.time.TimeValue
-import com.xiaomi.duckling.dimension.time.repeat.WorkdayType.Workday
+import com.xiaomi.duckling.dimension.time.form.Form
+import com.xiaomi.duckling.dimension.time.helper.TimeValueHelpers._
+import com.xiaomi.duckling.dimension.time.repeat.WorkdayType.{NonWorkday, Workday}
 
 object Examples extends DimExamples {
 
-  implicit def toSingleTimeValue(tv: TimeValue) = Option(tv.timeValue)
+  implicit def _toTuple(tv: TimeValue) = Option(tv, None: Option[Form])
 
   override def pairs: List[(ResolvedValue, List[String])] = List(
     (RepeatValue(DurationData(15, Minute, schema = "PT15M")), List("每隔15分钟", "隔15分钟")),
@@ -39,16 +40,18 @@ object Examples extends DimExamples {
       start = datetimeInterval(
         new DuckDateTime(LocalDateTime.of(2013, 3, 5, 4, 0, 0)),
         new DuckDateTime(LocalDateTime.of(2013, 3, 5, 12, 0, 0)),
-        Hour)), List("每个月五号的早上")),
-    (RepeatValue(DurationData(1, Month), start = ymd(2013, 3, 5)), List("每个月的五号")),
-    (RepeatValue(DurationData(1, Week), start = ymd(2013, 2, 13)), List("每周三", "每个星期三")),
-    (RepeatValue(DurationData(1, Day), start = h(8)), List("每天上午八点", "每个上午八点")),
-    (RepeatValue(workdayType = Workday), List("非工作日", "节假日")),
-    (RepeatValue(workdayType = Workday, start = h(8)), List("工作日八点", "每个工作日八点")),
-    (RepeatValue(workdayType = Workday, start = datetimeInterval(
+        Hour)
+    ), List("每个月五号的早上")),
+    (RepeatValue(DurationData(1, Month), start = ymd(m = 3, d = 5)), List("每个月的五号")),
+    (RepeatValue(DurationData(1, Week), start = (ymd(d = 13), Some(form.DayOfWeek))), List("每周三", "每个星期三")),
+    (RepeatValue(DurationData(1, Day), start = (h(8), Some(form.TimeOfDay(Some(8), false)))), List("每天上午八点", "每个上午八点")),
+    (RepeatValue(workdayType = NonWorkday), List("非工作日", "节假日")),
+    (RepeatValue(workdayType = Workday, start = (yMdHms(d = 13, H = 3, grain = Hour), Some(form.TimeOfDay(Some(3), false)))), List("工作日三点", "每个工作日三点")),
+    (RepeatValue(workdayType = Workday, start = (datetimeInterval(
       new DuckDateTime(LocalDateTime.of(2013, 2, 12, 8, 0, 0)),
       new DuckDateTime(LocalDateTime.of(2013, 2, 12, 12, 0, 0)),
-      Hour)), List("每个工作日上午"))
+      Hour,
+      partOfDay = "上午"), Some(form.PartOfDay("上午")))), List("每个工作日上午"))
   )
 
   override val dimension: Dimension = Repeat
