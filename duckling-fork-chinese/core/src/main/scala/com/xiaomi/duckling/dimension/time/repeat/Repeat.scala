@@ -24,6 +24,7 @@ import com.xiaomi.duckling.dimension.time.duration.{durationSchema, Duration, Du
 import com.xiaomi.duckling.dimension.time.grain.TimeGrain
 import com.xiaomi.duckling.dimension.time.Types._
 import com.xiaomi.duckling.dimension.time.enums.Grain
+import com.xiaomi.duckling.dimension.time.form.Form
 
 case object Repeat extends Dimension with Rules {
   override val name: String = "Repeat"
@@ -42,8 +43,7 @@ case class RepeatData(interval: Option[DurationData] = None,
     val instant = start match {
       case Some(_start) =>
         _start.resolve(context, options) match {
-          case Some((TimeValue(value, _, _, _, _, _), _)) =>
-            Some(value)
+          case Some((tv: TimeValue, _)) => Some(tv, _start.form)
           case _ => None
         }
       case None => None
@@ -61,7 +61,7 @@ case class RepeatData(interval: Option[DurationData] = None,
  */
 case class RepeatValue(interval: Option[DurationData] = None,
                        n: Option[Int] = None,
-                       start: Option[SingleTimeValue] = None,
+                       start:  Option[(TimeValue, Option[Form])] = None,
                        workdayType: Option[WorkdayType] = None)
     extends ResolvedValue {
 
@@ -81,7 +81,7 @@ case class RepeatValue(interval: Option[DurationData] = None,
     } else "undefined"
     val isWorkdayType = workdayType.nonEmpty
     start match {
-      case Some(x) =>
+      case Some((TimeValue(x, _, _, _, _, _), _)) =>
         val (repr, grain) = x match {
           case IntervalValue(start, end) => (s"${format(start.datetime, isWorkdayType)}/${format(end.datetime, isWorkdayType)}", start.grain)
           case OpenIntervalValue(start, _) => (s"${format(start.datetime, isWorkdayType)}", start.grain)

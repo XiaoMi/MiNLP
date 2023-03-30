@@ -23,7 +23,7 @@ import com.xiaomi.duckling.dimension.DimRules
 import com.xiaomi.duckling.dimension.implicits._
 import com.xiaomi.duckling.dimension.matcher.GroupMatch
 import com.xiaomi.duckling.dimension.matcher.Prods.{regexMatch, singleRegexMatch}
-import com.xiaomi.duckling.dimension.time.{Time, TimeData}
+import com.xiaomi.duckling.dimension.time.{form, Time, TimeData}
 import com.xiaomi.duckling.dimension.time.duration.{Duration, DurationData}
 import com.xiaomi.duckling.dimension.time.enums.Grain
 import com.xiaomi.duckling.dimension.time.predicates.{isAPartOfDay, isATimeOfDay, isNotLatent, isTimeDatePredicate, TimeDatePredicate}
@@ -34,7 +34,7 @@ trait Rules extends DimRules with LazyLogging {
    */
   val ruleEveryDuration = Rule(
     name = "<every> <duration>",
-    pattern = List("每隔?".regex, isDimension(Duration).predicate),
+    pattern = List("(每隔|每|隔)".regex, isDimension(Duration).predicate),
     prod = tokens {
       case _ :: Token(Duration, interval: DurationData) :: _ =>
         Token(Repeat, RepeatData(interval))
@@ -102,7 +102,21 @@ trait Rules extends DimRules with LazyLogging {
     name = "<work/non-workday> <time>",
     pattern = List(isOnlyWorkdaysType.predicate, isHourTimes.predicate),
     prod = tokens { case Token(Repeat, rd: RepeatData) :: Token(Time, td: TimeData) :: _ =>
-      Token(Repeat, RepeatData(workdayType = rd.workdayType, start = td))
+      // 工作日八点应该就是上午八点，不是晚上八点
+      val _form = td.form match {
+        case Some(form.TimeOfDay(h, true)) => Some(form.TimeOfDay(h, false))
+        case _ => td.form
+      }
+      val timePred = td.timePred match {
+        case tdp: TimeDatePredicate =>
+          val _hour = tdp.hour match {
+            case Some((true, h)) => Some((false, h))
+            case _ => tdp.hour
+          }
+          tdp.copy(hour = _hour)
+        case _ => td.timePred
+      }
+      Token(Repeat, RepeatData(workdayType = rd.workdayType, start = td.copy(timePred = timePred, form = _form)))
     }
   )
 }

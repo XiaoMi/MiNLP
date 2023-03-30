@@ -33,9 +33,9 @@ object TimeValueHelpers {
     datetime(LocalDateTime.of(2013, 2, 12, hour, minute, second), Second)
   }
 
-  def ymd(y: Int,
-          m: Int,
-          d: Int,
+  def ymd(y: Int = 2013,
+          m: Int = 2,
+          d: Int = 12,
           grain: Grain = Day,
           holiday: Option[String] = None,
           calendar: Calendar = Solar,
@@ -71,10 +71,14 @@ object TimeValueHelpers {
 
   def md(m: Int, d: Int): TimeValue = ymd(2013, m, d)
 
+  def yMdHms(y: Int = 2013, M: Int = 2, d: Int = 12, H: Int = 0, m: Int = 0, s: Int = 0, grain: Grain): TimeValue = {
+    datetime(LocalDateTime.of(y, M, d, H, m, s), grain)
+  }
+
   def datetimeInterval(dt1: DuckDateTime, dt2: DuckDateTime, g: Grain, holiday: Option[String] = None,
                        partOfDay: Option[String] = None): TimeValue = {
     val v = timeValue(TimeObject(dt1, g, Some(dt2)))
-    TimeValue(v, holiday = holiday)
+    TimeValue(v, holiday = holiday, partOfDay = partOfDay)
   }
 
   def localDateTimeInterval(d1: LocalDateTime,
