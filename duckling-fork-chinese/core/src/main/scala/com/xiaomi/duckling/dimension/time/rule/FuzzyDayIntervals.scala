@@ -32,17 +32,17 @@ import com.xiaomi.duckling.dimension.time.predicates._
 
 object FuzzyDayIntervals {
 
-  val pattern = "(早上|早晨|晨间|清晨|下午|晚上|中午|午间|上午|傍晚|黄昏|凌晨|半夜|夜间|夜晚|夜里)"
+  val pattern = "(早上|早晨|晨间|清晨|下午|晚上|中午|午间|上午|傍晚|黄昏|凌晨|半夜|夜间|夜晚|夜里|晚|早)"
 
   def between(s: String): (String, (Int, Int)) = {
     s match {
-      case "早上" | "早晨" | "晨间" | "清晨"              => ("早上", (4, 12))
-      case "上午"                             => ("上午", (8, 12))
-      case "中午" | "午间"                      => ("中午", (12, 14))
-      case "下午"                             => ("下午", (12, 18))
-      case "晚上" | "晚间" | "夜里" | "夜间" | "夜晚" => ("晚上", (18, 0))
-      case "午夜" | "凌晨" | "半夜"               => ("凌晨", (0, 6))
-      case "傍晚" | "黄昏"                      => ("傍晚", (17, 19))
+      case "早上" | "早晨" | "晨间" | "清晨" | "早" => ("早上", (4, 12))
+      case "上午" => ("上午", (8, 12))
+      case "中午" | "午间" => ("中午", (12, 14))
+      case "下午" => ("下午", (12, 18))
+      case "晚上" | "晚间" | "夜里" | "夜间" | "夜晚" | "晚" => ("晚上", (18, 0))
+      case "午夜" | "凌晨" | "半夜" => ("凌晨", (0, 6))
+      case "傍晚" | "黄昏" => ("傍晚", (17, 19))
     }
   }
 
@@ -55,7 +55,7 @@ object FuzzyDayIntervals {
     Rule(name = "fuzzy day intervals", pattern = List(pattern.regex), prod = singleRegexMatch {
       case s =>
         for ((name, td) <- ofInterval(s)) yield {
-          tt(partOfDay(name, td))
+          tt(partOfDay(name, td).copy(latent = name.length == 1))
         }
     })
 
@@ -131,7 +131,7 @@ object FuzzyDayIntervals {
     name = "fuzzy interval <time-of-day> 2",
     pattern = List(
       // 避免[2017年三月2号早上][10点半] 与 [2017年三月2号][早上10点半] 同时出现，只保留后者
-      and(isAPartOfDay, not(isHint(PartOfDayAtLast))).predicate,
+      and(isAPartOfDay, not(isHint(PartOfDayAtLast)), isNotLatent).predicate,
       "的".regex,
       and(or(isNotLatent, isLatent0oClockOfDay), or(isATimeOfDay, isIntervalOfDay)).predicate
     ),
