@@ -205,7 +205,7 @@ trait Rules extends DimRules {
     }
   )
 
-  private val RecentPattern = "(上|下|前|后|过去|未来|接下来|之前|往前|向前|今后|之后|往后|向后|最近|近|这)"
+  private val RecentPattern = "(上|下|前|后面|后|过去|未来|接下来|之前|往前|向前|今后|之后|往后|向后|最近|近|这)"
 
   /**
     * 时间区间:
@@ -221,7 +221,7 @@ trait Rules extends DimRules {
       case Token(_, GroupMatch(s :: _)) :: Token(Duration, DurationData(v, g, _, fuzzy, _)) :: _ =>
         // 月必须是x个月
         s match {
-          case "下" | "后" | "接下来" | "未来" | "今后" | "之后" | "向后" | "往后" =>
+          case "下" | "后" | "接下来" | "未来" | "今后" | "之后" | "向后" | "往后" | "后面" =>
             val td: Option[TimeData] =
               // 未来一周=未来七天
               if (s == "未来" && v == 1 && g == Week) {
