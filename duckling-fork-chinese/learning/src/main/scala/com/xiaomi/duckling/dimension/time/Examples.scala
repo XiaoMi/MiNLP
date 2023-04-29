@@ -147,6 +147,7 @@ object Examples extends DimExamples {
   val times = List(
     (hms(4, 30, 0), List("现在", "此时", "此刻", "当前")),
     (hm(15, 15), List("下午三点十五", "下午3:15", "15:15", "3:15pm", "3:15p.m", "下午三点一刻", "下午的三点一刻")),
+    (yMdHms(d=13, H=2, grain = Hour), List("晚上两点")),
     (hm(16, 40), List("十六时四十分", "十六点四十")),
     (hm(6, 10), List("六点十分", "六点一十")),
     (hms(4, 33, 0), List("过三分钟")),
