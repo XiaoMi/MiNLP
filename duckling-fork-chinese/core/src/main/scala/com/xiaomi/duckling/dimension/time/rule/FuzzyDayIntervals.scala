@@ -147,10 +147,12 @@ object FuzzyDayIntervals {
         if (h == 12 && s == "凌晨") 0
         else if (h >= 10 && (s == "中午" || s == "午间")) h // 中午11点
         else if (h == 12 && s == "凌晨") 0
-        else if (h == 12 && s == "晚上" || s == "晚间") 24
+        else if (h == 12 && (s == "晚上" || s == "晚间")) 24
         else {
-          val (_, (from, _)) = between(s)
-          if (from >= 12 && h < 12) h + 12 else h
+          val (part, (from, _)) = between(s)
+          if (part == "晚上" && h < 6) h // 晚上2点 => 凌晨2点
+          else if (from >= 12 && h < 12) h + 12
+          else h
         }
       p.copy(hour = Some(false, hAdjust))
     }
