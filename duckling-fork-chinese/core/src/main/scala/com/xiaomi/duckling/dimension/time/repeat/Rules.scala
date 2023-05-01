@@ -71,7 +71,7 @@ trait Rules extends DimRules with LazyLogging {
   }
 
   val ruleEveryGrain = Rule(
-    name = "<every> <grain> <datetime>",
+    name = "<every> <grain>",
     pattern = List("每(一个?|个)?(年度?|月|周|星期|天|小时|分钟)".regex),
     prod = tokens {
       case Token(_, GroupMatch(_ :: _ :: grain :: _)) :: _ =>
