@@ -34,6 +34,8 @@ object Examples extends DimExamples {
   implicit def _toTuple(tv: TimeValue) = Option(tv, None: Option[Form])
 
   override def pairs: List[(ResolvedValue, List[String])] = List(
+    (RepeatValue(DurationData(1, Day, schema = "P1D")), List("每天")),
+    (RepeatValue(DurationData(1, Week, schema = "P1W")), List("每周")),
     (RepeatValue(DurationData(15, Minute, schema = "PT15M")), List("每隔15分钟", "隔15分钟")),
     (RepeatValue(
       DurationData(1, Month),

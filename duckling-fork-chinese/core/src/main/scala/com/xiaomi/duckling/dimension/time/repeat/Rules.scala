@@ -58,6 +58,34 @@ trait Rules extends DimRules with LazyLogging {
     }
   )
 
+  private def toGrain(grain: String): Option[Grain] = {
+    grain match {
+      case "年" | "年度" => Grain.Year
+      case "月" => Grain.Month
+      case "周" | "星期" => Grain.Week
+      case "日" | "天" => Grain.Day
+      case "小时" => Grain.Hour
+      case "分钟" => Grain.Minute
+      case _ => None
+    }
+  }
+
+  val ruleEveryGrain = Rule(
+    name = "<every> <grain> <datetime>",
+    pattern = List("每(一个?|个)?(年度?|月|周|星期|天|小时|分钟)".regex),
+    prod = tokens {
+      case Token(_, GroupMatch(_ :: _ :: grain :: _)) :: _ =>
+        val grainHint: Option[Grain] = toGrain(grain)
+        if (grainHint.nonEmpty) {
+          val interval = DurationData(1, grainHint.get)
+          Token(Repeat, RepeatData(interval))
+        } else {
+          logger.warn(s"unmatched grain found: ${grain}, please feedback to fix it")
+          None
+        }
+    }
+  )
+
   val ruleEveryGrainDatetime = Rule(
     name = "<every> <grain> <datetime>",
     pattern = List(
@@ -67,15 +95,7 @@ trait Rules extends DimRules with LazyLogging {
       case Token(_, GroupMatch(_ :: _ :: grainToken :: _)) :: Token(_, td: TimeData) :: _
         if td.timePred.maxGrain.nonEmpty =>
         val grainOfInterval = td.timePred.maxGrain.get
-        val grainHint: Option[Grain] = grainToken match {
-          case "年" | "年度" => Grain.Year
-          case "月" => Grain.Month
-          case "周" | "星期" => Grain.Week
-          case "日" | "天" => Grain.Day
-          case "小时" => Grain.Hour
-          case "分钟" => Grain.Minute
-          case _ => None
-        }
+        val grainHint: Option[Grain] = toGrain(grainToken)
         if (grainHint.nonEmpty && grainHint.get.finer().contains(grainOfInterval)) {
           val interval = DurationData(1, grainHint.getOrElse(grainOfInterval))
           (Token(Repeat, RepeatData(interval, start = td)))
