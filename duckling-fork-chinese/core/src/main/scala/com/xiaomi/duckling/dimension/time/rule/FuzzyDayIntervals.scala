@@ -34,21 +34,43 @@ object FuzzyDayIntervals {
 
   val pattern = "(早上|早晨|晨间|清晨|下午|晚上|中午|午间|上午|傍晚|黄昏|凌晨|半夜|夜间|夜晚|夜里|晚|早)"
 
-  def between(s: String): (String, (Int, Int)) = {
+  /**
+   *
+   * @param s
+   * @return (归一串, 小一点的范围<更合理的>, 大一点的范围<兼容病态说法>)
+   */
+  def between(s: String): (String, (Int, Int), (Int, Int)) = {
     s match {
-      case "早上" | "早晨" | "晨间" | "清晨" | "早" => ("早上", (4, 12))
-      case "上午" => ("上午", (8, 12))
-      case "中午" | "午间" => ("中午", (12, 14))
-      case "下午" => ("下午", (12, 18))
-      case "晚上" | "晚间" | "夜里" | "夜间" | "夜晚" | "晚" => ("晚上", (18, 0))
-      case "午夜" | "凌晨" | "半夜" => ("凌晨", (0, 6))
-      case "傍晚" | "黄昏" => ("傍晚", (17, 19))
+      case "早上" | "早晨" | "晨间" | "清晨" | "早" => ("早上", (4, 12), (0, 12))
+      case "上午" => ("上午", (8, 12), (4, 12))
+      case "中午" | "午间" => ("中午", (12, 14), (10, 15))
+      case "下午" => ("下午", (12, 18), (12, 0))
+      case "晚上" | "晚间" | "夜里" | "夜间" | "夜晚" | "晚" => ("晚上", (18, 0), (18, 0))
+      case "午夜" | "凌晨" | "半夜" => ("凌晨", (0, 6), (0, 8))
+      case "傍晚" | "黄昏" => ("傍晚", (17, 19), (16, 20))
     }
   }
 
-  def ofInterval(s: String): Option[(String, TimeData)] = {
-    val (name, (from, to)) = between(s)
-    interval(Open, hour(is12H = false, from), hour(is12H = false, to)).map((name, _))
+  def ofInterval(s: String, larger: Boolean = false): Option[(String, TimeData)] = {
+    val (name, (from, to), (_from, _to)) = between(s)
+    val td =
+      if (larger) interval(Open, hour(is12H = false, _from), hour(is12H = false, _to))
+      else interval(Open, hour(is12H = false, from), hour(is12H = false, to))
+    td.map((name, _))
+  }
+
+  /**
+   * 扩大匹配范围，适应病态表达，比如下午7点，早上4点，中午10点
+   * @param td
+   * @return
+   */
+  def enlarge(td: TimeData): TimeData = {
+    (td.form, td.timePred) match {
+      case (Some(PartOfDay(part)), _: TimeIntervalsPredicate) =>
+        val _td = ofInterval(part, larger = true).map(_._2).get
+        _td.copy(latent = td.latent)
+      case _ => td
+    }
   }
 
   val ruleFuzzyDayIntervals =
@@ -149,7 +171,7 @@ object FuzzyDayIntervals {
         else if (h == 12 && s == "凌晨") 0
         else if (h == 12 && (s == "晚上" || s == "晚间")) 24
         else {
-          val (part, (from, _)) = between(s)
+          val (part, (from, _), _) = between(s)
           if (part == "晚上" && h < 6) h // 晚上2点 => 凌晨2点
           else if (from >= 12 && h < 12) h + 12
           else h
