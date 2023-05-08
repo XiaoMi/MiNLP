@@ -195,6 +195,20 @@ object predicates {
     case Token(_, td: TimeData) => td.form.contains(Weekend)
   }
 
+  def xGrain(grain: Grain): Predicate = {
+    case Token(_, td: TimeData) =>
+      td.timePred match {
+        case TimeDatePredicate(None, None, hour, None, None, dayOfMonth, month, None, None) =>
+          (grain, hour, dayOfMonth, month) match {
+            case (Hour, Some(h), None, None) => true
+            case (Day, None, Some(d), None) => true
+            case (Month, None, None, Some(m)) => true
+            case _ => false
+          }
+        case _ => false
+      }
+  }
+
   val isNotLatent: Predicate = {
     case Token(_, td: TimeData) => !td.latent
   }

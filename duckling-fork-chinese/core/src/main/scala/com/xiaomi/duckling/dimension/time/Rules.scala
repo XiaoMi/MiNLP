@@ -17,14 +17,17 @@
 package com.xiaomi.duckling.dimension.time
 
 import scalaz.Scalaz._
+
 import com.xiaomi.duckling.Types._
 import com.xiaomi.duckling.dimension.DimRules
 import com.xiaomi.duckling.dimension.implicits._
 import com.xiaomi.duckling.dimension.matcher.{GroupMatch, RegexMatch}
+import com.xiaomi.duckling.dimension.numeral.NumeralData
+import com.xiaomi.duckling.dimension.numeral.Predicates.{isInteger, isNatural}
 import com.xiaomi.duckling.dimension.ordinal.{Ordinal, OrdinalData}
 import com.xiaomi.duckling.dimension.time.Helpers._
 import com.xiaomi.duckling.dimension.time.Prods._
-import com.xiaomi.duckling.dimension.time.duration.{Duration, DurationData, isFuzzyNotLatentDuration, isNotLatentDuration}
+import com.xiaomi.duckling.dimension.time.duration.{isFuzzyNotLatentDuration, isNotLatentDuration, Duration, DurationData}
 import com.xiaomi.duckling.dimension.time.enums.{Grain, Hint, IntervalDirection}
 import com.xiaomi.duckling.dimension.time.enums.Grain._
 import com.xiaomi.duckling.dimension.time.enums.Hint._
@@ -125,13 +128,15 @@ trait Rules extends DimRules {
       name = "intersect",
       // 左右边均不能是中午/下午，避免与<dim time> <part-of-day>冲突
       pattern = List(
-        and(isDimension(Time), isNotLatent, not(isAPartOfDay), isNotHint(Hint.Season)).predicate,
+        and(isDimension(Time), isNotLatent, isNotHint(Hint.Season)).predicate,
         // "一日"单独是latent，但是可以参与组合
         and(isDimension(Time), or(and(or(isNotLatent, isLatent0oClockOfDay), not(isAPartOfDay)), isADayOfMonth)).predicate
       ),
       prod = tokens {
-        case Token(Time, td1: TimeData) :: Token(Time, td2: TimeData) :: _
-            if td1.timeGrain > td2.timeGrain && !(td1.hint == Hint.Date && td2.hint == Hint.Date) =>
+        case (t1@Token(Time, td1: TimeData)) :: (t2@Token(Time, td2: TimeData)) :: _
+          if td1.timeGrain > td2.timeGrain && !(td1.hint == Hint.Date && td2.hint == Hint.Date) ||
+            // 上午的8-9点
+            td1.timeGrain == td2.timeGrain && td1.timeGrain == Hour && isAPartOfDay(t1) && !isAPartOfDay(t2) =>
           // 破除(y-m)-d和y-(m-d)均构造出来的问题
           if (td1.hint == YearMonth && td2.hint == DayOnly) None
           // 固定顺序，避免(y-m)-(d H-M-S) 以及(y)-(m-d H-M-S)出现
@@ -144,10 +149,9 @@ trait Rules extends DimRules {
               else Intersect
             // 10号八点，需要去掉AMPM (今天是10号9点时，不应再出20点)
             // 今天8点，需要根据当前时间是出8/20点
-            val _td2 =
-              if (td1.hint == Hint.RecentNominal) td2
-              else removeAMPM(td2)
-            val td = intersect(td1, _td2).map(_.copy(hint = hint))
+            val _td2 = if (td1.hint == Hint.RecentNominal) td2 else removeAMPM(td2)
+            val _td1 = FuzzyDayIntervals.enlarge(td1)
+            val td = intersect(_td1, _td2).map(_.copy(hint = hint))
             tt(td)
           }
       }
@@ -158,14 +162,17 @@ trait Rules extends DimRules {
     // "一日"单独是latent，但是可以参与组合
     pattern = List(isNotLatent.predicate, "的".regex, or(or(isNotLatent, isLatent0oClockOfDay), isADayOfMonth).predicate),
     prod = tokens {
-      case Token(Time, td1: TimeData) :: _ :: Token(Time, td2: TimeData) :: _
-          if td1.timeGrain > td2.timeGrain =>
+      case (t1@Token(Time, td1: TimeData)) :: _ :: (t2@Token(Time, td2: TimeData)) :: _
+        if td1.timeGrain > td2.timeGrain ||
+          // 上午的8-9点
+          td1.timeGrain == td2.timeGrain && td1.timeGrain == Hour && isAPartOfDay(t1) && !isAPartOfDay(t2) =>
         if (td1.timeGrain > Day && td2.timeGrain < Day) None
         else {
           val hint =
             if (td1.timeGrain == Year && td2.hint == MonthOnly) YearMonth
             else NoHint
-          val td = intersect(td1, removeAMPM(td2)).map(_.copy(hint = hint))
+          val _td1 = FuzzyDayIntervals.enlarge(td1)
+          val td = intersect(_td1, removeAMPM(td2)).map(_.copy(hint = hint))
           tt(td)
         }
     }
@@ -424,6 +431,29 @@ trait Rules extends DimRules {
   )
 
   /**
+   * 3到5号，3到5点，3到5月
+   */
+  val ruleFromToIntervalAbbr1 = Rule(
+    name = "<from>(no grain) 到 <to>",
+    pattern = List(isNatural.predicate, "(至|到|~)".regex, and(isNotLatent, or(xGrain(Month), xGrain(Day), xGrain(Hour))).predicate),
+    prod = tokens {
+      case Token(_, vd: NumeralData) :: _ ::
+        Token(Time, td2@TimeData(pred2: TimeDatePredicate, _, g2, _, _, _, _, _, _, _, _, _)) :: _ =>
+        val _from = vd.value.toInt
+        val td1: Option[TimeData] = g2 match {
+          case Month if 0 <= _from && _from <= 12 => td2.copy(timePred = pred2.copy(month = _from))
+          case Day if 0 <= _from && _from <= 31 => td2.copy(timePred = pred2.copy(dayOfMonth = _from))
+          case Hour if 0 <= _from && _from < 24 => td2.copy(timePred = pred2.copy(hour = (_from < 12, _from)))
+          case _ => None
+        }
+        td1 match {
+          case Some(x) => tt(interval(if (g2 != Hour) Closed else Open, x, td2))
+          case None => None
+        }
+    }
+  )
+
+  /**
     * 时间区间
     */
   val ruleInAInterval = Rule(
@@ -569,7 +599,8 @@ trait Rules extends DimRules {
     ruleTimeBeforeOfAfter2,
     ruleTimeBeforeOfAfter3,
     ruleTimeAfterDuration,
-    ruleTimeBeforeDuration
+    ruleTimeBeforeDuration,
+    ruleFromToIntervalAbbr1
   )
 
   override def dimRules: List[Rule] =

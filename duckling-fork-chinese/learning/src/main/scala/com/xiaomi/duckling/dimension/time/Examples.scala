@@ -358,7 +358,7 @@ object Examples extends DimExamples {
         LocalDateTime.of(2013, 2, 12, 18, 0, 0),
         Hour
       ),
-      List("下午三点到6点", "中午3点到6点")
+      List("下午三点到6点", "中午3点到6点", "下午3到6点")
     ),
     (
       localDateTimeInterval(
