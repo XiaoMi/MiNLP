@@ -39,8 +39,6 @@ import com.xiaomi.duckling.dimension.time.predicates._
 import com.xiaomi.duckling.dimension.time.rule._
 
 trait Rules extends DimRules {
-  lazy private val enableTimeSeqence = conf.getBoolean("dimension.time.sequence.enable")
-
   val ruleRecentTime = Rule(
     name = "this/last/next <time>",
     pattern = List(
@@ -474,8 +472,6 @@ trait Rules extends DimRules {
   }
 
   def sequenceProd(td1: TimeData, td2: TimeData): Option[Token] = {
-    if (!enableTimeSeqence) None
-    else {
       (td1.timePred, td2.timePred) match {
         case (_: TimeDatePredicate, _: TimeDatePredicate) => None
         case _ =>
@@ -498,7 +494,6 @@ trait Rules extends DimRules {
             } else None
           } else None
       }
-    }
   }
 
   /**
@@ -511,8 +506,8 @@ trait Rules extends DimRules {
       "(之后)?的".regex,
       and(isNotHint(ReplacePartOfTime), isNotHint(Sequence)).predicate
     ),
-    prod = tokens {
-      case Token(_, td1: TimeData) :: _ :: Token(_, td2: TimeData) :: _ =>
+    prod = optTokens {
+      case (options, Token(_, td1: TimeData) :: _ :: Token(_, td2: TimeData) :: _) if options.timeOptions.sequence =>
         sequenceProd(td1, td2)
     }
   )
@@ -526,10 +521,10 @@ trait Rules extends DimRules {
       and(isNotLatent, isGrainGeDay).predicate,
       and(isHint(RecentNominal, Recent), isNotHint(Sequence)).predicate
     ),
-    prod = tokens {
-      case Token(_, td1: TimeData) :: Token(_, td2: TimeData) :: _
-          if td1.timeGrain > td2.timeGrain ||
-            td1.timeGrain == td2.timeGrain && !(recentHint(td1.hint) && recentHint(td2.hint)) =>
+    prod = optTokens {
+      case (options, Token(_, td1: TimeData) :: Token(_, td2: TimeData) :: _)
+          if options.timeOptions.sequence && (td1.timeGrain > td2.timeGrain ||
+            td1.timeGrain == td2.timeGrain && !(recentHint(td1.hint) && recentHint(td2.hint))) =>
         sequenceProd(td1, td2)
     }
   )
@@ -541,11 +536,10 @@ trait Rules extends DimRules {
     name = "sequence3: <recent nominal> <duration>",
     pattern =
       List(isHint(RecentNominal).predicate, "(往|向|之)?(前|后)的?".regex, isNotLatentDuration.predicate),
-    prod = tokens {
-      case Token(_, td1: TimeData) :: Token(_, GroupMatch(_ :: s :: _)) :: Token(
-            _,
-            DurationData(value, grain, latent, _, _)
-          ) :: _ if td1.timeGrain == grain =>
+    prod = optTokens {
+      case (options, Token(_, td1: TimeData) :: Token(_, GroupMatch(_ :: s :: _)) ::
+        Token(_, DurationData(value, grain, latent, _, _)) :: _)
+        if options.timeOptions.sequence && td1.timeGrain == grain =>
         val sign = if (s == "前") -1 else 1
         val td2 = cycleN(notImmediate = false, grain, sign * value)
         val pred = SequencePredicate(List(td1, td2))

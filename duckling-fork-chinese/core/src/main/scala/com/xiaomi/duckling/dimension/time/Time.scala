@@ -88,6 +88,18 @@ class TimeOptions {
    * 解析春夏秋冬四季/输出结果以节气为参照
    */
   @BooleanBeanProperty var parseFourSeasons: Boolean = false
+  /**
+   * 是否支持明天的明天类的解析
+   */
+  @BooleanBeanProperty var sequence: Boolean = true
+  /**
+   * duration: 是否支持几个月/几天
+   */
+  @BooleanBeanProperty var durationFuzzyOn: Boolean = true
+  /**
+   * duration: 模糊的数量
+   */
+  @BooleanBeanProperty var durationFuzzyValue: Int = 3
 }
 
 case class TimeData(timePred: TimePredicate,
