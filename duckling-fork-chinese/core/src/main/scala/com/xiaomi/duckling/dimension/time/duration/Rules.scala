@@ -20,7 +20,7 @@ import scalaz.std.string.parseInt
 import com.xiaomi.duckling.Types._
 import com.xiaomi.duckling.dimension.DimRules
 import com.xiaomi.duckling.dimension.implicits._
-import com.xiaomi.duckling.dimension.matcher.Prods.regexMatch
+import com.xiaomi.duckling.dimension.matcher.GroupMatch
 import com.xiaomi.duckling.dimension.numeral.Predicates._
 import com.xiaomi.duckling.dimension.numeral.seq.{DigitSequence, DigitSequenceData, isDigitLeading0, isDigitLengthGt, isDigitOfWidth}
 import com.xiaomi.duckling.dimension.numeral.{Numeral, NumeralData}
@@ -32,9 +32,6 @@ import com.xiaomi.duckling.dimension.time.predicates._
 import com.xiaomi.duckling.dimension.time.unitNumber.UnitNumber
 
 trait Rules extends DimRules {
-  val fuzzyOn: Boolean = conf.getBoolean("dimension.time.fuzzy.on")
-  val fuzzyValue: Int = conf.getInt("dimension.time.fuzzy.value")
-
   def compatibleWithUnitNumber(g: Grain): Boolean = {
     g match {
       case Grain.Hour    => true
@@ -76,14 +73,17 @@ trait Rules extends DimRules {
     }
   )
 
-  // TODO 这里应该参数化
   val ruleFewDuration = Rule(
     name = "few <unit-of-duration>",
     pattern = List("几个?".regex, isDimension(TimeGrain).predicate),
-    prod = tokens {
-      case _ :: Token(TimeGrain, GrainData(g, _)) :: _ =>
-        if (fuzzyOn) Token(Duration, DurationData(fuzzyValue, g, latent = true, fuzzy = true, schema = durationSchema(fuzzyValue.toString, g)))
-        else None
+    prod = optTokens {
+      case (options: Options, _ :: Token(TimeGrain, GrainData(g, _)) :: _) if options.timeOptions.durationFuzzyOn =>
+        Token(Duration,
+          DurationData(
+            options.timeOptions.durationFuzzyValue, g,
+            latent = true,
+            fuzzy = true,
+            schema = durationSchema(options.timeOptions.durationFuzzyValue.toString, g)))
     }
   )
 
@@ -96,18 +96,29 @@ trait Rules extends DimRules {
     }
   )
 
-  val ruleDurationDotNumeralHours = Rule(
-    name = "number.number hours",
-    pattern = List("(\\d+)\\.(\\d+) *小时".regex),
-    prod = regexMatch {
-      case _ :: h :: m :: _ =>
-        for {
-          hh <- parseInt(h).toOption
-          mm <- parseInt(m).toOption
+  val ruleDurationDotNumeral = Rule(
+    name = "number.number grain",
+    pattern = List("(\\d+)\\.(\\d+)".regex, isDimension(TimeGrain).predicate),
+    prod = tokens {
+      case Token(_, GroupMatch(_ :: integer :: decimal :: _)) :: Token(_, GrainData(g, false)) :: _ =>
+        (for {
+          i <- parseInt(integer).toOption
+          d <- parseInt(decimal).toOption
         } yield {
-          val mden = math.pow(10, m.length).toInt
-          tt(60 * hh + 60 * mm / mden, Minute)
-        }
+          val mden = math.pow(10, decimal.length).toInt
+          val token: Option[Token] = g match {
+            case Grain.NoGrain => None
+            case Grain.Second => None
+            case Grain.Minute => tt(60 * i + 60 * d / mden, Second)
+            case Grain.Hour => tt(60 * i + 60 * d / mden, Minute)
+            case Grain.Day => tt(24 * i + 24 * d / mden, Hour)
+            case Grain.Week => None
+            case Grain.Month => tt(30 * i + 30 * d / mden, Day)
+            case Grain.Quarter => None
+            case Grain.Year => tt(12 * i + 12 * d / mden, Day)
+          }
+          token
+        }).flatten
     }
   )
 
