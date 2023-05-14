@@ -53,7 +53,12 @@ object Examples extends DimExamples {
       new DuckDateTime(LocalDateTime.of(2013, 2, 12, 8, 0, 0)),
       new DuckDateTime(LocalDateTime.of(2013, 2, 12, 12, 0, 0)),
       Hour,
-      partOfDay = "上午"), Some(form.PartOfDay("上午")))), List("每个工作日上午"))
+      partOfDay = "上午"), Some(form.PartOfDay("上午")))), List("每个工作日上午")),
+    (RepeatValue(DurationData(1, Week), start = (datetimeInterval(
+      new DuckDateTime(LocalDateTime.of(2013, 2, 13, 12, 0, 0)),
+      new DuckDateTime(LocalDateTime.of(2013, 2, 13, 18, 0, 0)),
+      Hour,
+      partOfDay = "下午"), Some(form.PartOfDay("下午")))), List("每周三下午"))
   )
 
   override val dimension: Dimension = Repeat
