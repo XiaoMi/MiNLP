@@ -25,8 +25,8 @@ import com.xiaomi.duckling.dimension.matcher.GroupMatch
 import com.xiaomi.duckling.dimension.matcher.Prods.{regexMatch, singleRegexMatch}
 import com.xiaomi.duckling.dimension.time.{form, Time, TimeData}
 import com.xiaomi.duckling.dimension.time.duration.{Duration, DurationData}
-import com.xiaomi.duckling.dimension.time.enums.Grain
-import com.xiaomi.duckling.dimension.time.predicates.{isAPartOfDay, isATimeOfDay, isNotLatent, isTimeDatePredicate, TimeDatePredicate}
+import com.xiaomi.duckling.dimension.time.enums.{Grain, Hint}
+import com.xiaomi.duckling.dimension.time.predicates.{isAPartOfDay, isATimeOfDay, isHint, isNotLatent, isTimeDatePredicate, IntersectTimePredicate, TimeDatePredicate, TimeIntervalsPredicate}
 
 trait Rules extends DimRules with LazyLogging {
   /**
@@ -46,15 +46,19 @@ trait Rules extends DimRules with LazyLogging {
    */
   val ruleEveryDatetime = Rule(
     name = "<every> <datetime>",
-    pattern = List("每(一|一个|个)?".regex, isTimeDatePredicate.predicate),
+    pattern = List("每(一个|一|个)?".regex, or(isTimeDatePredicate, isHint(Hint.PartOfDayAtLast), isAPartOfDay).predicate),
     prod = tokens {
-      case _ :: (t @ Token(_, td: TimeData)) :: _ =>
-        val grainOfInterval = td.timePred.asInstanceOf[TimeDatePredicate].maxGrain.get
+      case _ :: (t@Token(_, td: TimeData)) :: _ if td.timePred.maxGrain.nonEmpty =>
+        val maxGrain = td.timePred.maxGrain.get
         val grain =
-          if (grainOfInterval == Grain.Hour && (isAPartOfDay(t) || isATimeOfDay(t))) Grain.Day
-          else grainOfInterval
+          if (maxGrain == Grain.Hour && (isAPartOfDay(t) || isATimeOfDay(t))) Grain.Day
+          else maxGrain
         val interval = DurationData(1, grain)
-        Token(Repeat, RepeatData(interval, start = td))
+        td.timePred match {
+          case _: TimeDatePredicate | _: TimeIntervalsPredicate | _: IntersectTimePredicate =>
+            Token(Repeat, RepeatData(interval, start = td))
+          case _ => None
+        }
     }
   )
 

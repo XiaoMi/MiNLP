@@ -72,13 +72,13 @@ case class RepeatValue(interval: Option[DurationData] = None,
    */
   override def schema: Option[String] = {
     val duration =
-    if (interval.nonEmpty) {
-      val _interval = interval.get
-      if (_interval.schema.isEmpty) durationSchema(_interval.value.toString, _interval.grain).get
-      else _interval.schema.get
-    } else if (workdayType.nonEmpty) {
-      workdayType.get.toString
-    } else "undefined"
+      if (interval.nonEmpty) {
+        val _interval = interval.get
+        if (_interval.schema.isEmpty) durationSchema(_interval.value.toString, _interval.grain).get
+        else _interval.schema.get
+      } else if (workdayType.nonEmpty) {
+        workdayType.get.toString
+      } else "undefined"
     val isWorkdayType = workdayType.nonEmpty
     start match {
       case Some((TimeValue(x, _, _, _, _, _), _)) =>
