@@ -378,6 +378,14 @@ object Examples extends DimExamples {
     ),
     (
       localDateTimeInterval(
+        LocalDateTime.of(2013, 2, 12, 9, 0, 0),
+        LocalDateTime.of(2013, 2, 12, 21, 0, 0),
+        Hour
+      ),
+      List("9点到9点")
+    ),
+    (
+      localDateTimeInterval(
         LocalDateTime.of(2013, 2, 13, 15, 0, 0),
         LocalDateTime.of(2013, 2, 13, 18, 0, 0),
         Hour
