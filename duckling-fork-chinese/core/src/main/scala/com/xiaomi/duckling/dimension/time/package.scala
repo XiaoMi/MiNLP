@@ -342,8 +342,10 @@ package object time {
     // Pick the first interval *after* the given time segment
     def f(thisSegment: TimeObject, ctx: TimeContext): Option[TimeObject] = {
       runPredicate(pred2)(thisSegment, ctx) match {
-        case (_, firstFuture #:: _) =>
-          Some(timeInterval(intervalType, thisSegment, firstFuture))
+        case (_, firstFuture #:: tail) =>
+          // 避免9点-9点，左右一样（空区间）
+          val end = if (firstFuture != thisSegment || tail.headOption.isEmpty) firstFuture else tail.head
+          Some(timeInterval(intervalType, thisSegment, end))
         case _ => None
       }
     }
