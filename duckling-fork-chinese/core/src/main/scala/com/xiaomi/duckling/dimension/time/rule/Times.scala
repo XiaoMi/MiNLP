@@ -61,7 +61,7 @@ object Times {
         else
           for (h <- getIntValue(t1)) yield {
             val latent = if (h == 0 && s == "点") true else false
-            val td = hour(is12H = h > 0, h.toInt).copy(latent = latent, hint = Hint.NoHint)
+            val td = hour(is12H = 0 < h && h <= 12 , h.toInt).copy(latent = latent, hint = Hint.NoHint)
             tt(td)
           }
     }
@@ -74,7 +74,7 @@ object Times {
       case token :: _ =>
         for {
           v <- getIntValue(token)
-          t <- tt(hour(is12H = true, v.toInt).copy(latent = true))
+          t <- tt(hour(is12H = v <= 12, v.toInt).copy(latent = true))
         } yield t
     }
   )
