@@ -28,7 +28,10 @@ object Examples extends DimExamples {
     (QuantityValue(-25.3, "C", "温度"), List("零下25.3摄氏度", "零下25.3°C", "负的二十五点3度")),
     (QuantityValue(21, "F", "温度"), List("华氏21度", "2十一华氏度")),
     (QuantityValue(+22.6, "F", "温度"), List("华氏22点6度", "二十二点6华氏度")),
-    (QuantityValue(-13, "F", "温度"), List("零下华氏十3度", "华氏零下十3度", "负的13华氏度"))
+    (QuantityValue(-13, "F", "温度"), List("零下华氏十3度", "华氏零下十3度", "负的13华氏度")),
+    (QuantityValue(22.5, "C", "温度"), List("22度半", "摄氏二十二度半")),
+    (QuantityValue(-31.5, "F", "温度"), List("零下华氏三十一度半", "华氏零下三十一度半", "华氏-31度半")),
+    (QuantityValue(-11.5, "C", "温度"), List("负11度半", "摄氏零下11度半", "零下摄氏11度半"))
   )
 
   override val dimension: Dimension = Temperature

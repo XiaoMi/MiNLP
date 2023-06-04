@@ -20,6 +20,7 @@ import com.xiaomi.duckling.Types._
 import com.xiaomi.duckling.dimension.DimRules
 import com.xiaomi.duckling.dimension.implicits._
 import com.xiaomi.duckling.dimension.matcher.{GroupMatch, RegexMatch}
+import com.xiaomi.duckling.dimension.numeral.Predicates.isInteger
 import com.xiaomi.duckling.dimension.numeral.{Numeral, NumeralData}
 import com.xiaomi.duckling.dimension.quantity.QuantityData
 
@@ -62,6 +63,38 @@ trait Rules extends DimRules {
       ) :: _ =>
         val unit = if (unitStr.contains("华氏") || unitStr.contains("°F")) "F" else "C"
         Token(Temperature, QuantityData(value, unit, "温度"))
+    }
+  )
+  
+  val ruleHalfTemperatureWithNegative = Rule(
+    name = "negative <number> unit like [31度半, 零下二十度半, 负的华氏31度半]",
+    pattern = List(
+      s"(华氏|摄氏)?${negatives.mkString("(", "|", ")?")}(华氏|摄氏)?".regex,
+      and(isInteger).predicate,
+      "度半".regex
+    ),
+    prod = tokens {
+      case Token(RegexMatch, GroupMatch(prefix :: _)) :: Token(Numeral, NumeralData(value, _, _, _, _, _)
+      ) :: _ :: _ =>
+        val negative =
+          if (prefix.nonEmpty && (prefix.contains("零下") || prefix.contains("负的") || prefix
+            .contains("负"))) -1
+          else +1
+        val unit =
+          if (prefix.contains("华氏")) "F" else "C"
+        
+        val temperature_value = if (value >= 0) value + 0.5 else value - 0.5
+        Token(Temperature, QuantityData(negative * temperature_value, unit, "温度"))
+    }
+  )
+  
+  val ruleHalfTemperature = Rule(
+    name = "<number> unit like [30度半]",
+    pattern = List(and(isInteger).predicate, "度半".regex),
+    prod = tokens {
+      case Token(Numeral, NumeralData(value, _, _, _, _, _)) :: _ :: _ =>
+        val temperature_value = if (value >= 0) value + 0.5 else value - 0.5
+        Token(Temperature, QuantityData(temperature_value, "C", "温度"))
     }
   )
 }
