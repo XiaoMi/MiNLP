@@ -90,7 +90,8 @@ object TimePredicateHelpers {
 
   def mkTimeIntervalsPredicate(t: IntervalType,
                                ta: TimeData,
-                               tb: TimeData): TimePredicate = {
+                               tb: TimeData,
+                               beforeEndOfInterval: Boolean): TimePredicate = {
     val a = ta.timePred
     val b = tb.timePred
 
@@ -102,7 +103,7 @@ object TimePredicateHelpers {
       EmptyTimePredicate
     }
     // this is potentially quadratic, but the sizes involved should be small
-    else TimeIntervalsPredicate(t, a, b)
+    else TimeIntervalsPredicate(t, a, b, beforeEndOfInterval)
   }
 
   def isPartOfDay(td: TimeData): Boolean = {

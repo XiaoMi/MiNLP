@@ -16,8 +16,6 @@
 
 package com.xiaomi.duckling.task
 
-import java.time.ZonedDateTime
-
 import org.apache.commons.lang3.time.StopWatch
 import org.json4s.jackson.Serialization.write
 
@@ -57,6 +55,7 @@ object NaiveBayesDebug {
     options.timeOptions.setResetTimeOfDay(false)
     options.timeOptions.setRecentInFuture(true)
     options.timeOptions.setAlwaysInFuture(true)
+    options.timeOptions.setBeforeEndOfInterval(true)
     options.numeralOptions.setAllowZeroLeadingDigits(false)
     options.numeralOptions.setCnSequenceAsNumber(false)
 

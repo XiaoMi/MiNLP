@@ -76,7 +76,8 @@ object NaiveBayesConsole extends LazyLogging {
         "inherit-duration-grain",
         "seasons",
         "sequence",
-        "fuzzy-on"
+        "fuzzy-on",
+        "before-end-of-interval"
       ),
       NullCompleter.INSTANCE
     )
@@ -125,6 +126,7 @@ object NaiveBayesConsole extends LazyLogging {
               case "seasons" => options.timeOptions.setParseFourSeasons(value); options
               case "sequence" => options.timeOptions.setSequence(value); options
               case "fuzzy-on" => options.timeOptions.setDurationFuzzyOn(value); options
+              case "before-end-of-interval" => options.timeOptions.setBeforeEndOfInterval(value); options
               case _ => options
             }
             opt

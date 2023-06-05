@@ -51,11 +51,11 @@ object FuzzyDayIntervals {
     }
   }
 
-  def ofInterval(s: String, larger: Boolean = false): Option[(String, TimeData)] = {
+  def ofInterval(s: String, larger: Boolean = false, beforeEndOfInterval: Boolean = false): Option[(String, TimeData)] = {
     val (name, (from, to), (_from, _to)) = between(s)
     val td =
-      if (larger) interval(Open, hour(is12H = false, _from), hour(is12H = false, _to))
-      else interval(Open, hour(is12H = false, from), hour(is12H = false, to))
+      if (larger) interval(Open, hour(is12H = false, _from), hour(is12H = false, _to), beforeEndOfInterval)
+      else interval(Open, hour(is12H = false, from), hour(is12H = false, to), beforeEndOfInterval)
     td.map((name, _))
   }
 
@@ -106,7 +106,7 @@ object FuzzyDayIntervals {
     }
   )
 
-  private def fuzzyIntervalTimeOfDay(td0: TimeData, td: TimeData): Option[Token] = {
+  private def fuzzyIntervalTimeOfDay(td0: TimeData, td: TimeData, beforeEndOfInterval: Boolean): Option[Token] = {
     val TimeData(pred, _, _, _, Some(form), _, _, _, _, _, _, _) = td
     val part = td0.form.get.asInstanceOf[PartOfDay].part
     // 利用左侧的区间将右侧的时间从12AMPM转换到24H制
@@ -117,13 +117,13 @@ object FuzzyDayIntervals {
           (is12H, hAdjust) <- hAdjustP.hour
         } yield timeOfDay(hAdjust, is12H = false, td).copy(timePred = hAdjustP, hint = Hint.NoHint)
       case (
-          TimeIntervalsPredicate(t, p1: TimeDatePredicate, p2: TimeDatePredicate),
+          TimeIntervalsPredicate(t, p1: TimeDatePredicate, p2: TimeDatePredicate, beforeEndOfInterval),
           IntervalOfDay
           ) =>
         for {
           from <- updatePredicateByFuzzyInterval(part, p1)
           to <- updatePredicateByFuzzyInterval(part, p2)
-        } yield td.copy(timePred = TimeIntervalsPredicate(t, from, to))
+        } yield td.copy(timePred = TimeIntervalsPredicate(t, from, to, beforeEndOfInterval))
       case _ => None
     }
     // 组装，上午8点，以及[昨晚]8点
@@ -143,9 +143,9 @@ object FuzzyDayIntervals {
       and(isAPartOfDay, not(isHint(PartOfDayAtLast))).predicate,
       and(or(isNotLatent, isLatent0oClockOfDay), or(isATimeOfDay, isIntervalOfDay)).predicate
     ),
-    prod = tokens {
-      case Token(Time, td0: TimeData) :: Token(Time, td: TimeData) :: _ =>
-        fuzzyIntervalTimeOfDay(td0, td)
+    prod = {
+      case (options: Options, Token(Time, td0: TimeData) :: Token(Time, td: TimeData) :: _) =>
+        fuzzyIntervalTimeOfDay(td0, td, options.timeOptions.beforeEndOfInterval)
     }
   )
 
@@ -157,9 +157,9 @@ object FuzzyDayIntervals {
       "的".regex,
       and(or(isNotLatent, isLatent0oClockOfDay), or(isATimeOfDay, isIntervalOfDay)).predicate
     ),
-    prod = tokens {
-      case Token(Time, td0: TimeData) :: _ :: Token(Time, td: TimeData) :: _ =>
-        fuzzyIntervalTimeOfDay(td0, td)
+    prod = {
+      case (options, Token(Time, td0: TimeData) :: _ :: Token(Time, td: TimeData) :: _) =>
+        fuzzyIntervalTimeOfDay(td0, td, options.timeOptions.beforeEndOfInterval)
     }
   )
 

@@ -103,7 +103,7 @@ object TimeDataHelpers {
     year(n).copy(latent = true)
   }
 
-  def weekend: TimeData = form(Weekend, interval1(Open, dayOfWeek(6), dayOfWeek(7)))
+  def weekend(beforeEndOfInterval: Boolean): TimeData = form(Weekend, interval1(Open, dayOfWeek(6), dayOfWeek(7), beforeEndOfInterval))
 
   def timeOfDayAMPM(isAM: Boolean, td: TimeData): TimeData = {
     val ampmPred: TimeDatePredicate = TimeDatePredicate(ampm = if (isAM) AM else PM)
@@ -224,20 +224,20 @@ object TimeDataHelpers {
     predNthAfter(nth - 1, dow_, month_)
   }
 
-  def interval(intervalType: IntervalType, td1: TimeData, td2: TimeData): Option[TimeData] = {
-    interval1(intervalType, td1, td2) match {
+  def interval(intervalType: IntervalType, td1: TimeData, td2: TimeData, beforeEndOfInterval: Boolean): Option[TimeData] = {
+    interval1(intervalType, td1, td2, beforeEndOfInterval) match {
       case td: TimeData if td.timePred == EmptyTimePredicate => None
       case res                                               => Some(res)
     }
   }
 
-  def interval1(intervalType: IntervalType, td1: TimeData, td2: TimeData): TimeData = {
+  def interval1(intervalType: IntervalType, td1: TimeData, td2: TimeData, beforeEndOfInterval: Boolean): TimeData = {
     val it =
       if (td1.hint == Hint.Season && td2.hint == Hint.Season) intervalType
       else if (td1.timeGrain == td2.timeGrain && td1.timeGrain == Day) Closed
       else intervalType
     TimeData(
-      timePred = mkTimeIntervalsPredicate(it, td1, td2),
+      timePred = mkTimeIntervalsPredicate(it, td1, td2, beforeEndOfInterval),
       timeGrain = if (td1.timeGrain > td2.timeGrain) td2.timeGrain else td1.timeGrain
     )
   }

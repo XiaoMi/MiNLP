@@ -17,19 +17,19 @@
 package com.xiaomi.duckling.dimension.time.date
 
 import scalaz.std.string.parseInt
-
 import java.time.LocalDate
+
 import scala.util.Try
 
 import com.xiaomi.duckling.Types._
 import com.xiaomi.duckling.dimension.DimRules
 import com.xiaomi.duckling.dimension.implicits._
-import com.xiaomi.duckling.dimension.matcher.GroupMatch
+import com.xiaomi.duckling.dimension.matcher.{GroupMatch, RegexMatch}
 import com.xiaomi.duckling.dimension.matcher.Prods.{regexMatch, singleRegexMatch}
 import com.xiaomi.duckling.dimension.numeral.Predicates.{getIntValue, isIntegerBetween}
 import com.xiaomi.duckling.dimension.numeral.seq.{DigitSequence, DigitSequenceData}
 import com.xiaomi.duckling.dimension.time.Prods.intersectDOM
-import com.xiaomi.duckling.dimension.time.duration.{Duration, DurationData, isADecade}
+import com.xiaomi.duckling.dimension.time.duration.{isADecade, Duration, DurationData}
 import com.xiaomi.duckling.dimension.time.enums.Grain._
 import com.xiaomi.duckling.dimension.time.enums.Hint.{NoHint, RecentNominal, YearMonth}
 import com.xiaomi.duckling.dimension.time.enums.IntervalType.{Closed, Open}
@@ -257,32 +257,33 @@ trait Rules extends DimRules {
   val ruleDecade = Rule(
     name = "date: tens of decade",
     pattern = List(isADecade.predicate, "年代".regex),
-    prod = tokens {
-      case t1 :: _ =>
+    prod = {
+      case (options, t1 :: _) =>
         val y = getIntValue(t1).get.toInt
         val adjustY = if (y > 20) 1900 + y else y + 2000
         val from = year(adjustY)
         val to = year(adjustY + 10)
-        for (td <- interval(Open, from, to)) yield Token(Date, td)
+        for (td <- interval(Open, from, to, options.timeOptions.beforeEndOfInterval)) yield Token(Date, td)
     }
   )
 
   val ruleQuarter = Rule(
     name = "date - <ordinal> <quarter>",
     pattern = List("第".regex, isAQuarterOfYear.predicate),
-    prod = tokens {
-      case _ :: Token(Duration, DurationData(value, _, _, _, _)) :: _ =>
-        for (td <- interval(Closed, month(3 * value - 2), month(3 * value))) yield {
+    prod = {
+      case (options, _ :: Token(Duration, DurationData(value, _, _, _, _)) :: _) =>
+        for (td <- interval(Closed, month(3 * value - 2), month(3 * value), options.timeOptions.beforeEndOfInterval)) yield {
           Token(Date, td.copy(reset = (Grain.resetTo(Quarter), 0)))
         }
     }
   )
 
-  val ruleSpecial0 = Rule(name = "date - special days: 今明两天", pattern = List("今明两天|今天明天".regex), prod = tokens {
-    case _ =>
-      val from = cycleNth(Day, 0, Day)
-      val to = cycleNth(Day, 1, Day)
-      for (td <- interval(Open, from, to)) yield Token(Date, td)
+  val ruleSpecial0 = Rule(name = "date - special days: 今明两天", pattern = List("今明两天|今天明天".regex),
+    prod = {
+      case (options, _) =>
+        val from = cycleNth(Day, 0, Day)
+        val to = cycleNth(Day, 1, Day)
+        for (td <- interval(Open, from, to, options.timeOptions.beforeEndOfInterval)) yield Token(Date, td)
   })
 
   val ruleSpecial1 = Rule(name = "date - special days: 元月", pattern = List("元月份?".regex), prod = tokens {
@@ -292,28 +293,30 @@ trait Rules extends DimRules {
   val ruleSpecial2 = Rule(
     name = "date - special days: 最近",
     pattern = List("(最近|近期|这段时间)".regex),
-    prod = tokens {
-      case _ =>
+    prod = {
+      case (options, _) =>
         val from = cycleNth(Day, 0, Day)
         val to = cycleNth(Day, 2, Day)
-        for (td <- interval(Open, from, to)) yield {
+        for (td <- interval(Open, from, to, options.timeOptions.beforeEndOfInterval)) yield {
           Token(Date, td.copy(hint = Hint.UncertainRecent))
         }
     }
   )
 
-  val ruleSpecial3 = Rule(name = "date - special days: 明后天", pattern = List("明后两?天|明天后天".regex), prod = tokens {
-    case _ =>
-      val from = cycleNth(Day, 1, Day)
-      val to = cycleNth(Day, 2, Day)
-      for (td <- interval(Open, from, to)) yield Token(Date, td)
+  val ruleSpecial3 = Rule(name = "date - special days: 明后天", pattern = List("明后两?天|明天后天".regex),
+    prod = {
+      case (options, _) =>
+        val from = cycleNth(Day, 1, Day)
+        val to = cycleNth(Day, 2, Day)
+        for (td <- interval(Open, from, to, options.timeOptions.beforeEndOfInterval)) yield Token(Date, td)
   })
 
-  val ruleSpecial4 = Rule(name = "date - special days: 今明后", pattern = List("今明后(三?天)?|今天明天后天(三天)?".regex), prod = tokens {
-    case _ =>
-      val from = cycleNth(Day, 0, Day)
-      val to = cycleNth(Day, 2, Day)
-      for (td <- interval(Open, from, to)) yield Token(Date, td)
+  val ruleSpecial4 = Rule(name = "date - special days: 今明后", pattern = List("今明后(三?天)?|今天明天后天(三天)?".regex),
+    prod = {
+      case (options, _) =>
+        val from = cycleNth(Day, 0, Day)
+        val to = cycleNth(Day, 2, Day)
+        for (td <- interval(Open, from, to, options.timeOptions.beforeEndOfInterval)) yield Token(Date, td)
   })
 
   val ruleEndOfMonth = Rule(name = "date - 月底", pattern = List("月(底|末)".regex), prod = tokens {
@@ -323,14 +326,15 @@ trait Rules extends DimRules {
       Token(Date, td)
   })
 
-  val ruleHalfYear = Rule(name = "date - 上/下半年", pattern = List("(上|下)半年".regex), prod = regexMatch {
-    case _ :: half :: _ =>
-      val start = if (half == "上") 0 else 6
-      val from = cycleNth(Month, start, Year)
-      val to = cycleNth(Month, start + 6, Year)
-      for (td <- interval(Open, from, to)) yield {
-        Token(Date, td)
-      }
+  val ruleHalfYear = Rule(name = "date - 上/下半年", pattern = List("(上|下)半年".regex),
+    prod = {
+      case (options: Options, Token(RegexMatch, GroupMatch(_ :: half :: _)) :: _) =>
+        val start = if (half == "上") 0 else 6
+        val from = cycleNth(Month, start, Year)
+        val to = cycleNth(Month, start + 6, Year)
+        for (td <- interval(Open, from, to, options.timeOptions.beforeEndOfInterval)) yield {
+          Token(Date, td)
+        }
   })
 
   val ruleIntersect =

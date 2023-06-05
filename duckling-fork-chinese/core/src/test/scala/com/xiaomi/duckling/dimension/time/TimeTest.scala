@@ -20,7 +20,7 @@ import java.time.{LocalDateTime, ZonedDateTime}
 
 import com.xiaomi.duckling.Api.analyze
 import com.xiaomi.duckling.Types._
-import com.xiaomi.duckling.dimension.time.Types.{InstantValue, SimpleValue}
+import com.xiaomi.duckling.dimension.time.Types.{InstantValue, SimpleValue, IntervalValue}
 import com.xiaomi.duckling.dimension.time.enums.Grain.Year
 import com.xiaomi.duckling.dimension.time.helper.TimeDataHelpers._
 import com.xiaomi.duckling.dimension.time.predicates.ReplacePartPredicate
@@ -109,6 +109,26 @@ class TimeTest extends UnitSpec {
       val cases = Table("query", "八号到十二月", "八点到五分", "春天一点", "这十分钟后", "十后", "后三十分钟后")
       forAll(cases) { query =>
         parse(query, context = testContext, options = options) should have size 0
+      }
+    }
+
+    it("beforeEndOfInterval") {
+      val _options = options.copy(timeOptions = new TimeOptions)
+      _options.timeOptions.setBeforeEndOfInterval(true)
+
+      val cases = Table(("query", "start", "end")
+        , ("三点到五点", "12 03:00:00", "12 05:00:00")
+        , ("星期一到星期三", "2013-02-11", "2013-02-14")
+        , ("1月到三月", "2013-01-01", "2013-04-01")
+      )
+
+      forAll(cases) { (query, s, t) =>
+        parse(query, options = _options).head.token.value match {
+          case TimeValue(IntervalValue(InstantValue(start, _), InstantValue(end, _)), _, _, _, _, _) =>
+            start.toString should include(s)
+            end.toString should include(t)
+          case _ => "parsing failure"
+        }
       }
     }
   }

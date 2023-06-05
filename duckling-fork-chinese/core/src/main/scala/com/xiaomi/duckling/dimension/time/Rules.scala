@@ -406,9 +406,9 @@ trait Rules extends DimRules {
   val ruleFromToInterval = Rule(
     name = "<from> 到 <to>",
     pattern = List(isNotLatent.predicate, "(至|到|~)".regex, isNotLatent.predicate),
-    prod = tokens {
-      case Token(Time, td1 @ TimeData(pred1, _, g1, _, _, _, _, _, _, _, _, _)) :: _ ::
-            Token(Time, td2 @ TimeData(pred2, _, g2, _, _, _, _, _, _, _, _, _)) :: _ =>
+    prod = {
+      case (options, Token(Time, td1 @ TimeData(pred1, _, g1, _, _, _, _, _, _, _, _, _)) :: _ ::
+            Token(Time, td2 @ TimeData(pred2, _, g2, _, _, _, _, _, _, _, _, _)) :: _) =>
         // 限定求交的Grain，避免日交月
         val m1 = maxPredicateGrain(pred1)
         val m2 = maxPredicateGrain(pred2)
@@ -423,7 +423,7 @@ trait Rules extends DimRules {
               case _                  => Open
             }
           } else Open
-          tt(interval(intervalType, td1, td2).map(_.copy(hint = FinalRule)))
+          tt(interval(intervalType, td1, td2, options.timeOptions.beforeEndOfInterval).map(_.copy(hint = FinalRule)))
         } else None
     }
   )
@@ -434,9 +434,9 @@ trait Rules extends DimRules {
   val ruleFromToIntervalAbbr1 = Rule(
     name = "<from>(no grain) 到 <to>",
     pattern = List(isNatural.predicate, "(至|到|~)".regex, and(isNotLatent, or(xGrain(Month), xGrain(Day), xGrain(Hour))).predicate),
-    prod = tokens {
-      case Token(_, vd: NumeralData) :: _ ::
-        Token(Time, td2@TimeData(pred2: TimeDatePredicate, _, g2, _, _, _, _, _, _, _, _, _)) :: _ =>
+    prod = {
+      case (options, Token(_, vd: NumeralData) :: _ ::
+        Token(Time, td2@TimeData(pred2: TimeDatePredicate, _, g2, _, _, _, _, _, _, _, _, _)) :: _ )=>
         val _from = vd.value.toInt
         val td1: Option[TimeData] = g2 match {
           case Month if 0 <= _from && _from <= 12 => td2.copy(timePred = pred2.copy(month = _from))
@@ -445,7 +445,7 @@ trait Rules extends DimRules {
           case _ => None
         }
         td1 match {
-          case Some(x) => tt(interval(if (g2 != Hour) Closed else Open, x, td2))
+          case Some(x) => tt(interval(if (g2 != Hour) Closed else Open, x, td2, options.timeOptions.beforeEndOfInterval))
           case None => None
         }
     }

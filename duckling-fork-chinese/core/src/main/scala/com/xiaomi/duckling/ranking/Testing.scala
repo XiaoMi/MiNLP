@@ -10,6 +10,7 @@ object Testing {
   val testContext: Context =
     Context(
       locale = Locale.CHINA,
+      // 星期二
       referenceTime = ZonedDateTime.of(LocalDateTime.of(2013, 2, 12, 4, 30, 0), ZoneCN)
     )
 
