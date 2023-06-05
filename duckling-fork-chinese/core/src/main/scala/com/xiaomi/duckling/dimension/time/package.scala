@@ -362,7 +362,6 @@ package object time {
         case _ => None
       }
     }
-
     if (!beforeEndOfInterval) timeSeqMap(dontReverse = true, f, pred1)
     else timeSeqMap(dontReverse = true, b, pred2)
   }

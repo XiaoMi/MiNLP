@@ -18,7 +18,7 @@ package com.xiaomi.duckling.dimension.time.rule
 
 import com.xiaomi.duckling.Types._
 import com.xiaomi.duckling.dimension.implicits._
-import com.xiaomi.duckling.dimension.matcher.GroupMatch
+import com.xiaomi.duckling.dimension.matcher.{GroupMatch, RegexMatch}
 import com.xiaomi.duckling.dimension.matcher.Prods._
 import com.xiaomi.duckling.dimension.time.{Time, TimeData}
 import com.xiaomi.duckling.dimension.time.Prods._
@@ -51,7 +51,7 @@ object FuzzyDayIntervals {
     }
   }
 
-  def ofInterval(s: String, larger: Boolean = false, beforeEndOfInterval: Boolean = false): Option[(String, TimeData)] = {
+  def ofInterval(s: String, larger: Boolean = false, beforeEndOfInterval: Boolean): Option[(String, TimeData)] = {
     val (name, (from, to), (_from, _to)) = between(s)
     val td =
       if (larger) interval(Open, hour(is12H = false, _from), hour(is12H = false, _to), beforeEndOfInterval)
@@ -64,44 +64,52 @@ object FuzzyDayIntervals {
    * @param td
    * @return
    */
-  def enlarge(td: TimeData): TimeData = {
+  def enlarge(td: TimeData, beforeEndOfInterval: Boolean): TimeData = {
     (td.form, td.timePred) match {
       case (Some(PartOfDay(part)), _: TimeIntervalsPredicate) =>
-        val _td = ofInterval(part, larger = true).map(_._2).get
+        val _td = ofInterval(part, larger = true, beforeEndOfInterval).map(_._2).get
         _td.copy(latent = td.latent)
       case _ => td
     }
   }
 
   val ruleFuzzyDayIntervals =
-    Rule(name = "fuzzy day intervals", pattern = List(pattern.regex), prod = singleRegexMatch {
-      case s =>
-        for ((name, td) <- ofInterval(s)) yield {
-          tt(partOfDay(name, td).copy(latent = name.length == 1))
-        }
-    })
+    Rule(name = "fuzzy day intervals", pattern = List(pattern.regex),
+      prod = {
+        case (options, tokens: List[Token]) =>
+          tokens.headOption.flatMap {
+            case Token(RegexMatch, GroupMatch(s :: _)) =>
+              for ((name, td) <- ofInterval(s, beforeEndOfInterval = options.timeOptions.beforeEndOfInterval)) yield {
+                tt(partOfDay(name, td).copy(latent = name.length == 1))
+              }
+            case _ => None
+          }
+      })
 
   val ruleRecent = Rule(
     name = "recent tonight/morning omit unit",
     pattern = List("(今|明|昨)(早上?|中午|晚上?)".regex),
-    prod = regexMatch {
-      case _ :: s0 :: s1 :: _ =>
-        val offset = s0 match {
-          case "今" => 0
-          case "明" => 1
-          case "昨" => -1
-        }
-        val part = s1(0) match {
-          case '早' => "早上"
-          case '中' => "中午"
-          case '晚' => "晚上"
-        }
-        val tdInterval = ofInterval(part)
-        for {
-          (_, td) <- tdInterval
-          td1 <- intersect(cycleNth(Day, offset), td)
-        } yield {
-          tt(partOfDay(part, td1))
+    prod = {
+      case (options, tokens: List[Token]) =>
+        tokens.headOption.flatMap {
+          case Token(RegexMatch, GroupMatch(_ :: s0 :: s1 :: _)) =>
+            val offset = s0 match {
+              case "今" => 0
+              case "明" => 1
+              case "昨" => -1
+            }
+            val part = s1(0) match {
+              case '早' => "早上"
+              case '中' => "中午"
+              case '晚' => "晚上"
+            }
+            val tdInterval = ofInterval(part, beforeEndOfInterval = options.timeOptions.beforeEndOfInterval)
+            for {
+              (_, td) <- tdInterval
+              td1 <- intersect(cycleNth(Day, offset), td)
+            } yield {
+              tt(partOfDay(part, td1))
+            }
         }
     }
   )
