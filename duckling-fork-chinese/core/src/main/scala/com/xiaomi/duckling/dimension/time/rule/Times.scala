@@ -81,7 +81,7 @@ object Times {
 
   val ruleDimTimePartOfDay = Rule(
     name = "<dim time> <part-of-day>",
-    pattern = List(isADayOfMonth.predicate, isAPartOfDay.predicate),
+    pattern = List(isADayOfMonth.predicate, and(isAPartOfDay, isNotLatent).predicate),
     prod = tokens {
       case Token(Time, td1: TimeData) :: Token(Time, td2: TimeData) :: _ =>
         for (td <- intersect(td1, td2)) yield {
