@@ -77,7 +77,7 @@ object FuzzyDayIntervals {
     Rule(name = "fuzzy day intervals", pattern = List(pattern.regex), prod = singleRegexMatch {
       case s =>
         for ((name, td) <- ofInterval(s)) yield {
-          tt(partOfDay(name, td).copy(latent = name.length == 1))
+          tt(partOfDay(name, td).copy(latent = s.length == 1))
         }
     })
 
