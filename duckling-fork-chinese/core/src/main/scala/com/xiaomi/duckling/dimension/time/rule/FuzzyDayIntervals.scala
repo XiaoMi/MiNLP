@@ -80,7 +80,7 @@ object FuzzyDayIntervals {
           tokens.headOption.flatMap {
             case Token(RegexMatch, GroupMatch(s :: _)) =>
               for ((name, td) <- ofInterval(s, beforeEndOfInterval = options.timeOptions.beforeEndOfInterval)) yield {
-                tt(partOfDay(name, td).copy(latent = name.length == 1))
+                tt(partOfDay(name, td).copy(latent = s.length == 1))
               }
             case _ => None
           }
