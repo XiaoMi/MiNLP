@@ -183,7 +183,7 @@ trait Rules extends DimRules {
     pattern =
       List("(这个?|今个?|本|下+一?个?|上+一?个?|去|昨|明|大*前|大*后)".regex, isDimension(TimeGrain).predicate),
     prod = tokens {
-      case Token(_, GroupMatch(s :: _)) :: Token(TimeGrain, GrainData(g, _)) :: _ =>
+      case Token(_, GroupMatch(s :: _)) :: Token(TimeGrain, GrainData(g, false)) :: _ =>
         val td: Option[TimeData] = s(0) match {
           case '这' => cycleNthThis(0, g, Year, Month, Hour, Week)
           case '今' => cycleNthThis(0, g, Year, Month, Day)

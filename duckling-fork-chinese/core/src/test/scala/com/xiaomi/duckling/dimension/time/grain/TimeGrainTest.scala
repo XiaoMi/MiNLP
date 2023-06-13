@@ -32,9 +32,16 @@ class TimeGrainTest extends UnitSpec {
     }
 
     it("负例") {
-      val answers = Api.analyze("2017年", Testing.testContext, Testing.testOptions.copy(targets = Set(Duration, Time)))
+      def parse(query: String) = {
+        Api.analyze(query, Testing.testContext, Testing.testOptions.copy(targets = Set(Duration, Time)))
+      }
+
+      val answers = parse("2017年")
       answers.size shouldBe 1
       answers.head.dim shouldBe Time
+
+      parse("一天一点") should be (empty) // 不应解析成 P1DT1H
+      parse("五点十分").map(_.dim) should contain theSameElementsInOrderAs List(Time) // 不应解析成 PT5H10M
     }
   }
 }

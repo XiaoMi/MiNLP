@@ -27,6 +27,7 @@ import com.xiaomi.duckling.dimension.time.predicates.ReplacePartPredicate
 import com.xiaomi.duckling.ranking.Testing
 import com.xiaomi.duckling.ranking.Testing._
 import com.xiaomi.duckling.UnitSpec
+import com.xiaomi.duckling.dimension.time.duration.Duration
 
 class TimeTest extends UnitSpec {
 
@@ -131,6 +132,15 @@ class TimeTest extends UnitSpec {
           case _ => "parsing failure"
         }
       }
+    }
+
+    it("fix #187") {
+      val opt = options.copy(full = true, withLatent = false)
+      val cases = Table("query", "国庆晚", "十月一晚", "下钟", "晚")
+      forAll(cases) {query =>
+        parse(query, options = opt) should be (empty)
+      }
+      parse("六点半", options = opt.copy(targets = Set(Duration))) should be (empty)
     }
   }
 

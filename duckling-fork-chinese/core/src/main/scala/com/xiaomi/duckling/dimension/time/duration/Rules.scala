@@ -133,9 +133,14 @@ trait Rules extends DimRules {
 
   val ruleDurationNumberGrainAndHalf = Rule(
     name = "<natural> <unit-of-duration> and a half",
-    pattern = List(isNatural.predicate, isDimension(TimeGrain).predicate, "半钟?".regex),
+    pattern = List(isNatural.predicate, "(分半钟?|天半|年半)".regex),
     prod = tokens {
-      case t1 :: Token(TimeGrain, GrainData(g, _)) :: _ =>
+      case t1 :: Token(_, GroupMatch(d :: _)) :: _ =>
+        val g = d.charAt(0) match {
+          case '分' => Minute
+          case '天' => Day
+          case '年' => Year
+        }
         for {
           i <- getIntValue(t1)
           d <- timesOneAndAHalf(g, i.toInt)
@@ -158,11 +163,11 @@ trait Rules extends DimRules {
   val ruleCompositeDuration = Rule(
     name = "composite <duration> <duration>",
     pattern =
-      List(isNatural.predicate, isDimension(TimeGrain).predicate, isDimension(Duration).predicate),
+      List(isNotLatentDuration.predicate, isDimension(Duration).predicate),
     prod = tokens {
-      case t1 :: Token(TimeGrain, GrainData(g, _)) :: Token(_, dd@DurationData(_, dg, _, _, _)) :: _
-        if g > dg && g != Month =>
-        for (i <- getIntValue(t1)) yield Token(Duration, DurationData(i.toInt, g, schema = durationSchema(i.toString, g)) + dd)
+      case Token(_, b@DurationData(v, g, _, _, _)) :: Token(_, a@DurationData(_, dg, _, _, _)) :: _
+        if g > dg && g != Month && (!a.latent || dg != Hour) =>
+        Token(Duration, b + a)
     }
   )
 
