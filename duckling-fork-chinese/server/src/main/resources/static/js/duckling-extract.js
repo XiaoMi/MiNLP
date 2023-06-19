@@ -7,6 +7,7 @@ new Vue({
                 dims:[]
             },
             dimList: [
+                {value: 'Act', label: 'Act'},
                 {value: 'Age', label: '年龄'},
                 {value: 'Area', label: '面积'},
                 {value: 'BloodType', label: '血型'},
