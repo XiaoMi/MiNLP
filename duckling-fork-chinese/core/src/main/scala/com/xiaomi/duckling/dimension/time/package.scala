@@ -149,7 +149,7 @@ package object time {
             hour.map(runHourPredicate(ampm)),
             dayOfWeek.map(runDayOfTheWeekPredicate),
             dayOfMonth.map(runDayOfTheMonthPredicate),
-            month.map(runMonthPredicate(calendar)),
+            month.map(runMonthPredicate(calendar.orElse(Some(Solar)))),
             year.map(runYearPredicate)
           ).flatten
 
@@ -293,7 +293,7 @@ package object time {
   }
 
   def runMonthPredicate(calendar: Option[Calendar])(n: Int)(t: TimeObject, context: TimeContext): PastFutureTime = {
-    val y = timeRound(t, Year)
+    val y = timeRound(t, Year, calendar)
     val rounded =
       calendar match {
         case Some(Solar) | None => timePlus(y, Month, n - 1)
@@ -357,8 +357,10 @@ package object time {
 
     def b(thisSegment: TimeObject, ctx: TimeContext): Option[TimeObject] = {
       runPredicate(pred1)(thisSegment, ctx) match {
-        case (last #:: _, _) =>
-          Some(timeInterval(intervalType, last, thisSegment))
+        case (past, future) =>
+          val choosed = future.take(safeMax).find(t => timeStartsBeforeTheEndOf(t)(thisSegment))
+            .orElse(past.take(safeMax).find(t => timeStartsBeforeTheEndOf(t)(thisSegment)))
+          choosed.map(timeInterval(intervalType, _, thisSegment))
         case _ => None
       }
     }

@@ -30,7 +30,7 @@ import com.xiaomi.duckling.dimension.time.enums._
 
 object TimeObjectHelpers {
 
-  def timeRound(dt: DuckDateTime, grain: Grain): (DuckDateTime, Grain) = {
+  def timeRound0(dt: DuckDateTime, grain: Grain, calendar: Option[Calendar] = None): (DuckDateTime, Grain) = {
     val zone = dt.zone
     val (year, month, dayOfMonth, hours, mins, secs) =
       (dt.year, dt.month, dt.dayOfMonth, dt.hour, dt.minute, dt.second)
@@ -40,15 +40,19 @@ object TimeObjectHelpers {
     val newMins = if (grain > Minute) 0 else mins
     val newSecs = if (grain > Second) 0 else secs
     val time = LocalTime.of(newHours, newMins, newSecs)
-    val date = dt.date.of(year, newMonth, newDayOfMonth)
+    val date = (calendar match {
+      case Some(Solar) => dt.date.toSolar
+      case Some(Lunar(leap)) => dt.date.toLunar
+      case _ => dt.date
+    }).of(year, newMonth, newDayOfMonth)
     val datetime = DuckDateTime(date, time, zone)
     if (grain == Week) (datetime.minusDays(datetime.dayOfWeek - 1), Week)
     else (datetime, grain)
   }
 
-  def timeRound(t: TimeObject, grain: Grain): TimeObject = {
-    val (start, g) = timeRound(t.start, grain)
-    val end = t.end.map(timeRound(_, grain)).map(_._1)
+  def timeRound(t: TimeObject, grain: Grain, calendar: Option[Calendar] = None): TimeObject = {
+    val (start, g) = timeRound0(t.start, grain, calendar)
+    val end = t.end.map(timeRound0(_, grain, calendar)).map(_._1)
     TimeObject(start = start, grain = g, end = end)
   }
 

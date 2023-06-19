@@ -122,10 +122,15 @@ class TimeTest extends UnitSpec {
         , ("星期一到星期三", "2013-02-11", "2013-02-14")
         , ("1月到三月", "2013-01-01", "2013-04-01")
         , ("凌晨", "12 00:00:00", "12 06:00:00")
+        , ("过年到现在", "农历 二〇一三年正月初一", "2013-02-12")
+        , ("一月八号到过年", "2014-01-08", "农历 二〇一四年正月初二")
+        , ("明年一月五号到二月二十号", "2014-01-05", "2014-02-21")
       )
 
       forAll(cases) { (query, s, t) =>
-        parse(query, options = _options).head.token.value match {
+        val answers = parse(query, options = _options)
+        answers should not be empty
+        answers.head.token.value match {
           case TimeValue(IntervalValue(InstantValue(start, _), InstantValue(end, _)), _, _, _, _, _) =>
             start.toString should include(s)
             end.toString should include(t)
