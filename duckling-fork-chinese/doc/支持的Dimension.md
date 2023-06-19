@@ -92,9 +92,14 @@ case class OpenIntervalValue(start: Double, direction: IntervalDirection) extend
 |          | 一万两千零3十四  | {<br/>  "n": 12034<br/>}   |
 
 
+## Act
+
+| 示例           | 解析结果示例                                                 |
+| -------------- | ------------------------------------------------------------ |
+| 倒数第一幕     | {<br/>  "v": -1,<br/>  "unit": "场",<br/>  "dim": "场"<br/>} |
+| 第一百一十一场 | {<br/>  "v": 111,<br/>  "unit": "场",<br/>  "dim": "场"<br/>} |
 
 ## Age
-
 
 
 | 示例       | 解析结果示例（示意）                                     |

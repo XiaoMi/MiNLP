@@ -16,6 +16,7 @@
 
 package com.xiaomi.duckling.dimension
 
+import com.xiaomi.duckling.dimension.act.Act
 import com.xiaomi.duckling.dimension.age.Age
 import com.xiaomi.duckling.dimension.bloodtype.BloodType
 import com.xiaomi.duckling.dimension.constellation.Constellation
@@ -48,6 +49,7 @@ import com.xiaomi.duckling.dimension.url.DuckURL
 
 class FullDimensions extends Dimensions {
   override val dims: List[Dimension] = List(
+    Act,
     Age,
     Area,
     BloodType,
