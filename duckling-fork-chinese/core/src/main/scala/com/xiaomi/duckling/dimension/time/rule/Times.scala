@@ -47,7 +47,7 @@ object Times {
           h <- parseInt(hh).toOption
           m <- parseInt(mm).toOption
         } yield {
-          tt(hourMinute(is12H = true, h, m))
+          tt(hourMinute(is12H = 0 < h && h <= 12, h, m))
         }
     }
   )
