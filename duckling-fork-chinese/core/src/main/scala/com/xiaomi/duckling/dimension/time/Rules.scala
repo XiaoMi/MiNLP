@@ -16,9 +16,11 @@
 
 package com.xiaomi.duckling.dimension.time
 
+import org.apache.commons.lang3.StringUtils
+
 import scalaz.Scalaz._
 
-import com.xiaomi.duckling.Types._
+import com.xiaomi.duckling.Types.{TokensProduction, _}
 import com.xiaomi.duckling.dimension.DimRules
 import com.xiaomi.duckling.dimension.implicits._
 import com.xiaomi.duckling.dimension.matcher.{GroupMatch, RegexMatch}
@@ -210,7 +212,7 @@ trait Rules extends DimRules {
     }
   )
 
-  private val RecentPattern = "(上|下|前|后面|后|过去|未来|接下来|之前|往前|向前|今后|之后|往后|向后|最近|近|这)"
+  private val RecentPattern = "(上|下|近|这|前|后)|(后面|过去|未来|接下来|之前|往前|向前|今后|之后|往后|向后|最近)的?"
 
   /**
     * 时间区间:
@@ -223,7 +225,8 @@ trait Rules extends DimRules {
     name = "recent/last/next <duration>",
     pattern = List(RecentPattern.regex, or(isNotLatentDuration, isFuzzyNotLatentDuration).predicate),
     prod = tokens {
-      case Token(_, GroupMatch(s :: _)) :: Token(Duration, DurationData(v, g, _, fuzzy, _)) :: _ =>
+      case Token(_, GroupMatch(_ :: g1 :: g2 :: _)) :: Token(Duration, DurationData(v, g, _, fuzzy, _)) :: _ =>
+        val s = if (StringUtils.isBlank(g1)) g2 else g1
         // 月必须是x个月
         s match {
           case "下" | "后" | "接下来" | "未来" | "今后" | "之后" | "向后" | "往后" | "后面" =>
