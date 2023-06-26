@@ -32,7 +32,7 @@ import com.xiaomi.duckling.dimension.time.predicates._
 
 object FuzzyDayIntervals {
 
-  val pattern = "(早上|早晨|晨间|清晨|下午|晚上|中午|午间|上午|傍晚|黄昏|凌晨|半夜|夜间|夜晚|夜里|晚|早)"
+  val pattern = "(早上|早晨|晨间|清晨|下午|晚上|中午|午间|上午|傍晚|黄昏|凌晨|半夜|午夜|夜间|夜晚|夜里|晚|早)"
 
   /**
    *
