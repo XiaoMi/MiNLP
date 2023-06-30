@@ -232,7 +232,7 @@ trait Rules extends DimRules {
           case "下" | "后" | "接下来" | "未来" | "今后" | "之后" | "向后" | "往后" | "后面" =>
             val td: Option[TimeData] =
               // 未来一周=未来七天
-              if (s == "未来" && g == Week) {
+              if ((s == "未来" || s == "接下来") && g == Week) {
                 cycleN(notImmediate = false, Day, 7 * v)
               }
               // 未来一个月等于未来30天

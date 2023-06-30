@@ -263,7 +263,15 @@ object Examples extends DimExamples {
         LocalDateTime.of(2013, 3, 4, 0, 0, 0),
         Week
       ),
-      List("接下来三周", "下三个周")
+      List("下三个周")
+    ),
+    (
+      localDateTimeInterval(
+        LocalDateTime.of(2013, 2, 12, 0, 0, 0),
+        LocalDateTime.of(2013, 3, 5, 0, 0, 0),
+        Day
+      ),
+      List("接下来三周")
     ),
     (
       localDateTimeInterval(
