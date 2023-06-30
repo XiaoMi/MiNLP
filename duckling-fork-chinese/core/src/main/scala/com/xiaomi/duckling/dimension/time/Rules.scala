@@ -240,7 +240,7 @@ trait Rules extends DimRules {
                 cycleN(notImmediate = false, Day, 30)
               }
               // = 1 已经在 this <cycle> 中定义过了
-              else if (s == "下" && g == Day || v == 1) None
+              else if (s == "下" && (g == Day || v == 1)) None
               else {
                 val td1 = cycleN(notImmediate = false, g, v)
                 g match {
