@@ -77,7 +77,7 @@ object SolarTerms {
           val from = TimeData(timePred = solarTermPredicate(ss), timeGrain = Day, okForThisNext = true, holiday = ss, hint = Hint.Season)
           val to = TimeData(timePred = solarTermPredicate(se), timeGrain = Day, okForThisNext = true, holiday = se, hint = Hint.Season)
   
-          for (td <- interval(Open, from, to)) yield Token(Date, td.copy(holiday = holiday, hint = Hint.Season))
+          for (td <- interval(Open, from, to, options.timeOptions.beforeEndOfInterval)) yield Token(Date, td.copy(holiday = holiday, hint = Hint.Season))
         } else None
     })
 

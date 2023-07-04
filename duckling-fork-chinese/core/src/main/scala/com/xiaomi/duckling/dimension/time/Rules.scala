@@ -132,8 +132,7 @@ trait Rules extends DimRules {
         // "一日"单独是latent，但是可以参与组合
         and(isDimension(Time), or(and(or(isNotLatent, isLatent0oClockOfDay), not(isAPartOfDay)), isADayOfMonth)).predicate
       ),
-      prod = tokens {
-        case (t1@Token(Time, td1: TimeData)) :: (t2@Token(Time, td2: TimeData)) :: _
+      prod = { case (options, (t1@Token(Time, td1: TimeData)) :: (t2@Token(Time, td2: TimeData)) :: _)
           if td1.timeGrain > td2.timeGrain && !(td1.hint == Hint.Date && td2.hint == Hint.Date) ||
             // 上午的8-9点
             td1.timeGrain == td2.timeGrain && td1.timeGrain == Hour && isAPartOfDay(t1) && !isAPartOfDay(t2) =>
@@ -150,7 +149,7 @@ trait Rules extends DimRules {
             // 10号八点，需要去掉AMPM (今天是10号9点时，不应再出20点)
             // 今天8点，需要根据当前时间是出8/20点
             val _td2 = if (td1.hint == Hint.RecentNominal) td2 else removeAMPM(td2)
-            val _td1 = FuzzyDayIntervals.enlarge(td1)
+            val _td1 = FuzzyDayIntervals.enlarge(td1, options.timeOptions.beforeEndOfInterval)
             val td = intersect(_td1, _td2).map(_.copy(hint = hint))
             tt(td)
           }
@@ -161,8 +160,8 @@ trait Rules extends DimRules {
     name = "intersect: <x> 的 <y>",
     // "一日"单独是latent，但是可以参与组合
     pattern = List(isNotLatent.predicate, "的".regex, or(or(isNotLatent, isLatent0oClockOfDay), isADayOfMonth).predicate),
-    prod = tokens {
-      case (t1@Token(Time, td1: TimeData)) :: _ :: (t2@Token(Time, td2: TimeData)) :: _
+    prod = {
+      case (options, (t1@Token(Time, td1: TimeData)) :: _ :: (t2@Token(Time, td2: TimeData)) :: _)
         if td1.timeGrain > td2.timeGrain ||
           // 上午的8-9点
           td1.timeGrain == td2.timeGrain && td1.timeGrain == Hour && isAPartOfDay(t1) && !isAPartOfDay(t2) =>
@@ -171,7 +170,7 @@ trait Rules extends DimRules {
           val hint =
             if (td1.timeGrain == Year && td2.hint == MonthOnly) YearMonth
             else NoHint
-          val _td1 = FuzzyDayIntervals.enlarge(td1)
+          val _td1 = FuzzyDayIntervals.enlarge(td1, options.timeOptions.beforeEndOfInterval)
           val td = intersect(_td1, removeAMPM(td2)).map(_.copy(hint = hint))
           tt(td)
         }
@@ -409,9 +408,9 @@ trait Rules extends DimRules {
   val ruleFromToInterval = Rule(
     name = "<from> 到 <to>",
     pattern = List(isNotLatent.predicate, "(至|到|~)".regex, isNotLatent.predicate),
-    prod = tokens {
-      case Token(Time, td1 @ TimeData(pred1, _, g1, _, _, _, _, _, _, _, _, _)) :: _ ::
-            Token(Time, td2 @ TimeData(pred2, _, g2, _, _, _, _, _, _, _, _, _)) :: _ =>
+    prod = {
+      case (options, Token(Time, td1 @ TimeData(pred1, _, g1, _, _, _, _, _, _, _, _, _)) :: _ ::
+            Token(Time, td2 @ TimeData(pred2, _, g2, _, _, _, _, _, _, _, _, _)) :: _) =>
         // 限定求交的Grain，避免日交月
         val m1 = maxPredicateGrain(pred1)
         val m2 = maxPredicateGrain(pred2)
@@ -426,7 +425,7 @@ trait Rules extends DimRules {
               case _                  => Open
             }
           } else Open
-          tt(interval(intervalType, td1, td2).map(_.copy(hint = FinalRule)))
+          tt(interval(intervalType, td1, td2, options.timeOptions.beforeEndOfInterval).map(_.copy(hint = FinalRule)))
         } else None
     }
   )
@@ -437,9 +436,9 @@ trait Rules extends DimRules {
   val ruleFromToIntervalAbbr1 = Rule(
     name = "<from>(no grain) 到 <to>",
     pattern = List(isNatural.predicate, "(至|到|~)".regex, and(isNotLatent, or(xGrain(Month), xGrain(Day), xGrain(Hour))).predicate),
-    prod = tokens {
-      case Token(_, vd: NumeralData) :: _ ::
-        Token(Time, td2@TimeData(pred2: TimeDatePredicate, _, g2, _, _, _, _, _, _, _, _, _)) :: _ =>
+    prod = {
+      case (options, Token(_, vd: NumeralData) :: _ ::
+        Token(Time, td2@TimeData(pred2: TimeDatePredicate, _, g2, _, _, _, _, _, _, _, _, _)) :: _ )=>
         val _from = vd.value.toInt
         val td1: Option[TimeData] = g2 match {
           case Month if 0 <= _from && _from <= 12 => td2.copy(timePred = pred2.copy(month = _from))
@@ -448,7 +447,7 @@ trait Rules extends DimRules {
           case _ => None
         }
         td1 match {
-          case Some(x) => tt(interval(if (g2 != Hour) Closed else Open, x, td2))
+          case Some(x) => tt(interval(if (g2 != Hour) Closed else Open, x, td2, options.timeOptions.beforeEndOfInterval))
           case None => None
         }
     }

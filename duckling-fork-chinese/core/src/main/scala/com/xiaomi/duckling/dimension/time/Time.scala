@@ -16,7 +16,7 @@
 
 package com.xiaomi.duckling.dimension.time
 
-import scala.beans.BooleanBeanProperty
+import scala.beans.{BeanProperty, BooleanBeanProperty}
 
 import com.typesafe.scalalogging.LazyLogging
 
@@ -99,7 +99,11 @@ class TimeOptions {
   /**
    * duration: 模糊的数量
    */
-  @BooleanBeanProperty var durationFuzzyValue: Int = 3
+  @BeanProperty var durationFuzzyValue: Int = 3
+  /**
+   * 参考时间点 ref 位于 [a, b) 之间时，false 取 a >= ref 的值，true取 a <= ref < b 的
+   */
+  @BooleanBeanProperty var beforeEndOfInterval: Boolean = false
 }
 
 case class TimeData(timePred: TimePredicate,

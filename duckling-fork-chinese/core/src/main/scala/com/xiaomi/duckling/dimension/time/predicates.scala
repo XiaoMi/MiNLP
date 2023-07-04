@@ -87,7 +87,7 @@ object predicates {
     }
   }
 
-  case class TimeIntervalsPredicate(t: IntervalType, p1: TimePredicate, p2: TimePredicate)
+  case class TimeIntervalsPredicate(t: IntervalType, p1: TimePredicate, p2: TimePredicate, beforeEndOfInterval: Boolean)
     extends TimePredicate {
 
     override val maxGrain: Option[Grain] = {

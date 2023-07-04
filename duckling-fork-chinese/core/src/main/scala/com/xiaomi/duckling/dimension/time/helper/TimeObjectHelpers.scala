@@ -30,23 +30,30 @@ import com.xiaomi.duckling.dimension.time.enums._
 
 object TimeObjectHelpers {
 
-  def timeRound(t: TimeObject, grain: Grain): TimeObject = {
-    val zone = t.start.zone
-    val d = t.start
+  def timeRound0(dt: DuckDateTime, grain: Grain, calendar: Option[Calendar] = None): (DuckDateTime, Grain) = {
+    val zone = dt.zone
     val (year, month, dayOfMonth, hours, mins, secs) =
-      (d.year, d.month, d.dayOfMonth, d.hour, d.minute, d.second)
+      (dt.year, dt.month, dt.dayOfMonth, dt.hour, dt.minute, dt.second)
     val newMonth = if (grain > Month) 1 else month
     val newDayOfMonth = if (grain > Week) 1 else dayOfMonth
     val newHours = if (grain > Hour) 0 else hours
     val newMins = if (grain > Minute) 0 else mins
     val newSecs = if (grain > Second) 0 else secs
     val time = LocalTime.of(newHours, newMins, newSecs)
-    val date = t.start.date.of(year, newMonth, newDayOfMonth)
+    val date = (calendar match {
+      case Some(Solar) => dt.date.toSolar
+      case Some(Lunar(leap)) => dt.date.toLunar
+      case _ => dt.date
+    }).of(year, newMonth, newDayOfMonth)
     val datetime = DuckDateTime(date, time, zone)
-    val (start, g) =
-      if (grain == Week) (datetime.minusDays(datetime.dayOfWeek - 1), Week)
-      else (datetime, grain)
-    TimeObject(start = start, grain = g)
+    if (grain == Week) (datetime.minusDays(datetime.dayOfWeek - 1), Week)
+    else (datetime, grain)
+  }
+
+  def timeRound(t: TimeObject, grain: Grain, calendar: Option[Calendar] = None): TimeObject = {
+    val (start, g) = timeRound0(t.start, grain, calendar)
+    val end = t.end.map(timeRound0(_, grain, calendar)).map(_._1)
+    TimeObject(start = start, grain = g, end = end)
   }
 
   def timeSequence(grain: Grain,
@@ -146,6 +153,14 @@ object TimeObjectHelpers {
   def timeBefore(t1: TimeObject, t2: TimeObject, grain: Grain = NoGrain): Boolean = {
     if (grain == NoGrain) t1.start.isBefore(t2.start)
     else timeBefore(timeRound(t1, grain), timeRound(t2, grain))
+  }
+
+  @tailrec
+  def endBefore(t1: TimeObject, t2: TimeObject, grain: Grain = NoGrain): Boolean = {
+    if (grain == NoGrain) {
+      if (t1.end.nonEmpty) t1.end.get.isBefore(t2.start)
+      else timeBefore(t1, t2, grain)
+    } else endBefore(timeRound(t1, grain), timeRound(t2, grain))
   }
 
   def timeInterval(intervalType: IntervalType, to1: TimeObject, to2: TimeObject): TimeObject = {

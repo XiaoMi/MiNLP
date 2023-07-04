@@ -113,12 +113,16 @@ package object time {
           // 逻辑比较混乱，待收集到问题再处理
           val happened =
             td.timePred match {
-              case _: TimeDatePredicate | _: TimeIntervalsPredicate | _: IntersectTimePredicate =>
+              case _: TimeDatePredicate | _: IntersectTimePredicate =>
                 // 若参考时间是2013/2/12 04:30，在alwaysInFuture情况下
                 // 1. 过了一部分还需要再出的，12号 => 2/12，2月 => 2013/2
                 // 2. 问4点，需要给出 16:00
                 val g = if (td.timeGrain >= Grain.Day) td.timeGrain else Grain.NoGrain
                 timeBefore(ahead, refTime, g)
+              case TimeIntervalsPredicate(_, _, _, beforeEndOfInterval) =>
+                val g = if (td.timeGrain >= Grain.Day) td.timeGrain else Grain.NoGrain
+                if (!beforeEndOfInterval) timeBefore(ahead, refTime, g)
+                else endBefore(ahead, refTime, g)
               case _ => false
             }
           if (happened || td.notImmediate && timeIntersect(ahead)(refTime).nonEmpty) {
@@ -145,7 +149,7 @@ package object time {
             hour.map(runHourPredicate(ampm)),
             dayOfWeek.map(runDayOfTheWeekPredicate),
             dayOfMonth.map(runDayOfTheMonthPredicate),
-            month.map(runMonthPredicate(calendar)),
+            month.map(runMonthPredicate(calendar.orElse(Some(Solar)))),
             year.map(runYearPredicate)
           ).flatten
 
@@ -158,8 +162,8 @@ package object time {
           series
         }
       case IntersectTimePredicate(pred1, pred2) => runIntersectPredicate(pred1, pred2)
-      case TimeIntervalsPredicate(intervalType, p1, p2) =>
-        runTimeIntervalsPredicate(intervalType, p1, p2)
+      case TimeIntervalsPredicate(intervalType, p1, p2, beforeEndOfInterval) =>
+        runTimeIntervalsPredicate(intervalType, p1, p2, beforeEndOfInterval)
       case TimeOpenIntervalPredicate(t) => runTimeOpenIntervalPredicate(t)
       case SequencePredicate(xs)               => runSequencePredicate(xs)
       case ReplacePartPredicate(td1, td2)      => runReplacePartPredicate(td1, td2)
@@ -289,7 +293,7 @@ package object time {
   }
 
   def runMonthPredicate(calendar: Option[Calendar])(n: Int)(t: TimeObject, context: TimeContext): PastFutureTime = {
-    val y = timeRound(t, Year)
+    val y = timeRound(t, Year, calendar)
     val rounded =
       calendar match {
         case Some(Solar) | None => timePlus(y, Month, n - 1)
@@ -338,7 +342,8 @@ package object time {
 
   def runTimeIntervalsPredicate(intervalType: IntervalType,
                                 pred1: TimePredicate,
-                                pred2: TimePredicate): SeriesPredicateF = {
+                                pred2: TimePredicate,
+                                beforeEndOfInterval: Boolean): SeriesPredicateF = {
     // Pick the first interval *after* the given time segment
     def f(thisSegment: TimeObject, ctx: TimeContext): Option[TimeObject] = {
       runPredicate(pred2)(thisSegment, ctx) match {
@@ -350,7 +355,17 @@ package object time {
       }
     }
 
-    timeSeqMap(dontReverse = true, f, pred1)
+    def b(thisSegment: TimeObject, ctx: TimeContext): Option[TimeObject] = {
+      runPredicate(pred1)(thisSegment, ctx) match {
+        case (past, future) =>
+          val choosed = future.take(safeMax).find(t => timeStartsBeforeTheEndOf(t)(thisSegment))
+            .orElse(past.take(safeMax).find(t => timeStartsBeforeTheEndOf(t)(thisSegment)))
+          choosed.map(timeInterval(intervalType, _, thisSegment))
+        case _ => None
+      }
+    }
+    if (!beforeEndOfInterval) timeSeqMap(dontReverse = true, f, pred1)
+    else timeSeqMap(dontReverse = true, b, pred2)
   }
 
   /**

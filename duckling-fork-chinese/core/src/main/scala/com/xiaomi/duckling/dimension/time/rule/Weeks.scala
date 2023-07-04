@@ -70,8 +70,8 @@ object Weeks {
     }
   )
 
-  val ruleWeekend = Rule(name = "week-end", pattern = List("周末".regex), prod = tokens {
-    case _ => tt(weekend)
+  val ruleWeekend = Rule(name = "week-end", pattern = List("周末".regex), prod = {
+    case (options, _) => tt(weekend(options.timeOptions.beforeEndOfInterval))
   })
 
   def mkRuleDaysOfWeek(pairs: List[(String, String)]): List[Rule] = {
