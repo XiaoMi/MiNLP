@@ -51,11 +51,11 @@ object FuzzyDayIntervals {
     }
   }
 
-  def ofInterval(s: String, larger: Boolean = false, beforeEndOfInterval: Boolean): Option[(String, TimeData)] = {
+  def ofInterval(s: String, larger: Boolean = false): Option[(String, TimeData)] = {
     val (name, (from, to), (_from, _to)) = between(s)
     val td =
-      if (larger) interval(Open, hour(is12H = false, _from), hour(is12H = false, _to), beforeEndOfInterval)
-      else interval(Open, hour(is12H = false, from), hour(is12H = false, to), beforeEndOfInterval)
+      if (larger) interval(Open, hour(is12H = false, _from), hour(is12H = false, _to), beforeEndOfInterval = true)
+      else interval(Open, hour(is12H = false, from), hour(is12H = false, to), beforeEndOfInterval = true)
     td.map((name, _))
   }
 
@@ -67,7 +67,7 @@ object FuzzyDayIntervals {
   def enlarge(td: TimeData, beforeEndOfInterval: Boolean): TimeData = {
     (td.form, td.timePred) match {
       case (Some(PartOfDay(part)), _: TimeIntervalsPredicate) =>
-        val _td = ofInterval(part, larger = true, beforeEndOfInterval).map(_._2).get
+        val _td = ofInterval(part, larger = true).map(_._2).get
         _td.copy(latent = td.latent)
       case _ => td
     }
@@ -79,7 +79,7 @@ object FuzzyDayIntervals {
         case (options, tokens: List[Token]) =>
           tokens.headOption.flatMap {
             case Token(RegexMatch, GroupMatch(s :: _)) =>
-              for ((name, td) <- ofInterval(s, beforeEndOfInterval = options.timeOptions.beforeEndOfInterval)) yield {
+              for ((name, td) <- ofInterval(s)) yield {
                 tt(partOfDay(name, td).copy(latent = s.length == 1))
               }
             case _ => None
@@ -103,7 +103,7 @@ object FuzzyDayIntervals {
               case '中' => "中午"
               case '晚' => "晚上"
             }
-            val tdInterval = ofInterval(part, beforeEndOfInterval = options.timeOptions.beforeEndOfInterval)
+            val tdInterval = ofInterval(part)
             for {
               (_, td) <- tdInterval
               td1 <- intersect(cycleNth(Day, offset), td)
