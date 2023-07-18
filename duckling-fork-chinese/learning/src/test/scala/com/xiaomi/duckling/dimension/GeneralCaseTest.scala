@@ -33,16 +33,16 @@ class GeneralCaseTest
 
   val dims =
     if (sys.props.contains("duckling.dim")) {
-      val list = sys.props("duckling.dim").split(",").map(RuleSets.namedDimensions).toList
+      val list = FullDimensions.convert(sys.props("duckling.dim").split(","))
       logger.info(s"test only dims of: ${list.map(_.name).mkString("[", ", ", "]")}")
       list
     } else {
       logger.info("test all dims")
-      RuleSets.dims
-    }.distinct
+      FullDimensions.dims
+    }
 
 
-  val naiveBayesDims = dims.distinct.map(dim => (dim, dimExamples(dim)))
+  val naiveBayesDims = dims.map(dim => (dim, dimExamples(dim)))
 
   describe("General cases: naive bayes") {
     for ((dim, corpus) <- naiveBayesDims) {

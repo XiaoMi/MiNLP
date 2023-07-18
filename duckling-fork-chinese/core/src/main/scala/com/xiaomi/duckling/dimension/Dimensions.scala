@@ -16,6 +16,11 @@
 
 package com.xiaomi.duckling.dimension
 
+import com.xiaomi.duckling.Rules
+import com.xiaomi.duckling.Types.Rule
+
 trait Dimensions {
   val dims: List[Dimension]
+
+  def rules(): List[Rule] = Rules.rulesFor(null, dims.toSet)
 }

@@ -43,14 +43,6 @@ object Dependencies {
 
   lazy val benchmarkDependencies = Seq(scalaTest % Test, jmhAnn, jmhCore, slf4jnop)
 
-  lazy val liteExcludes = Seq(
-    "com.vdurmont" % "emoji-java",
-    "commons-io" % "commons-io",
-    "org.apache.commons" % "commons-text",
-    "org.apache.commons" % "commons-lang3",
-    "org.json4s" %% "json4s-jackson"
-  )
-
   lazy val learningDependencies = Seq(jline, jlineJansi, logback, reflections, shapeless)
 
   // test

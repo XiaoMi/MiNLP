@@ -51,7 +51,7 @@ publish / skip := true // don't publish the root project
 
 lazy val `duckling-fork-chinese` = project.in(file("."))
   .settings(sharedSettings)
-  .aggregate(core, learning, test, lite, server, benchmark)
+  .aggregate(core, learning, test, server, benchmark)
 
 lazy val core = project
   .settings(
@@ -72,16 +72,6 @@ lazy val learning = project
     name := "duckling-learning",
     sharedSettings,
     libraryDependencies ++= learningDependencies
-  ).dependsOn(core % "compile->compile", test % "test->test")
-
-lazy val lite = project
-  .settings(
-    name := "duckling-lite",
-    sharedSettings,
-    libraryDependencies ++= Seq(
-      logback % Provided // logging
-    ),
-    excludeDependencies ++= liteExcludes
   ).dependsOn(core % "compile->compile", test % "test->test")
 
 lazy val server = project
