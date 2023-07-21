@@ -21,17 +21,18 @@ import java.util.Locale
 
 import org.json4s.jackson.Serialization.write
 
+import com.google.common.collect.Sets
+
 import com.xiaomi.duckling.Api
 import com.xiaomi.duckling.Api.formatToken
 import com.xiaomi.duckling.JsonSerde._
 import com.xiaomi.duckling.Types.{Context, Options}
-import com.xiaomi.duckling.dimension.RuleSets
+import com.xiaomi.duckling.dimension.FullDimensions
 
 object AnswerSizeDetector {
   def main(args: Array[String]): Unit = {
     val Array(dims, query) = args
-    val targets = dims.split(",").map(RuleSets.namedDimensions).toSet
-
+    val targets = FullDimensions.convert(dims.split(","))
     val options = Options(withLatent = false, targets = targets)
     options.rankOptions.setWinnerOnly(false)
     val context = Context(ZonedDateTime.now(), Locale.CHINA)

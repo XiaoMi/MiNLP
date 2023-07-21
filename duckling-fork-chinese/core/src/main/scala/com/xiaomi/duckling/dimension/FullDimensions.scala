@@ -16,6 +16,8 @@
 
 package com.xiaomi.duckling.dimension
 
+import com.typesafe.scalalogging.LazyLogging
+
 import com.xiaomi.duckling.dimension.act.Act
 import com.xiaomi.duckling.dimension.age.Age
 import com.xiaomi.duckling.dimension.bloodtype.BloodType
@@ -47,8 +49,8 @@ import com.xiaomi.duckling.dimension.time.duration.Duration
 import com.xiaomi.duckling.dimension.time.repeat.Repeat
 import com.xiaomi.duckling.dimension.url.DuckURL
 
-class FullDimensions extends Dimensions {
-  override val dims: List[Dimension] = List(
+object FullDimensions extends Dimensions with LazyLogging {
+  override lazy val dims: List[Dimension] = List(
     Act,
     Age,
     Area,
@@ -80,4 +82,47 @@ class FullDimensions extends Dimensions {
     Time,
     Velocity
   )
+
+  val namedDimensions = Map(
+    "Act" -> (() => Act),
+    "Age" -> (() => Age),
+    "Area" -> (() => Area),
+    "BloodType" -> (() => BloodType),
+    "Constellation" -> (() => Constellation),
+    "Currency" -> (() => Currency),
+    "Date" -> (() => Date),
+    "DigitSequence" -> (() => DigitSequence),
+    "Distance" -> (() => Distance),
+    "DuckURL" -> (() => DuckURL),
+    "Duplicate" -> (() => Duplicate),
+    "Duration" -> (() => Duration),
+    "Episode" -> (() => Episode),
+    "Fraction" -> (() => Fraction),
+    "Gender" -> (() => Gender),
+    "Level" -> (() => Level),
+    "Lyric" -> (() => Lyric),
+    "MultiChar" -> (() => MultiChar),
+    "Multiple" -> (() => Multiple),
+    "Numeral" -> (() => Numeral),
+    "Ordinal" -> (() => Ordinal),
+    "PhoneNumber" -> (() => PhoneNumber),
+    "Place" -> (() => Place),
+    "Quantity" -> (() => Quantity),
+    "Rating" -> (() => Rating),
+    "Repeat" -> (() => Repeat),
+    "Season" -> (() => Season),
+    "Temperature" -> (() => Temperature),
+    "Time" -> (() => Time),
+    "Velocity" -> (() => Velocity)
+  )
+
+  def convert(dims: Traversable[String]): Set[Dimension] = {
+    dims.flatMap { d =>
+      if (namedDimensions.contains(d)) Some(namedDimensions(d)())
+      else {
+        logger.warn(s"[$d] not found in Dimensions, ignored")
+        None
+      }
+    }.toSet
+  }
 }

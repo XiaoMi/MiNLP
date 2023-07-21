@@ -25,7 +25,7 @@ import scala.util.matching.Regex
 
 import com.typesafe.config.ConfigFactory
 
-import com.xiaomi.duckling.dimension.{Dimension, EnumeratedDimension, RuleSets}
+import com.xiaomi.duckling.dimension.{Dimension, EnumeratedDimension, FullDimensions}
 import com.xiaomi.duckling.dimension.numeral.NumeralOptions
 import com.xiaomi.duckling.dimension.time.TimeOptions
 import com.xiaomi.duckling.dimension.time.Types.DuckDateTime
@@ -212,7 +212,7 @@ object Types {
         withLatent = withLatent,
         full = false,
         debug = false,
-        targets = targets.asScala.map(RuleSets.namedDimensions).toSet,
+        targets = FullDimensions.convert(targets.asScala),
         varcharExpand = false,
         entityWithNode = false
       )

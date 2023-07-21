@@ -18,45 +18,24 @@ package com.xiaomi.duckling.ranking
 
 import java.util.{Map => JMap}
 
-import scala.collection.JavaConverters._
-
 import com.typesafe.scalalogging.LazyLogging
 
-import com.xiaomi.duckling.{Resources, Rules}
-import com.xiaomi.duckling.Types.{conf, Answer, Rule}
-import com.xiaomi.duckling.dimension.RuleSets
+import com.xiaomi.duckling.Resources
+import com.xiaomi.duckling.Types.Answer
 import com.xiaomi.duckling.ranking.Bayes.Classifier
 import com.xiaomi.duckling.ranking.Types.BagOfFeatures
 import com.xiaomi.duckling.types.Node
 
-object NaiveBayesRank extends LazyLogging {
+class NaiveBayesRank(modelResource: String) extends LazyLogging {
 
   type Classifiers = JMap[String, Classifier]
 
-  private val dimPath = "model.bayes.dims"
-  private val modelPath = "model.bayes.file"
-
-  private val dims =
-    if (conf.hasPath(dimPath)) {
-      conf.getStringList(dimPath).asScala.map(s => RuleSets.namedDimensions(s.toLowerCase)).toList
-    } else {
-      throw new IllegalArgumentException("no dimension specified, ignore")
-    }
-
-  val rules: List[Rule] = Rules.rulesFor(null, dims.toSet)
-
-  lazy val classifiers: Classifiers = {
-    try {
-      val path =
-        if (conf.hasPathOrNull(modelPath)) conf.getString(modelPath)
-        else "file_not_found"
-      logger.info(s"read NaiveBayes model from resource: $path")
-      Resources.inputStream(path)(in => KryoSerde.loadSerializedResource(in, classOf[Classifiers]))
-    } catch {
-      case t: Throwable =>
-        logger.warn(s"load model failed ${t.getMessage}", t.getCause)
-        throw t
-    }
+  private val classifiers: Classifiers = try {
+    Resources.inputStream(modelResource)(in => KryoSerde.loadSerializedResource(in, classOf[Classifiers]))
+  } catch {
+    case t: Throwable =>
+      logger.error(s"load model failed ${t.getMessage}", t.getCause)
+      throw t
   }
 
   def score(answer: Answer): Answer = {
@@ -70,14 +49,16 @@ object NaiveBayesRank extends LazyLogging {
         classifiers.get(rule) match {
           case null => 0.0
           case c =>
-            val feats = extractFeatures(node)
+            val feats = NaiveBayesRank.extractFeatures(node)
             val childSum = children.map(score).sum
             if (feats.nonEmpty) Bayes.classify(c, feats)._2 + childSum
             else childSum
         }
     }
   }
+}
 
+object NaiveBayesRank {
   /**
    * -- | Feature extraction
    * -- | Features:

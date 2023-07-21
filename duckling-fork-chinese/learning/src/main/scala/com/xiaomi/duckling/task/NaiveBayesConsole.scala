@@ -32,9 +32,9 @@ import com.xiaomi.duckling.Api
 import com.xiaomi.duckling.Api.formatToken
 import com.xiaomi.duckling.JsonSerde._
 import com.xiaomi.duckling.Types._
-import com.xiaomi.duckling.dimension.RuleSets
 import com.xiaomi.duckling.dimension.implicits._
 import com.xiaomi.duckling.dimension.matcher._
+import com.xiaomi.duckling.dimension.FullDimensions
 import com.xiaomi.duckling.ranking.Ranker
 import com.xiaomi.duckling.ranking.Testing.testContext
 import com.xiaomi.duckling.types.Node
@@ -64,7 +64,7 @@ object NaiveBayesConsole extends LazyLogging {
 
     val dimension = new ArgumentCompleter(
       new StringsCompleter("dimension"),
-      new StringsCompleter(RuleSets.namedDimensions.keys.toList: _*)
+      new StringsCompleter(FullDimensions.namedDimensions.keys.toList: _*)
     )
 
     val options = new ArgumentCompleter(
@@ -111,7 +111,7 @@ object NaiveBayesConsole extends LazyLogging {
     val cols = line.split("\\s+")
     if (cols.length >= 2) {
       if (line.startsWith("dimension ")) {
-        val targets = cols.tail.map(s => RuleSets.namedDimensions(s)).toSet
+        val targets = FullDimensions.convert(cols.tail)
         (true, options.copy(targets = targets))
       } else if (line.startsWith("option ")) {
         val opt =

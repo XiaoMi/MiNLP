@@ -33,9 +33,8 @@ import com.xiaomi.duckling.ranking.Bayes.Classifier
 import com.xiaomi.duckling.ranking.CorpusSets.{dimExamples, Corpus, Example}
 import com.xiaomi.duckling.ranking.Types._
 import com.xiaomi.duckling.types.Node
-import com.xiaomi.duckling.JsonSerde
+import com.xiaomi.duckling.{JsonSerde, Rules}
 import com.xiaomi.duckling.JsonSerde._
-import com.xiaomi.duckling.dimension.DimExamples
 import com.xiaomi.duckling.ranking.NaiveBayesRank.extractFeatures
 
 object NaiveBayesLearning extends LazyLogging {
@@ -144,7 +143,8 @@ object NaiveBayesLearning extends LazyLogging {
   def main(args: Array[String]): Unit = {
     if (args.length != 0) {
       val corpus = dimExamples.values.map(d => d.corpus).reduce((a, b) => (a._1, a._2, a._3 ++ b._3))
-      val classifiers = makeClassifiers(NaiveBayesRank.rules, corpus)
+      val rules = Rules.rulesFor(null, dimExamples.keySet)
+      val classifiers = makeClassifiers(rules, corpus)
 
       val file = args(0)
       val origin = writePretty(classifiers)
