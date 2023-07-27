@@ -41,7 +41,7 @@ object Examples extends DimExamples {
     (DurationData(30, Minute, schema = Some("PT30M")), List("30分钟", "半个钟头")),
     (DurationData(12, Hour, schema = Some("P0DT12H")), List("半天")),
     (DurationData(90, Minute, schema = Some("PT1H30M")), List("一个半小时", "一小时30分钟", "一个小时30分钟")),
-    (DurationData(2, Hour, schema = Some("PT2H")), List("两个小时")),
+    (DurationData(2, Hour, schema = Some("PT2H")), List("两个小时整")),
     (DurationData(45, Day, schema = Some("P1M15D")), List("一个半月")),
     (DurationData(15, Day, schema = Some("P0M15D")), List("半个月")),
     (DurationData(27, Month, schema = Some("P2Y3M")), List("两年零三个月","两年外加三个月", "两年加上三个月", "两年加三个月", "两年三个月")),
