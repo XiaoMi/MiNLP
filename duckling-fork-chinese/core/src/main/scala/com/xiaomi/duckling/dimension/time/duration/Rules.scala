@@ -42,6 +42,24 @@ trait Rules extends DimRules {
     }
   }
 
+  val tp: TokensProduction = {
+    case t1 :: Token(TimeGrain, GrainData(g, latent)) :: _ =>
+      if (isDimension(UnitNumber)(t1) && !compatibleWithUnitNumber(g)) None
+      else {
+        if (isDimension(Numeral)(t1) && g == Month) None
+        else {
+          t1 match {
+            case Token(_, NumeralData(v, _, _, seq, _, _)) =>
+              val n = math.floor(v).toInt
+              // 2012年 不召回, 两千年召回
+              if (seq.nonEmpty && g == Year && 1950 <= n && n <= 2050) None
+              else Token(Duration, DurationData(n, g, latent = latent, schema = durationSchema(n.toString, g)))
+            case _ => None
+          }
+        }
+      }
+  }
+
   val ruleIntegerUnitOfDuration = Rule(
     name = "<integer> <unit-of-duration>",
     pattern = List(
@@ -54,23 +72,23 @@ trait Rules extends DimRules {
       ).predicate,
       isDimension(TimeGrain).predicate
     ),
-    prod = tokens {
-      case t1 :: Token(TimeGrain, GrainData(g, latent)) :: _ =>
-        if (isDimension(UnitNumber)(t1) && !compatibleWithUnitNumber(g)) None
-        else {
-          if (isDimension(Numeral)(t1) && g == Month) None
-          else {
-            t1 match {
-              case Token(_, NumeralData(v, _, _, seq, _, _)) =>
-                val n = math.floor(v).toInt
-                // 2012年 不召回, 两千年召回
-                if (seq.nonEmpty && g == Year && 1950 <= n && n <= 2050) None
-                else Token(Duration, DurationData(n, g, latent = latent, schema = durationSchema(n.toString, g)))
-              case _ => None
-            }
-          }
-        }
-    }
+    prod = tokens(tp)
+  )
+
+  val ruleIntegerUnitOfDuration2 = Rule(
+    name = "<integer> <unit-of-duration>",
+    pattern = List(
+      and(
+        isNatural,
+        isNumberOrUnitNumber,
+        not(isDigitLengthGt(1)),
+        // 一九八七 年 不召回
+        not(isCnSequence)
+      ).predicate,
+      isDimension(TimeGrain).predicate,
+      "整".regex
+    ),
+    prod = tokens(tp)
   )
 
   val ruleFewDuration = Rule(
