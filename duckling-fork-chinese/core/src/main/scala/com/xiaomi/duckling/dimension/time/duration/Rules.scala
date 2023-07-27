@@ -76,7 +76,7 @@ trait Rules extends DimRules {
   )
 
   val ruleIntegerUnitOfDuration2 = Rule(
-    name = "<integer> <unit-of-duration>",
+    name = "<integer> <unit-of-duration> exactly",
     pattern = List(
       and(
         isNatural,
