@@ -40,15 +40,16 @@ case class RepeatData(interval: Option[DurationData] = None,
 
   override def resolve(context: Context,
                        options: Options): Option[(ResolvedValue, Boolean)] = {
-    val instant = start match {
+    val (instant, success) = start match {
       case Some(_start) =>
         _start.resolve(context, options) match {
-          case Some((tv: TimeValue, _)) => Some(tv, _start.form)
-          case _ => None
+          case Some((tv: TimeValue, _)) => (Some(tv, _start.form), true)
+          case _ => (None, false)
         }
-      case None => None
+      case None => (None, true)
     }
-    Some(RepeatValue(interval, n, instant, workdayType), false)
+    if (success) Some(RepeatValue(interval, n, instant, workdayType), false)
+    else None
   }
 }
 

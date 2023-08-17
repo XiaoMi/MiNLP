@@ -134,8 +134,14 @@ object TimeDataHelpers {
     TimeData(timePred = timeMinute(n), timeGrain = Minute)
   }
 
-  def hourMinute(is12H: Boolean, h: Int, m: Int): TimeData = {
-    val td = intersect1(hour(is12H, h), minute(m))
+  def second(n: Int): TimeData = TimeData(timePred = timeSecond(n), timeGrain = Second)
+
+  def hourMinuteSecond(is12H: Boolean, h: Int, m: Int, s: Option[Int] = None): TimeData = {
+    val td = s match {
+      case Some(v) => intersect1(hour(is12H, h), intersect1(minute(m), second(v)))
+      case None => intersect1(hour(is12H, h), minute(m))
+    }
+
     timeOfDay(Some(h), is12H, td)
   }
 

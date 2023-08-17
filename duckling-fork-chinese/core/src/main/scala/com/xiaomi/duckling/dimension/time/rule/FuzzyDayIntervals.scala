@@ -220,7 +220,7 @@ object FuzzyDayIntervals {
             case _ => (0, Hour)
           }
   
-        val td = if (grain == Minute) hourMinute(is12H = true, 24, m) else hour(true, 24)
+        val td = if (grain == Minute) hourMinuteSecond(is12H = true, 24, m) else hour(true, 24)
         val pred = SequencePredicate(List(cycleNth(Day, offset), td))
         tt(TimeData(pred, timeGrain = grain))
     }

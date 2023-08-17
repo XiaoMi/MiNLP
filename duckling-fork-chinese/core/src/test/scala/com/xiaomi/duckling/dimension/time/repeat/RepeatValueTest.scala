@@ -18,6 +18,7 @@ class RepeatValueTest extends UnitSpec {
     val cases = Table(("query", "schema")
       , ("每个工作日上午", "Repeat_Hour_08:00/12:00_Workday")
       , ("每个非工作日上午八点", "Repeat_Hour_08:00_NonWorkday")
+      , ("每月2号下午2点", "Repeat_Hour_2013-03-02T14:00_P1M")
     )
 
     it("should schema") {

@@ -16,6 +16,8 @@
 
 package com.xiaomi.duckling.dimension.time.rule
 
+import org.apache.commons.lang3.StringUtils
+
 import scalaz.Scalaz._
 
 import com.xiaomi.duckling.Types._
@@ -38,16 +40,17 @@ object Times {
     case _ => tt(now)
   })
 
-  val ruleHhmmTimeOfDay = Rule(
-    name = "hh:mm (time-of-day)",
-    pattern = List(raw"((?:[01]?\d)|(?:2[0-3])):([0-5]\d)".regex),
+  val ruleHhmmssTimeOfDay = Rule(
+    name = "hh:mm[:ss] (time-of-day)",
+    pattern = List(raw"((?:[01]?\d)|(?:2[0-3])):([0-5]\d)(:([0-5]\d))?".regex),
     prod = regexMatch {
-      case _ :: hh :: mm :: _ =>
+      case _ :: hh :: mm :: _ :: ss :: _ =>
         for {
           h <- parseInt(hh).toOption
           m <- parseInt(mm).toOption
         } yield {
-          tt(hourMinute(is12H = 0 < h && h <= 12, h, m))
+          val s = parseInt(ss).toOption
+          tt(hourMinuteSecond(is12H = 0 < h && h <= 12, h, m, s))
         }
     }
   )
@@ -117,7 +120,7 @@ object Times {
       case Token(Time, TimeData(_, _, _, _, Some(TimeOfDay(Some(hour), _)), _, _, _, _, _, _, _)) :: _ :: token :: _ =>
         for {
           n <- getIntValue(token)
-          t <- tt(hourMinute(is12H = true, hour, n.toInt))
+          t <- tt(hourMinuteSecond(is12H = true, hour, n.toInt))
         } yield t
     }
   )
@@ -133,7 +136,7 @@ object Times {
           else if (g1(0) == '零') integerMap(g1.substring(1))
           else if (g1(0) == '0') g1.substring(1).toInt
           else 10
-        tt(hourMinute(is12H = true, hour, m))
+        tt(hourMinuteSecond(is12H = true, hour, m))
     }
   )
 
@@ -152,8 +155,8 @@ object Times {
         if (mOpt.isEmpty) None
         else {
           val m = mOpt.get.toInt
-          if (u.startsWith("分")) tt(hourMinute(is12H = is12H, h, m))
-          else if (u == "刻" && m >= 1 && m <= 3) tt(hourMinute(is12H = is12H, h, 15 * m))
+          if (u.startsWith("分")) tt(hourMinuteSecond(is12H = is12H, h, m))
+          else if (u == "刻" && m >= 1 && m <= 3) tt(hourMinuteSecond(is12H = is12H, h, 15 * m))
           else None
         }
     }
@@ -170,7 +173,7 @@ object Times {
 
   val rules = List(
     ruleNow,
-    ruleHhmmTimeOfDay,
+    ruleHhmmssTimeOfDay,
     ruleTimeOfDayOClock,
     ruleIntegerLatentTimeOfDay,
     ruleDimTimePartOfDay,
