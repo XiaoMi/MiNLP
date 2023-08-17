@@ -84,6 +84,8 @@ object TimePredicateHelpers {
 
   def timeMinute(n: Int): TimePredicate = TimeDatePredicate(minute = n)
 
+  def timeSecond(n: Int): TimePredicate = TimeDatePredicate(second = n)
+
   def timeDayOfMonth(i: Int): TimePredicate = TimeDatePredicate(dayOfMonth = Some(i))
 
   def timeDayOfWeek(i: Int): TimePredicate = TimeDatePredicate(dayOfWeek = Some(i))
