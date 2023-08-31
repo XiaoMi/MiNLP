@@ -289,7 +289,7 @@ object Engine extends LazyLogging {
         case (rule, n, nodes) =>
           val validNodes = nodes.filter(_.isValid(doc))
           if (validNodes.isEmpty) None
-          else Some(rule, n, validNodes.toSet.toList)
+          else Some(rule, n, validNodes.distinct)
       }
     }
   }

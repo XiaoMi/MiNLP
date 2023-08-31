@@ -55,6 +55,21 @@ object Times {
     }
   )
 
+  val ruleHhmmssCN_TimeOfDay = Rule(
+    name = "hh时mm分ss秒 (time-of-day)",
+    pattern = List(raw"((?:[01]?\d)|(?:2[0-3]))[时点]([0-5]?\d)分(([0-5]?\d)秒)?".regex),
+    prod = regexMatch {
+      case _ :: hh :: mm :: _ :: ss :: _ =>
+        for {
+          h <- parseInt(hh).toOption
+          m <- parseInt(mm).toOption
+        } yield {
+          val s = parseInt(ss).toOption
+          tt(hourMinuteSecond(is12H = 0 < h && h <= 12, h, m, s))
+        }
+    }
+  )
+
   val ruleTimeOfDayOClock = Rule(
     name = "<time-of-day> o'clock",
     pattern = List(and(isIntegerBetween(0, 24), not(isCnSequence)).predicate, "(点(整|钟)?|时)".regex),
@@ -177,7 +192,7 @@ object Times {
     ruleTimeOfDayOClock,
     ruleIntegerLatentTimeOfDay,
     ruleDimTimePartOfDay,
-    // rulePartOfDayDimTime,
+    ruleHhmmssCN_TimeOfDay,
     // ruleRelativeMinutesAfterPastIntegerOClockOfDay,
     ruleRelativeMinutesAfterPastIntegerHourOfDay,
     ruleRelativeMinutesAfterPastIntegerHourAndHalfOfDay,
