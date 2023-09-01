@@ -57,7 +57,7 @@ object Times {
 
   val ruleHhmmssCN_TimeOfDay = Rule(
     name = "hh时mm分ss秒 (time-of-day)",
-    pattern = List(raw"((?:[01]?\d)|(?:2[0-3]))[时点]([0-5]?\d)分(([0-5]?\d)秒)?".regex),
+    pattern = List(raw"((?:[01]?\d)|(?:2[0-3]))[点]([0-5]?\d)分(([0-5]?\d)秒)?".regex),
     prod = regexMatch {
       case _ :: hh :: mm :: _ :: ss :: _ =>
         for {
