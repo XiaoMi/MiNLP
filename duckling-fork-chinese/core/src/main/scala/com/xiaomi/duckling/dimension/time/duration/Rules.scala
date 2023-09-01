@@ -181,11 +181,13 @@ trait Rules extends DimRules {
   val ruleCompositeDuration = Rule(
     name = "composite <duration> <duration>",
     pattern =
-      List(isNotLatentDuration.predicate, isDimension(Duration).predicate),
+      List(isDimension(Duration).predicate, isDimension(Duration).predicate),
     prod = tokens {
-      case Token(_, b@DurationData(v, g, _, _, _)) :: Token(_, a@DurationData(_, dg, _, _, _)) :: _
-        if g > dg && g != Month && (!a.latent || dg != Hour) =>
-        Token(Duration, b + a)
+      case Token(_, b@DurationData(v, g, _, _, _)) :: Token(_, a@DurationData(_, dg, _, _, _)) :: _ if g > dg =>
+        // ❌ 两年三月
+        // ✅ 一分三十秒
+        if (!b.latent && g != Month && (!a.latent || dg != Hour) || (b.latent && g == Minute)) Token(Duration, b + a)
+        else None
     }
   )
 

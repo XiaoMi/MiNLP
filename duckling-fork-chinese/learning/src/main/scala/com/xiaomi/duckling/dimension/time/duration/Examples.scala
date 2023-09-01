@@ -24,7 +24,7 @@ object Examples extends DimExamples {
 
   override def pairs: List[(ResolvedValue, List[String])] = List(
     (DurationData(1, Second, schema = Some("PT1S")), List("1秒钟", "1秒")),
-    (DurationData(69, Second, schema = Some("PT1M9S")), List("1分09秒", "一分零九秒")),
+    (DurationData(69, Second, schema = Some("PT1M9S")), List("1分09秒", "一分零九秒", "一分九秒")),
     (DurationData(185, Minute, schema = Some("PT3H5M")), List("3小时05分", "三小时零五分钟")),
     (DurationData(90, Second, schema = Some("PT1M30S")), List("1分半", "1分半钟")),
     (DurationData(2, Minute, schema = Some("PT2M")), List("2分钟", "两分钟", "二分钟")),
