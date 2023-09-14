@@ -35,6 +35,10 @@ public enum Hint {
      */
     PartOfDayAtLast,
     /**
+     * 上午下午组合
+     */
+    PartOfDay,
+    /**
      * 节假日
      */
     Holiday,

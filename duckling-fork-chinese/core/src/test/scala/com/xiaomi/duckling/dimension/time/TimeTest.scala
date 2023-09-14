@@ -107,7 +107,7 @@ class TimeTest extends UnitSpec {
     }
 
     it("不支持日到月等") {
-      val cases = Table("query", "八号到十二月", "八点到五分", "春天一点", "这十分钟后", "十后", "后三十分钟后")
+      val cases = Table("query", "八号到十二月", "八点到五分", "春天一点", "这十分钟后", "十后", "后三十分钟后", "早上晚上八点")
       forAll(cases) { query =>
         parse(query, context = testContext, options = options) should have size 0
       }

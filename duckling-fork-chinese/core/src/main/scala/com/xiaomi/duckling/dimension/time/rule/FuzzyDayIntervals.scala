@@ -123,7 +123,7 @@ object FuzzyDayIntervals {
         for {
           hAdjustP <- updatePredicateByFuzzyInterval(part, p)
           (is12H, hAdjust) <- hAdjustP.hour
-        } yield timeOfDay(hAdjust, is12H = false, td).copy(timePred = hAdjustP, hint = Hint.NoHint)
+        } yield timeOfDay(hAdjust, is12H = false, td).copy(timePred = hAdjustP, hint = Hint.PartOfDay)
       case (
           TimeIntervalsPredicate(t, p1: TimeDatePredicate, p2: TimeDatePredicate, beforeEndOfInterval),
           IntervalOfDay
@@ -149,7 +149,7 @@ object FuzzyDayIntervals {
     pattern = List(
       // 避免[2017年三月2号早上][10点半] 与 [2017年三月2号][早上10点半] 同时出现，只保留后者
       and(isAPartOfDay, not(isHint(PartOfDayAtLast))).predicate,
-      and(or(isNotLatent, isLatent0oClockOfDay), or(isATimeOfDay, isIntervalOfDay)).predicate
+      and(or(isNotLatent, isLatent0oClockOfDay), or(isATimeOfDay, isIntervalOfDay), not(isHint(Hint.PartOfDay))).predicate
     ),
     prod = {
       case (options: Options, Token(Time, td0: TimeData) :: Token(Time, td: TimeData) :: _) =>
@@ -163,7 +163,7 @@ object FuzzyDayIntervals {
       // 避免[2017年三月2号早上][10点半] 与 [2017年三月2号][早上10点半] 同时出现，只保留后者
       and(isAPartOfDay, not(isHint(PartOfDayAtLast)), isNotLatent).predicate,
       "的".regex,
-      and(or(isNotLatent, isLatent0oClockOfDay), or(isATimeOfDay, isIntervalOfDay)).predicate
+      and(or(isNotLatent, isLatent0oClockOfDay), or(isATimeOfDay, isIntervalOfDay), not(isHint(Hint.PartOfDay))).predicate
     ),
     prod = {
       case (options, Token(Time, td0: TimeData) :: _ :: Token(Time, td: TimeData) :: _) =>
