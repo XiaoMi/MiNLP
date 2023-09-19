@@ -19,5 +19,5 @@ package com.xiaomi.duckling.dimension.numeral
 import com.xiaomi.duckling.Types.Token
 
 package object fraction {
-  def fraction(v: Double, numerator: Double, denominator: Double): Token = Token(Fraction, FractionData(v, numerator, denominator))
+  def fraction(v: Double, numerator: Double, denominator: Double, numeratorPrecision: Int, denominatorPrecision: Int, precision: Option[Int] = None): Token = Token(Fraction, FractionData(v, numerator, denominator, numeratorPrecision, denominatorPrecision, precision))
 }
