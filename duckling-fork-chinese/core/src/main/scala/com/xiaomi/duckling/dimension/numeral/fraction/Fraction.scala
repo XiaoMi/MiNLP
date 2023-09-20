@@ -28,11 +28,11 @@ case object Fraction extends Dimension with Rules {
   override val dimDependents: List[Dimension] = List(Numeral)
 }
 
-case class FractionData(n: Double, numerator: Double, denominator: Double) extends NumeralValue with Resolvable {
+case class FractionData(n: Double, numerator: Double, denominator: Double, numeratorPrecision: Int, denominatorPrecision: Int, precision: Option[Int] = None) extends NumeralValue with Resolvable {
 
   override def resolve(context: Types.Context,
                        options: Types.Options): Option[(FractionData, Boolean)] =
-    (FractionData(n, numerator: Double, denominator: Double), false)
+    (FractionData(n, numerator, denominator, numeratorPrecision, denominatorPrecision, precision), false)
 
   override def schema: Option[String] =
     if (numerator * denominator >= 0) Some(s"$numerator/$denominator")
