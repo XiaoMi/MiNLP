@@ -105,7 +105,7 @@ trait Rules extends DimRules {
           }
 
           fractionPart.map { p =>
-            val v = intPart + p
+            val v = if (intPart >= 0) intPart + p else intPart - p
             token(NumeralData(v, composable = false, precision = precision))
           }
       }
