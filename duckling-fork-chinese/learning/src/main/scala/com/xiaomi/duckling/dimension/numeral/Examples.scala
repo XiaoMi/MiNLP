@@ -76,7 +76,8 @@ object Examples extends DimExamples {
     ((1.45, 2), List("1点45")),
     ((1.4, 1), List("一点四")),
     ((1987.43, 2), List("一千九百八十七点四三")),
-    ((123.123, 3), List("123.123"))
+    ((123.123, 3), List("123.123")),
+    ((-100.3, 1), List("负一百点三"))
   )
 
   override def pairs: List[(ResolvedValue, List[String])] = {

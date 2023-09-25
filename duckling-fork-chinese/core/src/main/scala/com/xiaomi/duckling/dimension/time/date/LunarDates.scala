@@ -45,20 +45,6 @@ object LunarDates {
     }
   )
   
-  val ruleLunarSymbolDate2 = Rule(
-    name = "<day> <lunar>",
-    pattern = List(
-      // 避免农历八月初八按[农历]八月初八和[农历八月]初八结合两次
-      and(isTimeDatePredicate, isNotHint(Hint.Intersect), isNotHint(Hint.YearMonth)).predicate,
-      "的?(农|阴)历".regex
-    ),
-    prod = tokens {
-      case Token(Date, td: TimeData) :: _ =>
-        val t = lunar(td).copy(calendar = Lunar(false), hint = Hint.Lunar)
-        Token(Date, t)
-    }
-  )
-
   val ruleLunarMonth = Rule(
     name = "<lunar-month> 正/腊/冬",
     pattern = List("闰?(正|腊|冬)月".regex),
@@ -97,5 +83,5 @@ object LunarDates {
     }
   )
 
-  val rules = List(ruleLunarSymbolDate1, ruleLunarSymbolDate2, ruleLunarMonth, ruleLunarDayOfMonth)
+  val rules = List(ruleLunarSymbolDate1, ruleLunarMonth, ruleLunarDayOfMonth)
 }
