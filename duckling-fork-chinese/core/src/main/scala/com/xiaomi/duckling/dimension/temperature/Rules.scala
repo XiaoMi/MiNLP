@@ -20,7 +20,7 @@ import com.xiaomi.duckling.Types._
 import com.xiaomi.duckling.dimension.DimRules
 import com.xiaomi.duckling.dimension.implicits._
 import com.xiaomi.duckling.dimension.matcher.{GroupMatch, RegexMatch}
-import com.xiaomi.duckling.dimension.numeral.Predicates.isInteger
+import com.xiaomi.duckling.dimension.numeral.Predicates.{isInteger, isIntegerBetween}
 import com.xiaomi.duckling.dimension.numeral.{Numeral, NumeralData}
 import com.xiaomi.duckling.dimension.quantity.QuantityData
 
@@ -94,6 +94,16 @@ trait Rules extends DimRules {
     prod = tokens {
       case Token(Numeral, NumeralData(value, _, _, _, _, _)) :: _ :: _ =>
         val temperature_value = if (value >= 0) value + 0.5 else value - 0.5
+        Token(Temperature, QuantityData(temperature_value, "C", "温度"))
+    }
+  )
+
+  val ruleDecimal1Temperature = Rule(
+    name = "<number> unit like [30度5]",
+    pattern = List(and(isInteger).predicate, "度".regex, isIntegerBetween(1, 9).predicate),
+    prod = tokens {
+      case Token(Numeral, NumeralData(v1, _, _, _, _, _)) :: _ :: Token(Numeral, NumeralData(v2, _, _, _, _, _)) :: _ =>
+        val temperature_value = if (v1 >= 0) v1 + 0.1 * v2 else v1 - 0.1 * v2
         Token(Temperature, QuantityData(temperature_value, "C", "温度"))
     }
   )

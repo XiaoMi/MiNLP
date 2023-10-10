@@ -24,7 +24,7 @@ object Examples extends DimExamples {
   override def pairs: List[(Types.ResolvedValue, List[String])] = List(
     (QuantityValue(30, "C", "温度"), List("摄氏30度", "30摄氏度")),
     (QuantityValue(13, "C", "温度"), List("十三度", "十三°", "13°C")),
-    (QuantityValue(12.5, "C", "温度"), List("12点5度", "12.5摄氏度")),
+    (QuantityValue(12.5, "C", "温度"), List("12点5度", "12.5摄氏度", "十二度五")),
     (QuantityValue(-25.3, "C", "温度"), List("零下25.3摄氏度", "零下25.3°C", "负的二十五点3度")),
     (QuantityValue(21, "F", "温度"), List("华氏21度", "2十一华氏度")),
     (QuantityValue(+22.6, "F", "温度"), List("华氏22点6度", "二十二点6华氏度")),
