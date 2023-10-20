@@ -106,7 +106,7 @@ object Examples extends DimExamples {
         LocalDateTime.of(2016, 1, 1, 0, 0, 0),
         Year
       ),
-      List("下三年", "未来三年")
+      List("下三年", "未来三年", "三年内")
     ),
     (
       localDateTimeInterval(
@@ -216,7 +216,7 @@ object Examples extends DimExamples {
         LocalDateTime.of(2013, 2, 12, 4, 45, 0),
         Minute
       ),
-      List("未来一刻钟", "之后一刻钟", "向后一刻钟", "往后一刻钟")
+      List("未来一刻钟", "之后一刻钟", "向后一刻钟", "往后一刻钟", "一刻钟以内")
     )
   )
 
@@ -271,7 +271,7 @@ object Examples extends DimExamples {
         LocalDateTime.of(2013, 3, 5, 0, 0, 0),
         Day
       ),
-      List("接下来三周")
+      List("接下来三周", "三周内")
     ),
     (
       localDateTimeInterval(
@@ -279,7 +279,7 @@ object Examples extends DimExamples {
         LocalDateTime.of(2013, 2, 19, 0, 0, 0),
         Day
       ),
-      List("未来一周")
+      List("未来一周", "一周内")
     ),
     (
       datetime(LocalDateTime.of(2013, 3, 5, 4, 30, 0), Second),

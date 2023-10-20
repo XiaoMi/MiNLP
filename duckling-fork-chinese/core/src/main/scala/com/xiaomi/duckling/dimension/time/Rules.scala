@@ -458,10 +458,15 @@ trait Rules extends DimRules {
     */
   val ruleInAInterval = Rule(
     name = "in a <duration>",
-    pattern = List(isNotLatentDuration.predicate, "内".regex),
+    pattern = List(isNotLatentDuration.predicate, "[之以]?内".regex),
     prod = tokens {
       case Token(Duration, DurationData(value, grain, _, _, _)) :: _ =>
-        tt(cycleN(notImmediate = false, grain, value, NoGrain))
+        val (g, v) = grain match {
+          case Month => (Day, value * 30)
+          case Week => (Day, value * 7)
+          case _ => (grain, value)
+        }
+        tt(cycleN(notImmediate = false, g, v))
     }
   )
 
