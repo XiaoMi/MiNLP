@@ -146,9 +146,12 @@ trait Rules extends DimRules {
 
   val ruleYearNumericWithYearSymbol = Rule(
     name = "date - year (numeric with year symbol)",
-    pattern = List(seqYearOf1000to9999.predicate, "(年?版|年)".regex),
+    pattern = List(seqYearOf1000to9999or00to99.predicate, "(年?版|年)".regex),
     prod = tokens {
-      case token :: _ => getIntValue(token).map(i => Token(Date, year(i.toInt)))
+      case token :: _ => getIntValue(token).map(i => {
+        val y = if (i < 30) i + 2000 else if (i < 100) i + 1900 else i
+        Token(Date, year(y.toInt))
+      })
     }
   )
 
@@ -173,34 +176,6 @@ trait Rules extends DimRules {
   )
 
   val singleNumberPredicate = singleNumeber.predicate
-
-  val ruleTwoDigitYear = Rule(
-    name = "date - year (like 九八年)",
-    pattern = List(singleNumberPredicate, singleNumberPredicate, "(年?版|年)".regex),
-    prod = tokens {
-      case t1 :: t2 :: _ =>
-        val y = for {
-          thirdDigit <- getIntValue(t1)
-          fourthDigit <- getIntValue(t2)
-        } yield {
-          val lastTwo = thirdDigit * 10 + fourthDigit
-          if (thirdDigit >= 3) 1900 + lastTwo
-          else 2000 + lastTwo
-        }
-        y.map(i => Token(Date, year(i.toInt)))
-    }
-  )
-
-  val ruleTowDigitYear06 = Rule(
-    name = "date - year (like 06年)",
-    pattern = List(raw"\d{2}".regex, "(年?版|年)".regex),
-    prod = singleRegexMatch {
-      case s =>
-        val lastTwo = Integer.parseInt(s)
-        val y = adjustYear(lastTwo, s).get
-        Token(Date, year(y))
-    }
-  )
 
   val ruleMonthNumericWithMonthSymbol = Rule(
     name = "date: month (numeric with month symbol)",
