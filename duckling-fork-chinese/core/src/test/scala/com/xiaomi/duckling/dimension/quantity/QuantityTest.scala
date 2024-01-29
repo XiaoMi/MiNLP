@@ -33,7 +33,7 @@ class QuantityTest extends UnitSpec {
         options.copy(targets = Set(Quantity, Numeral), full = false)
       )
       answers(0).token.value match {
-        case QuantityValue(1.0, "千米", _) => true shouldBe true
+        case QuantityValue(1.0, "千米", _, _, _) => true shouldBe true
         case _ => true shouldBe (false)
       }
       answers(1).token.value match {

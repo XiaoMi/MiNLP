@@ -30,13 +30,13 @@ case object Quantity extends Dimension with Rules {
   override val dimDependents: List[Dimension] = List(Numeral)
 }
 
-case class QuantityData(v: Double, unit: String, dim: String, isLatent: Boolean = false)
+case class QuantityData(v: Double, unit: String, dim: String, isLatent: Boolean = false, originValue: Option[Double] = None, originUnit: Option[String] = None)
     extends Resolvable
     with ResolvedValue {
   override def resolve(context: Context, options: Options): Option[(ResolvedValue, Boolean)] =
-    (QuantityValue(v, unit, dim), isLatent)
+    (QuantityValue(v, unit, dim, originValue, originUnit), isLatent)
 }
 
-case class QuantityValue(v: Double, unit: String, dim: String) extends ResolvedValue {
+case class QuantityValue(v: Double, unit: String, dim: String, originValue: Option[Double] = None, originUnit: Option[String] = None) extends ResolvedValue {
   override def schema: Option[String] = if ("温度".equalsIgnoreCase(dim)) Some(s"$v$unit") else Some(s"$v")
 }
