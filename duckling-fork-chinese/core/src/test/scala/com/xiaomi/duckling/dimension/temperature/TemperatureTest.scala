@@ -34,7 +34,7 @@ class TemperatureTest extends UnitSpec {
   describe("TemperatureTest") {
     it("simple") {
       temperatureAnalyze("2十一°F").token.value match {
-        case QuantityValue(v, unit, dim) =>
+        case QuantityValue(v, unit, dim, _, _) =>
           (v, unit, dim) shouldBe ((21.0, "F", "温度"))
       }
     }

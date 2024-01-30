@@ -24,6 +24,8 @@ import com.xiaomi.duckling.dimension.numeral.fraction.{Fraction, FractionData}
 import com.xiaomi.duckling.dimension.numeral.{DoubleSideIntervalValue, Numeral, NumeralValue, OpenIntervalValue}
 import com.xiaomi.duckling.dimension.ordinal.{Ordinal, OrdinalData}
 import com.xiaomi.duckling.dimension.quantity.QuantityValue
+import com.xiaomi.duckling.dimension.quantity.distance.Distance
+import com.xiaomi.duckling.dimension.quantity.velocity.Velocity
 import com.xiaomi.duckling.dimension.rating.Rating
 import com.xiaomi.duckling.dimension.season.Season
 import com.xiaomi.duckling.dimension.temperature.Temperature
@@ -45,7 +47,7 @@ class ApiTest extends UnitSpec {
 
     it("should date") {
       val options = testOptions.copy(targets = Set(Numeral, Time, Duration, Date), full = false)
-      println(Api.analyze("1分9秒", testContext, options))
+      println(Api.analyze("一年前的今天", testContext, options))
     }
 
     it("should age") {
@@ -195,6 +197,21 @@ class ApiTest extends UnitSpec {
             answer =>
               answer.token.value match {
                 case data: NumeralValue  => println(data.schema)
+                case _ => println("error")
+              }
+          }
+      }
+    }
+  
+    it("should distance") {
+      val options = testOptions.copy(targets = Set(Distance), full = false)
+      val queries = List("三十公里", "十海里", "一光年", "三毫米", "三英寸")
+      queries.foreach{
+        query =>
+          Api.analyze(query, testContext, options).foreach{
+            answer =>
+              answer.token.value match {
+                case data: QuantityValue  => println(data)
                 case _ => println("error")
               }
           }
