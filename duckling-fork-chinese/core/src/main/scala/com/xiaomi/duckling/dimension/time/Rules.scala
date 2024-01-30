@@ -255,6 +255,8 @@ trait Rules extends DimRules {
                 case Week => (reset(Week) _ >>> tt)(td)
                 case _    => tt(td)
               }
+            } else if (s != "这" && g == Week) { // 最?近一周，改为最近7天。
+              cycleN(notImmediate = false, Day, 7 * v).map(t => tt(t.at(Hint.Recent)))
             } else tt(cycleNth(g, 0))
           case "上" | "前" | "之前" | "往前"  | "向前" | "过去" | "过去" =>
             if (s == "上" && (g == Day || g == Year)) None
