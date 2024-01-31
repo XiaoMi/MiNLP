@@ -218,7 +218,15 @@ object Examples extends DimExamples {
         Minute
       ),
       List("未来一刻钟", "之后一刻钟", "向后一刻钟", "往后一刻钟", "一刻钟以内")
-    )
+    ),
+      (
+        localDateTimeInterval(
+            LocalDateTime.of(2013, 2, 12, 0, 0, 0),
+            LocalDateTime.of(2013, 2, 19, 0, 0, 0),
+            Day
+        ),
+        List("最近一周", "最近一星期", "近七天")
+      )
   )
 
   val weeks = List(
