@@ -270,8 +270,13 @@ trait Rules extends DimRules {
     pattern = List("(最近|近期|这段时间)".regex),
     prod = {
       case (options, _) =>
-        val from = cycleNth(Day, 0, Day)
-        val to = cycleNth(Day, 2, Day)
+        val fuzzyValue = options.timeOptions.durationFuzzyValue - 1
+        val (from, to) = if (options.timeOptions.recentInFuture && options.timeOptions.alwaysInFuture) {
+          (cycleNth(Day, 0, Day), cycleNth(Day, fuzzyValue, Day))
+        } else {
+          (cycleNth(Day, -fuzzyValue, Day), cycleNth(Day, 0, Day))
+        }
+        
         for (td <- interval(Open, from, to, options.timeOptions.beforeEndOfInterval)) yield {
           Token(Date, td.copy(hint = Hint.UncertainRecent))
         }
