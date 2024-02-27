@@ -280,7 +280,7 @@ class LocalHolidayProvider extends HolidayProvider {
     val builder = Maps.newTreeMap[String, String]()
     normalMap.foreach{
       case (pt, normalSet) => normalSet.foreach(normal =>
-        if (pt == normal && normal.contains(pt) || !normal.contains(pt)) {
+        if (!builder.containsKey(pt) || builder.containsKey(pt) && pt == normal) {
           builder.put(pt, normal)
         }
       )
