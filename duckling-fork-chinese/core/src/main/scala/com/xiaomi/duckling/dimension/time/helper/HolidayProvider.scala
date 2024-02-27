@@ -184,7 +184,6 @@ class LocalHolidayProvider extends HolidayProvider {
       (monthDay(4, 23), "世界读书日", "世界读书日|读书日"),
       (monthDay(4, 26), "国际知识产权日", "国际知识产权日|知识产权日"),
       (monthDay(4, 30), "国际爵士日", "国际爵士日|爵士日"),
-      (monthDay(4, 4), "台湾儿童节", "台湾儿童节|儿童节"),
       (monthDay(4, 6), "米粉节", "米粉节"),
       (monthDay(5, 1), "劳动节", "五一国际劳动节|51国际劳动节|国际劳动节|五一劳动节|劳动节|五一"),
       (monthDay(5, 12), "护士节", "护士节"),
@@ -197,6 +196,7 @@ class LocalHolidayProvider extends HolidayProvider {
       (monthDay(5, 4), "五四青年节", "中国五四青年节|五四青年节|中国54青年节|54青年节|中国青年节|青年节"),
       (monthDay(5, 8), "世界红十字日", "世界红十字日"),
       (monthDay(6, 1), "儿童节", "国际六一儿童节|六一儿童节|国际61儿童节|61儿童节|儿童节|六一"),
+      (monthDay(4, 4), "台湾儿童节", "台湾儿童节|儿童节"),
       (monthDay(6, 11), "中国人口日", "中国人口日"),
       (monthDay(6, 14), "世界献血日", "世界献血日"),
       (monthDay(6, 15), "健康素食日", "健康素食日"),
@@ -279,7 +279,11 @@ class LocalHolidayProvider extends HolidayProvider {
 
     val builder = Maps.newTreeMap[String, String]()
     normalMap.foreach{
-      case (pt, normalSet) => normalSet.foreach(normal => builder.put(pt, normal))
+      case (pt, normalSet) => normalSet.foreach(normal =>
+        if (!builder.containsKey(pt) || builder.containsKey(pt) && pt == normal) {
+          builder.put(pt, normal)
+        }
+      )
     }
     val tokenMapBuilder = ImmutableMap.builder[String, Token]()
     tokenMap.toMap.foreach{case (k, v) => tokenMapBuilder.put(k, v)}
