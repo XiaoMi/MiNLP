@@ -211,7 +211,7 @@ trait Rules extends DimRules {
     }
   )
 
-  private val RecentPattern = "(上|下|近|这|前|后)|(后面|过去|未来|接下来|之前|往前|向前|今后|之后|往后|向后|最近)的?"
+  private val RecentPattern = "(上|下|近|这|前|后面?)|(过去|未来|接下来|之前|往前|向前|今后|之后|往后|向后|最近|将来)的?"
 
   /**
     * 时间区间:
@@ -228,7 +228,7 @@ trait Rules extends DimRules {
         val s = if (StringUtils.isBlank(g1)) g2 else g1
         // 月必须是x个月
         s match {
-          case "下" | "后" | "接下来" | "未来" | "今后" | "之后" | "向后" | "往后" | "后面" =>
+          case "下" | "后" | "接下来" | "未来" | "今后" | "之后" | "向后" | "往后" | "后面" | "将来" =>
             val td: Option[TimeData] =
               // 未来一周=未来七天
               if ((s == "未来" || s == "接下来") && g == Week) {
