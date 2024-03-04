@@ -61,7 +61,8 @@ object Examples extends DimExamples {
     (ymd(2013, 12, 10, calendar = Lunar(false)), List("农历十二月初十", "腊月初十")),
     (ymd(2013, 12, 13, calendar = Lunar(false)), List("农历十二月十三", "腊月十三")),
     (ymd(2013, 8, 8, calendar = Lunar(false)), List("农历八月初八", "农历2013年八月八日", "八月初八")),
-    (localDateTimeInterval(LocalDateTime.of(2013, 2, 12, 0, 0), LocalDateTime.of(2013, 2, 15, 0, 0), Grain.Day), List("今明后三天", "今天明天后天三天"))
+    (localDateTimeInterval(LocalDateTime.of(2013, 2, 12, 0, 0), LocalDateTime.of(2013, 2, 15, 0, 0), Grain.Day), List("今明后三天", "今天明天后天三天")),
+    (localDateTimeInterval(LocalDateTime.of(2013, 2, 13, 0, 0), LocalDateTime.of(2013, 2, 16, 0, 0), Grain.Day), List("明后大后三天", "明天后天大后天三天"))
   )
 
   override val dimension: Dimension = Date
