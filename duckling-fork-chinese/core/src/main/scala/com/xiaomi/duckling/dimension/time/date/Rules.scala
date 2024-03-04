@@ -299,6 +299,14 @@ trait Rules extends DimRules {
         for (td <- interval(Open, from, to, options.timeOptions.beforeEndOfInterval)) yield Token(Date, td)
   })
 
+  val ruleSpecial5 = Rule(name = "date - special days: 明天后天大后天", pattern = List("(明后大后|明天后天大后天)(三天)?".regex),
+    prod = {
+      case (options, _) =>
+        val from = cycleNth(Day, 1, Day)
+        val to = cycleNth(Day, 3, Day)
+        for (td <- interval(Open, from, to, options.timeOptions.beforeEndOfInterval)) yield Token(Date, td)
+    })
+
   val ruleEndOfMonth = Rule(name = "date - 月底", pattern = List("月(底|末)".regex), prod = tokens {
     case _ =>
       val td1 = TimeData(EndOfGrainPredicate, timeGrain = Day)
