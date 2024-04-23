@@ -256,8 +256,8 @@ object predicates {
     case Token(Time | Date, td: TimeData) => hints.contains(td.hint)
   }
 
-  val isNotHint: Hint => Predicate = (hint: Hint) => {
-    case Token(Time | Date, td: TimeData) => td.hint != hint
+  def isNotHint(hints: Hint*): Predicate = {
+    case Token(Time | Date, td: TimeData) => !hints.contains(td.hint)
   }
 
   val is24oClockOfDay: Predicate = {
