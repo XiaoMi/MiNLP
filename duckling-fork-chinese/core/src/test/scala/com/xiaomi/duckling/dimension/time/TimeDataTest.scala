@@ -44,38 +44,40 @@ class TimeDataTest extends UnitSpec with LazyLogging {
       }
     }
 
-    val testCases = List(
-      //2013, 2, 12, 4, 30, 0
-      ("昨天", 2013, 2, 11),
-      ("今天", 2013, 2, 12),
-      ("明天", 2013, 2, 13),
-      ("一月二号", 2013, 1, 2),
-      ("二月十一号", 2013, 2, 11),
-      ("明年一月二号", 2014, 1, 2),
-      ("今年三月十号", 2013, 3, 10)
+    val testCases = Table( ("query", "year", "month", "day"),
+      ("最近三天", 2013, 2, 9)
+      , ("过去三天", 2013, 2, 9)
+      , ("昨天", 2013, 2, 11)
+      , ("今天", 2013, 2, 12)
+      , ("明天", 2013, 2, 13)
+      , ("一月二号", 2013, 1, 2)
+      , ("二月十一号", 2013, 2, 11)
+      , ("明年一月二号", 2014, 1, 2)
+      , ("今年三月十号", 2013, 3, 10)
     )
 
     it("not InFuture eq") {
       val timeOptions = new TimeOptions()
       timeOptions.setAlwaysInFuture(false)
+      timeOptions.setRecentInFuture(false)
       val options = testOptions.copy(targets = Set(Time), timeOptions = timeOptions)
-
-      testCases.foreach {
-        case (query, yyyy, mm, dd) =>
-          val answers = analyze(query, testContext, options)
-          answers.headOption match {
-            case Some(answer) =>
-              answer.token.value match {
-                case TimeValue(SimpleValue(InstantValue(dt, _)), _, _, _, _, _) =>
-                  (dt.year, dt.month, dt.dayOfMonth) shouldBe(yyyy, mm, dd)
-                case v =>
-                  logger.warn(s"unexpected value: $query => $v")
-                  true shouldBe false
-              }
-            case _ =>
-              logger.warn(s"empty result: $query")
-              true shouldBe false
-          }
+      forAll(testCases) { (query, yyyy, mm, dd) =>
+        val answers = analyze(query, testContext, options)
+        answers.headOption match {
+          case Some(answer) =>
+            answer.token.value match {
+              case TimeValue(SimpleValue(InstantValue(dt, _)), _, _, _, _, _) =>
+                (dt.year, dt.month, dt.dayOfMonth) shouldBe(yyyy, mm, dd)
+              case TimeValue(IntervalValue(InstantValue(dt, _), _), _, _, _, _, _) =>
+                (dt.year, dt.month, dt.dayOfMonth) shouldBe(yyyy, mm, dd)
+              case v =>
+                logger.warn(s"unexpected value: $query => $v")
+                true shouldBe false
+            }
+          case _ =>
+            logger.warn(s"empty result: $query")
+            true shouldBe false
+        }
       }
     }
 
