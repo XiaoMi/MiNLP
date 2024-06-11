@@ -125,7 +125,8 @@ case class TimeData(timePred: TimePredicate,
     val refTime =
       refTimeAdjust(new TimeObject(context.referenceTime, Grain.Second), options.timeOptions)
 
-    val reverseTake = hint == Hint.UncertainRecent && !options.timeOptions.recentInFuture || !options.timeOptions.alwaysInFuture
+    val reverseTake = (hint == Hint.UncertainRecent && !options.timeOptions.recentInFuture
+      || hint != Hint.Recent && !options.timeOptions.alwaysInFuture)
     val valueOpt =
       try {
         resolveTimeData(refTime, this, reverseTake)
