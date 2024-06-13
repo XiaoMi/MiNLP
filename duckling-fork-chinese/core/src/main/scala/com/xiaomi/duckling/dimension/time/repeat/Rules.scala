@@ -112,7 +112,7 @@ trait Rules extends DimRules with LazyLogging {
 
   val ruleWorkDays = Rule(
     name = "<work/non-workday>",
-    pattern = List("(每一?个)?(工作日|非工作日|节假日)".regex),
+    pattern = List("(每一?个)?(工作日|非工作日|节假日)(每天)?".regex),
     prod = regexMatch { case _ :: _ :: t :: _ =>
     val workdayType = t match {
         case "工作日" => WorkdayType.Workday
