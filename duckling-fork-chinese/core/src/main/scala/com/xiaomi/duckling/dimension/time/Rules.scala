@@ -575,15 +575,6 @@ trait Rules extends DimRules {
     }
   )
 
-  val tomorrow = Rule(
-    name = "次日|第二天",
-    pattern = List("次日|第二天".regex),
-    prod = tokens {
-      case Token(RegexMatch, GroupMatch(s :: _)) :: _ =>
-        tt(cycleNthThis(1, Day, Day, Year))
-    }
-  )
-
   def openInterval(td: TimeData, direction: IntervalDirection): Option[Token] = {
     val pred = SequencePredicate(List(td, TimeData(TimeOpenIntervalPredicate(direction), timeGrain = Grain.NoGrain)))
     tt(TimeData(pred, timeGrain = td.timeGrain, hint = Hint.Sequence))
@@ -591,7 +582,6 @@ trait Rules extends DimRules {
 
   val composite = List(
     ruleRecentTime,
-    tomorrow,
     ruleNthTimeOfTime,
     ruleNthTimeOfTime2,
     ruleIntersect,

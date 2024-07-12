@@ -28,7 +28,7 @@ import com.xiaomi.duckling.dimension.matcher.{GroupMatch, RegexMatch}
 import com.xiaomi.duckling.dimension.matcher.Prods.{regexMatch, singleRegexMatch}
 import com.xiaomi.duckling.dimension.numeral.Predicates.{getIntValue, isIntegerBetween}
 import com.xiaomi.duckling.dimension.numeral.seq.{DigitSequence, DigitSequenceData}
-import com.xiaomi.duckling.dimension.time.Prods.intersectDOM
+import com.xiaomi.duckling.dimension.time.Prods.{intersectDOM, tt}
 import com.xiaomi.duckling.dimension.time.duration.{isADecade, Duration, DurationData}
 import com.xiaomi.duckling.dimension.time.enums.Grain._
 import com.xiaomi.duckling.dimension.time.enums.Hint.{NoHint, RecentNominal, YearMonth}
@@ -226,6 +226,15 @@ trait Rules extends DimRules {
             //            case "前" => -2
           }
         Token(Date, cycleNth(Day, offset).copy(hint = RecentNominal))
+    }
+  )
+
+  val tomorrow = Rule(
+    name = "次日",
+    pattern = List("次日".regex),
+    prod = tokens {
+      case Token(RegexMatch, GroupMatch(s :: _)) :: _ =>
+        tt(cycleNthThis(1, Day, Day, Year))
     }
   )
 
