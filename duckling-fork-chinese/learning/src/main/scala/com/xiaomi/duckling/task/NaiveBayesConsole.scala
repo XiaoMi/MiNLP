@@ -77,7 +77,9 @@ object NaiveBayesConsole extends LazyLogging {
         "seasons",
         "sequence",
         "fuzzy-on",
-        "before-end-of-interval"
+        "before-end-of-interval",
+        "recent-in-future",
+        "always-in-future"
       ),
       NullCompleter.INSTANCE
     )
@@ -127,6 +129,8 @@ object NaiveBayesConsole extends LazyLogging {
               case "sequence" => options.timeOptions.setSequence(value); options
               case "fuzzy-on" => options.timeOptions.setDurationFuzzyOn(value); options
               case "before-end-of-interval" => options.timeOptions.setBeforeEndOfInterval(value); options
+              case "recent-in-future" => options.timeOptions.setRecentInFuture(value); options
+              case "always-in-future" => options.timeOptions.setAlwaysInFuture(value); options
               case _ => options
             }
             opt
