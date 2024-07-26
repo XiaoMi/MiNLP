@@ -93,7 +93,7 @@ package object time {
         case ahead #:: _ =>
           val happened =
             td.timePred match {
-              case _: TimeDatePredicate => timeBefore(ahead, refTime, td.timeGrain)
+              case _: TimeDatePredicate | _: TimeIntervalsPredicate => timeStartsBeforeTheEndOf(ahead)(refTime)
               case _ => false
             }
           if (happened) Some(ahead)

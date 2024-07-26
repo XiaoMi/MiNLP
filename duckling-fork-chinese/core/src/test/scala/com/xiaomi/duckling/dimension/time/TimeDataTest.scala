@@ -44,8 +44,9 @@ class TimeDataTest extends UnitSpec with LazyLogging {
       }
     }
 
-    val testCases = Table( ("query", "year", "month", "day"),
-      ("最近三天", 2013, 2, 9)
+    val testCases = Table( ("query", "year", "month", "day")
+      , ("凌晨", 2013, 2, 12)
+      , ("最近三天", 2013, 2, 9)
       , ("过去三天", 2013, 2, 9)
       , ("昨天", 2013, 2, 11)
       , ("今天", 2013, 2, 12)
