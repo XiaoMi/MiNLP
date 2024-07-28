@@ -19,6 +19,7 @@ package com.xiaomi.duckling.dimension.ordinal
 import com.xiaomi.duckling.Types._
 import com.xiaomi.duckling.dimension.DimRules
 import com.xiaomi.duckling.dimension.implicits._
+import com.xiaomi.duckling.dimension.matcher.{GroupMatch, RegexMatch}
 import com.xiaomi.duckling.dimension.numeral.Predicates.isNumeralDimension
 import com.xiaomi.duckling.dimension.numeral.{Numeral, NumeralData}
 
@@ -37,4 +38,21 @@ trait Rules extends DimRules {
       case Token(Ordinal, OrdinalData(value, _)) :: _ =>
         ordinal(value, ge = true)
     })
+  
+  val ruleReverseOrdinalDigits = Rule(
+    name = "reverse ordinal (digits)",
+    pattern = List("倒数第".regex, isNumeralDimension.predicate),
+    prod = tokens {
+      case _ :: Token(Numeral, NumeralData(v, _, _, _, _, _)) :: _ => ordinal(-math.floor(v).toLong)
+    }
+  )
+  
+  val ruleLastOrdinalDigits = Rule(
+    name = "reverse last ordinal (digits)",
+    pattern = List("最后(1|一)个?".regex),
+    prod = tokens {
+      case Token(RegexMatch, GroupMatch(s :: _)) :: _ =>
+        ordinal(-1, ge = s.endsWith("个"))
+    }
+  )
 }

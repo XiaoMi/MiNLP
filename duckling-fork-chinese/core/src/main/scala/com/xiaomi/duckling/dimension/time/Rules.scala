@@ -122,6 +122,53 @@ trait Rules extends DimRules {
         }
     }
   )
+  
+  /**
+    * 今年/本月/2024年/5月 + 最后一天/(倒数)?第二天
+    */
+  val ruleNthTimeOfOrdinalGrain = Rule(
+    name = "nth <time> of <ordinal> grain",
+    pattern =
+      List(isDimension(Time).predicate, isDimension(Ordinal).predicate, isDimension(TimeGrain).predicate),
+    prod = tokens {
+      case Token(Time, td: TimeData) ::
+        Token(Ordinal, od: OrdinalData)
+        :: Token(TimeGrain, GrainData(g, _)) :: _ if td.timeGrain > g && g == Grain.Day && !od.ge =>
+        
+        val predicate = if (od.value >= 0) {
+          val ov = if(od.value > 0) od.value.toInt -1 else 0
+          SequencePredicate(List(td, cycleNth(g, ov)))
+        } else {
+          SequencePredicate(List(td, cycleNth(td.timeGrain, 1), cycleNth(g, od.value.toInt)))
+        }
+        
+        tt(TimeData(timePred = predicate, timeGrain = td.timeGrain))
+    }
+  )
+  
+  val ruleNthTimeOfOrdinalGrain2 = Rule(
+    name = "nth <time> of <ordinal> grain2",
+    pattern = List(
+      isDimension(Time).predicate,
+      "的".regex,
+      isDimension(Ordinal).predicate,
+      isDimension(TimeGrain).predicate
+    ),
+    prod = tokens {
+      case Token(Time, td: TimeData) :: _ ::
+        Token(Ordinal, od: OrdinalData)
+        :: Token(TimeGrain, GrainData(g, _)) :: _ if td.timeGrain > g && g == Grain.Day && !od.ge =>
+        
+        val predicate = if (od.value >= 0) {
+          val ov = if(od.value > 0) od.value.toInt -1 else 0
+          SequencePredicate(List(td, cycleNth(g, ov)))
+        } else {
+          SequencePredicate(List(td, cycleNth(td.timeGrain, 1), cycleNth(g, od.value.toInt)))
+        }
+        
+        tt(TimeData(timePred = predicate, timeGrain = td.timeGrain))
+    }
+  )
 
   val ruleIntersect =
     Rule(
@@ -584,6 +631,8 @@ trait Rules extends DimRules {
     ruleRecentTime,
     ruleNthTimeOfTime,
     ruleNthTimeOfTime2,
+    ruleNthTimeOfOrdinalGrain,
+    ruleNthTimeOfOrdinalGrain2,
     ruleIntersect,
     ruleIntersect2,
     ruleRecentCycle,

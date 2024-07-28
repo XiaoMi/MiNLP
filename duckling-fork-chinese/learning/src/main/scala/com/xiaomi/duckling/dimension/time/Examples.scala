@@ -501,7 +501,10 @@ object Examples extends DimExamples {
     (h(15), List("今天3点")),
     // 8点，不是20点
     (datetime(LocalDateTime.of(2013, 2, 11, 8, 0, 0), Hour), List("2013年2月11号8点")),
-    (datetime(LocalDateTime.of(2013, 2, 14, 8, 0, 0), Hour), List("2月14号8点"))
+    (datetime(LocalDateTime.of(2013, 2, 14, 8, 0, 0), Hour), List("2月14号8点")),
+    (datetime(LocalDateTime.of(2013, 2, 2, 0, 0, 0), Day), List("2013年2月2", "2013年2月第二天", "今年2月的第二天", "本月第二天")),
+    (datetime(LocalDateTime.of(2013, 1, 2, 0, 0, 0), Day), List("2013年的第二天", "今年的第二天", "今年倒数第364天")),
+    (datetime(LocalDateTime.of(2013, 5, 31, 0, 0, 0), Day), List("5月的最后一天", "5月最后一天", "5月第31天"))
   )
 
   override def pairs: List[(ResolvedValue, List[String])] =
