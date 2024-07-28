@@ -128,7 +128,7 @@ trait Rules extends DimRules {
       name = "intersect",
       // 左右边均不能是中午/下午，避免与<dim time> <part-of-day>冲突
       pattern = List(
-        and(isDimension(Time), isNotLatent, isNotHint(Hint.Season)).predicate,
+        and(isDimension(Time), isNotLatent, isNotHint(Hint.Season, Hint.FinalRule)).predicate,
         // "一日"单独是latent，但是可以参与组合
         and(isDimension(Time), or(and(or(isNotLatent, isLatent0oClockOfDay), not(isAPartOfDay)), isADayOfMonth)).predicate
       ),
@@ -345,7 +345,7 @@ trait Rules extends DimRules {
         val predicate = SequencePredicate(
           List(td, TimeData(TimeOpenIntervalPredicate(intervalDirection), timeGrain = Grain.NoGrain))
         )
-        tt(TimeData(timePred = predicate, timeGrain = td.timeGrain))
+        tt(TimeData(timePred = predicate, timeGrain = td.timeGrain, hint = Hint.FinalRule))
     }
   )
 

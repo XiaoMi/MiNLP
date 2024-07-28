@@ -46,7 +46,7 @@ import java.util.concurrent.TimeUnit;
 @State(Scope.Benchmark)
 public class DateTimeBenchmark {
     Context context = new Context(ZonedDateTime.of(LocalDateTime.of(2016, 12, 8, 11, 30, 30), Types.ZoneCN()), Locale.CHINA);
-    final Types.Options option = new Types.Options(Sets.newHashSet("time", "duration"), false);
+    final Types.Options option = new Types.Options(Sets.newHashSet("Time", "Duration"), false);
     final Random rand = new Random();
 
 
