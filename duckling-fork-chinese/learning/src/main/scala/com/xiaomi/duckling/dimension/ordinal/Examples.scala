@@ -22,7 +22,12 @@ import com.xiaomi.duckling.dimension.{Dimension, DimExamples}
 object Examples extends DimExamples {
 
   override def pairs: List[(Types.ResolvedValue, List[String])] =
-    List((7, List("第七", "第七个")), (11, List("第十一")), (91, List("第九十一"))).map {
+    List(
+      (7, List("第七", "第七个")),
+      (11, List("第十一")),
+      (91, List("第九十一")),
+      (-2, List("倒数第二")),
+      (-1, List("倒数第一", "最后一个"))).map {
       case (expected, texts) => (OrdinalData(expected), texts)
     }
 
