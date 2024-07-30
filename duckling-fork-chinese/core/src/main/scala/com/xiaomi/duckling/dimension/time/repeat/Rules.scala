@@ -22,11 +22,12 @@ import com.xiaomi.duckling.Types._
 import com.xiaomi.duckling.dimension.DimRules
 import com.xiaomi.duckling.dimension.implicits._
 import com.xiaomi.duckling.dimension.matcher.GroupMatch
-import com.xiaomi.duckling.dimension.matcher.Prods.{regexMatch, singleRegexMatch}
-import com.xiaomi.duckling.dimension.time.{form, Time, TimeData}
+import com.xiaomi.duckling.dimension.matcher.Prods.regexMatch
+import com.xiaomi.duckling.dimension.time.{form, GrainWrapper, Time, TimeData}
 import com.xiaomi.duckling.dimension.time.duration.{Duration, DurationData}
 import com.xiaomi.duckling.dimension.time.enums.{Grain, Hint}
-import com.xiaomi.duckling.dimension.time.predicates.{isAPartOfDay, isATimeOfDay, isHint, isNotLatent, isTimeDatePredicate, IntersectTimePredicate, TimeDatePredicate, TimeIntervalsPredicate}
+import com.xiaomi.duckling.dimension.time.helper.TimeDataHelpers.intersect
+import com.xiaomi.duckling.dimension.time.predicates._
 
 trait Rules extends DimRules with LazyLogging {
   /**
@@ -153,6 +154,18 @@ trait Rules extends DimRules with LazyLogging {
     pattern = List(isOnlyWorkdaysType.predicate, "的".regex, isHourTimes.predicate),
     prod = tokens { case Token(Repeat, rd: RepeatData) :: _ :: Token(Time, td: TimeData) :: _ =>
       workdaysTime(rd, td)
+    }
+  )
+
+  // 周一到周五的早上八点
+  val ruleIntervalTime = Rule(
+    name = "<interval> <time/interval>",
+    pattern = List(isInterval.predicate, isDimension(Time).predicate),
+    prod = tokens { case Token(Time, outer: TimeData) :: Token(Time, inner: TimeData):: _ if outer.timeGrain > inner.timeGrain =>
+      val oInterval = outer.timePred.asInstanceOf[TimeIntervalsPredicate]
+      // start
+      val start = intersect(TimeData(oInterval.p1, timeGrain=outer.timeGrain), inner)
+      Token(Repeat, RepeatData(start = start, repeatNFromInterval = outer))
     }
   )
 }

@@ -34,6 +34,10 @@ object Examples extends DimExamples {
   implicit def _toTuple(tv: TimeValue) = Option(tv, None: Option[Form])
 
   override def pairs: List[(ResolvedValue, List[String])] = List(
+    (RepeatValue(start = (datetimeInterval(
+      new DuckDateTime(LocalDateTime.of(2013, 2, 18, 12, 0, 0)),
+      new DuckDateTime(LocalDateTime.of(2013, 2, 18, 18, 0, 0)),
+      Hour), None), repeatGrain = Day, n = 3), List("周一到周三下午")),
     (RepeatValue(DurationData(1, Day, schema = "P1D")), List("每天")),
     (RepeatValue(DurationData(1, Week, schema = "P1W")), List("每周")),
     (RepeatValue(DurationData(15, Minute, schema = "PT15M")), List("每隔15分钟", "隔15分钟")),

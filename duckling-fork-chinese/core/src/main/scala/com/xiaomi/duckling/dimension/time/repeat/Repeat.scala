@@ -25,6 +25,7 @@ import com.xiaomi.duckling.dimension.time.grain.TimeGrain
 import com.xiaomi.duckling.dimension.time.Types._
 import com.xiaomi.duckling.dimension.time.enums.Grain
 import com.xiaomi.duckling.dimension.time.form.Form
+import com.xiaomi.duckling.dimension.time.Helpers.countGrains
 
 case object Repeat extends Dimension with Rules {
   override val name: String = "Repeat"
@@ -35,7 +36,9 @@ case object Repeat extends Dimension with Rules {
 case class RepeatData(interval: Option[DurationData] = None,
                       n: Option[Int] = None,
                       start: Option[TimeData] = None,
-                      workdayType: Option[WorkdayType] = None)
+                      workdayType: Option[WorkdayType] = None,
+                      repeatGrain: Option[Grain] = None,
+                      repeatNFromInterval: Option[TimeData] = None)
     extends Resolvable {
 
   override def resolve(context: Context,
@@ -48,7 +51,19 @@ case class RepeatData(interval: Option[DurationData] = None,
         }
       case None => (None, true)
     }
-    if (success) Some(RepeatValue(interval, n, instant, workdayType), false)
+    val repeatN = repeatNFromInterval match {
+      case Some(intervalTimeData) =>
+        intervalTimeData.resolve(context, options) match {
+          case Some((tv: TimeValue, _)) =>
+            tv.timeValue match {
+              case IntervalValue(start, end) => Some(countGrains(start, end))
+              case _ => None
+            }
+          case _ => None
+        }
+      case _ => None
+    }
+    if (success) Some(RepeatValue(interval, n.orElse(repeatN), instant, repeatGrain = repeatNFromInterval.map(_.timeGrain), workdayType), false)
     else None
   }
 }
@@ -63,6 +78,7 @@ case class RepeatData(interval: Option[DurationData] = None,
 case class RepeatValue(interval: Option[DurationData] = None,
                        n: Option[Int] = None,
                        start:  Option[(TimeValue, Option[Form])] = None,
+                       repeatGrain: Option[Grain] = None,
                        workdayType: Option[WorkdayType] = None)
     extends ResolvedValue {
 

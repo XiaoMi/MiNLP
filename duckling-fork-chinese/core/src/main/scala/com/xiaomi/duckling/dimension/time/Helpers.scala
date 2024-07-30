@@ -16,6 +16,8 @@
 
 package com.xiaomi.duckling.dimension.time
 
+import java.time.temporal.ChronoUnit
+
 import com.xiaomi.duckling.Types._
 import com.xiaomi.duckling.dimension.implicits._
 import com.xiaomi.duckling.dimension.time.enums.Grain
@@ -23,6 +25,7 @@ import com.xiaomi.duckling.dimension.time.enums.Grain._
 import com.xiaomi.duckling.dimension.time.form.{TimeOfDay, Month => _}
 import com.xiaomi.duckling.dimension.time.helper.TimeDataHelpers.hour
 import com.xiaomi.duckling.dimension.time.predicates.{TimeDatePredicate, TimePredicate}
+import com.xiaomi.duckling.dimension.time.Types.InstantValue
 
 object Helpers {
 
@@ -64,6 +67,22 @@ object Helpers {
         }
         td2.copy(timePred = pred, form = form)
       } else td2
+  }
+
+  def countGrains(start: InstantValue, end: InstantValue): Int = {
+    val a = start.datetime.toLocalDatetime
+    val b = end.datetime.toLocalDatetime
+    val n = start.grain match {
+      case NoGrain | Second => ChronoUnit.SECONDS.between(a, b)
+      case Minute => ChronoUnit.MINUTES.between(a, b)
+      case Hour => ChronoUnit.HOURS.between(a, b)
+      case Day => ChronoUnit.DAYS.between(a, b)
+      case Week => ChronoUnit.WEEKS.between(a, b)
+      case Month => ChronoUnit.MONTHS.between(a, b)
+      case Quarter => ChronoUnit.MONTHS.between(a, b) / 3
+      case Year => ChronoUnit.YEARS.between(a, b)
+    }
+    n.intValue()
   }
 
 }
