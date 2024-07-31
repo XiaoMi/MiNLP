@@ -157,14 +157,25 @@ trait Rules extends DimRules with LazyLogging {
     }
   )
 
-  // 周一到周五的早上八点
+  // 周一到周五早上八点
   val ruleIntervalTime = Rule(
     name = "<interval> <time/interval>",
     pattern = List(isInterval.predicate, isDimension(Time).predicate),
     prod = tokens { case Token(Time, outer: TimeData) :: Token(Time, inner: TimeData):: _ if outer.timeGrain > inner.timeGrain =>
       val oInterval = outer.timePred.asInstanceOf[TimeIntervalsPredicate]
       // start
-      val start = intersect(TimeData(oInterval.p1, timeGrain=outer.timeGrain), inner)
+      val start = intersect(inner, TimeData(oInterval.p1, timeGrain=outer.timeGrain))
+      Token(Repeat, RepeatData(start = start, repeatNFromInterval = outer))
+    }
+  )
+
+  // 周一到周五早上的八点
+  val ruleIntervalTime1 = Rule(
+    name = "<interval> 的 <time/interval>",
+    pattern = List(isInterval.predicate, "的".regex, isDimension(Time).predicate),
+    prod = tokens { case Token(Time, outer: TimeData) :: _ :: Token(Time, inner: TimeData):: _ if outer.timeGrain > inner.timeGrain =>
+      val oInterval = outer.timePred.asInstanceOf[TimeIntervalsPredicate]
+      val start = intersect(inner.copy(hint = Hint.NoHint), TimeData(oInterval.p1, timeGrain=outer.timeGrain).copy(hint = Hint.NoHint))
       Token(Repeat, RepeatData(start = start, repeatNFromInterval = outer))
     }
   )

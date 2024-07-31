@@ -19,6 +19,8 @@ package com.xiaomi.duckling.task
 import java.nio.charset.StandardCharsets
 import java.time.ZonedDateTime
 
+import scala.util.control.Breaks.break
+
 import org.fusesource.jansi.Ansi
 import org.jline.reader.{EndOfFileException, LineReader, LineReaderBuilder}
 import org.jline.reader.impl.completer._
@@ -143,7 +145,7 @@ object NaiveBayesConsole extends LazyLogging {
     } else (false, options)
   }
 
-  def round(reader: LineReader, options: Options): Options = {
+  def round(reader: LineReader, options: Options): (Boolean, Options) = {
     reader.getTerminal.flush()
 
     val line =
@@ -152,7 +154,6 @@ object NaiveBayesConsole extends LazyLogging {
       } catch {
         case ex: EndOfFileException =>
           logger.info("bye!")
-          System.exit(0)
           ""
       }
 
@@ -175,11 +176,11 @@ object NaiveBayesConsole extends LazyLogging {
       }
     }
 
-    _options
+    (line == "", _options)
   }
 
   def run(): Unit = {
-    var options = Options(targets = Set(), withLatent = false)
+    var options: Options = Options(targets = Set(), withLatent = false)
     options.rankOptions.setRanker(Ranker.NaiveBayes)
     options.rankOptions.setWinnerOnly(true)
     options.rankOptions.setCombinationRank(false)
@@ -197,7 +198,9 @@ object NaiveBayesConsole extends LazyLogging {
 
     val reader = buildLineReader()
     while (true) {
-      options = round(reader, options)
+      round(reader, options) match {
+        case (true, _) => break()
+      }
     }
   }
 
