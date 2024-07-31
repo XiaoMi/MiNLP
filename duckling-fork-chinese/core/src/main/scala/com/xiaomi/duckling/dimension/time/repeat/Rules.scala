@@ -91,10 +91,12 @@ trait Rules extends DimRules with LazyLogging {
     }
   )
 
+  private val predicateEveryGrain = "每(一个?|个)?(年度?|月|周|星期|天|小时|分钟)的?".regex
+
   val ruleEveryGrainDatetime = Rule(
     name = "<every> <grain> <datetime>",
     pattern = List(
-      "每(一个?|个)?(年度?|月|周|星期|天|小时|分钟)的?".regex,
+      predicateEveryGrain,
       and(isDimension(Time), isNotLatent).predicate),
     prod = tokens {
       case Token(_, GroupMatch(_ :: _ :: grainToken :: _)) :: Token(_, td: TimeData) :: _
@@ -177,6 +179,33 @@ trait Rules extends DimRules with LazyLogging {
       val oInterval = outer.timePred.asInstanceOf[TimeIntervalsPredicate]
       val start = intersect(inner.copy(hint = Hint.NoHint), TimeData(oInterval.p1, timeGrain=outer.timeGrain).copy(hint = Hint.NoHint))
       Token(Repeat, RepeatData(start = start, repeatNFromInterval = outer))
+    }
+  )
+
+  val ruleEveryRepeat = Rule(
+    name = "每 x <repeat>",
+    pattern = List(predicateEveryGrain, isDimension(Repeat).predicate),
+    prod = tokens { case Token(_, GroupMatch(_ :: _ :: grainToken :: _)) :: Token(_, repeat: RepeatData):: _ =>
+      val grainHint: Option[Grain] = toGrain(grainToken)
+      (grainHint, repeat.repeatNFromInterval) match {
+        case (Some(everyGrain), Some(td)) if everyGrain >= td.timeGrain =>
+          val interval = DurationData(1, grainHint.getOrElse(everyGrain))
+          Token(Repeat, repeat.copy(interval = interval))
+        case _ => None
+      }
+    }
+  )
+
+  val ruleEveryRepeat1 = Rule(
+    name = "每 <repeat>",
+    pattern = List("每个?".regex, isDimension(Repeat).predicate),
+    prod = tokens { case _ :: Token(_, repeat: RepeatData):: _ =>
+      repeat.repeatNFromInterval match {
+        case Some(td) if td.timePred.maxGrain.isDefined =>
+          val interval = DurationData(1, td.timePred.maxGrain.get)
+          Token(Repeat, repeat.copy(interval = interval))
+        case _ => None
+      }
     }
   )
 }

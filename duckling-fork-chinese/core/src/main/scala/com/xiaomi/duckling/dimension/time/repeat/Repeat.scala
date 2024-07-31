@@ -33,7 +33,7 @@ case object Repeat extends Dimension with Rules {
   override val dimDependents: List[Dimension] = List(TimeGrain, Duration, Time)
 }
 
-case class RepeatData(interval: Option[DurationData] = None,
+case class RepeatData(interval: Option[DurationData] = None, // 间隔，如果与其它的配合，表示外层间隔
                       n: Option[Int] = None,
                       start: Option[TimeData] = None,
                       workdayType: Option[WorkdayType] = None,
