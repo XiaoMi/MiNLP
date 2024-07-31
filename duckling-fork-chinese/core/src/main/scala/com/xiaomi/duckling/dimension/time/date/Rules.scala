@@ -410,7 +410,7 @@ trait Rules extends DimRules {
     prod = regexMatch {case text :: _ =>
       val m = WeekX.matcher(text)
       var pos = 0
-      val days = mutable.MutableList[Int]()
+      val days = mutable.Buffer[Int]()
       while (m.find(pos)) {
         val d = m.group(2) match {
           case "一" => 1
