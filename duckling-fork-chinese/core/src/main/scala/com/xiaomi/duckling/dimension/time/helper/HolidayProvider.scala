@@ -50,6 +50,7 @@ class LocalHolidayProvider extends HolidayProvider {
   val rulePeriodicHolidays: List[(Token, String, String)] = mkRuleHolidays(
     // Fixed dates, year over year
     List(
+      (monthDay(1, 10), "中国人民警察节", "中国人民警察节|人民警察节|中国警察节|警察节"),
       (monthDay(2, 7), "国际声援南非日", "国际声援南非日|声援南非日"),
       (monthDay(2, 15), "中国12亿人口日", "中国12亿人口日"),
       (monthDay(2, 21), "反对殖民主义斗争日", "反对殖民主义斗争日|反对殖民制度斗争日"),
@@ -140,7 +141,7 @@ class LocalHolidayProvider extends HolidayProvider {
       (monthDay(12, 12), "双十二", "双十二|双十二电商节"),
       (monthDay(12, 12), "西安事变纪念日", "西安事变纪念日"),
       (monthDay(12, 13), "南京大屠杀纪念日", "南京大屠杀纪念日"),
-      (monthDay(12, 13), "南京大屠杀死难者国家公祭日", "南京大屠杀死难者国家公祭日"),
+      (monthDay(12, 13), "南京大屠杀死难者国家公祭日", "南京大屠杀死难者国家公祭日|国家公祭日"),
       (monthDay(12, 2), "全国交通安全日", "全国交通安全日|交通安全日"),
       (monthDay(12, 20), "澳门回归纪念日", "澳门回归纪念日|澳门回归日"),
       (monthDay(12, 24), "平安夜", "平安夜"),
@@ -160,7 +161,7 @@ class LocalHolidayProvider extends HolidayProvider {
       (monthDay(3, 1), "国际海豹日", "国际海豹日|海豹日"),
       (monthDay(3, 12), "植树节", "中国植树节|植树节"),
       (monthDay(3, 14), "白色情人节", "白色情人节"),
-      (monthDay(3, 15), "国际消费者权益日", "国际消费者权益日|世界消费者权益日|消费者权益日|三一五"),
+      (monthDay(3, 15), "国际消费者权益日", "国际消费者权益日|世界消费者权益日|消费者权益日|三一五|消费者日"),
       (monthDay(3, 17), "中国国医节", "中国国医节|国医节"),
       (monthDay(3, 17), "圣帕特里克节", "圣帕特里克节"),
       (monthDay(3, 21), "世界森林日", "世界森林日|森林日"),

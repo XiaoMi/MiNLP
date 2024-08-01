@@ -355,10 +355,11 @@ object Types {
     }
 
     def withYear(y: Int): DuckDateTime = this.copy(date = date.withYear(y))
-
     def withMonth(m: Int): DuckDateTime = this.copy(date = date.withMonth(m))
-
     def withDayOfMonth(d: Int): DuckDateTime = this.copy(date = date.withDayOfMonth(d))
+    def withHour(h: Int): DuckDateTime = this.copy(time = time.withHour(h))
+    def withMinute(m: Int): DuckDateTime = this.copy(time = time.withMinute(m))
+    def withSecond(s: Int): DuckDateTime = this.copy(time = time.withSecond(s))
 
     def to(calendar: Calendar): DuckDateTime = {
       calendar match {

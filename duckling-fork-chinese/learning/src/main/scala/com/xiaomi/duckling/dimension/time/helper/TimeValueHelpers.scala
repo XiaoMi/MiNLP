@@ -1,6 +1,6 @@
 package com.xiaomi.duckling.dimension.time.helper
 
-import java.time.{LocalDateTime, LocalTime}
+import java.time.{LocalDate, LocalDateTime, LocalTime}
 
 import com.github.heqiao2010.lunar.LunarCalendar
 
@@ -10,6 +10,7 @@ import com.xiaomi.duckling.Types.{Context, ZoneCN}
 import com.xiaomi.duckling.dimension.time.enums._
 import com.xiaomi.duckling.dimension.time.enums.Grain._
 import com.xiaomi.duckling.dimension.time.Types._
+import com.xiaomi.duckling.ranking.Testing
 import com.xiaomi.duckling.ranking.Testing.testContext
 
 object TimeValueHelpers {
@@ -71,8 +72,12 @@ object TimeValueHelpers {
 
   def md(m: Int, d: Int): TimeValue = ymd(2013, m, d)
 
-  def yMdHms(y: Int = 2013, M: Int = 2, d: Int = 12, H: Int = 0, m: Int = 0, s: Int = 0, grain: Grain): TimeValue = {
-    datetime(LocalDateTime.of(y, M, d, H, m, s), grain)
+  def ymdhms(y: Int = 2013, M: Int = 2, d: Int = 12, h: Int = 0, m: Int = 0, s: Int = 0, grain: Grain, calendar: Calendar = Solar, holiday: Option[String] = None): TimeValue = {
+    val date = calendar match {
+      case Solar => SolarDate(LocalDate.of(y, M, d))
+      case Lunar(leap) => LunarDate(new LunarCalendar(y, M, d, leap))
+    }
+    datetime(DuckDateTime(date, LocalTime.of(h, m, s), Testing.testContext.referenceTime.getZone), grain, holiday)
   }
 
   def datetimeInterval(dt1: DuckDateTime, dt2: DuckDateTime, g: Grain, holiday: Option[String] = None,

@@ -52,6 +52,7 @@ object Examples extends DimExamples {
     (y(2013), List("今年", "这一年")),
     (y(2014), List("明年", "下一年")),
     (ymd(2013, 12, 30, calendar = Lunar(false)).copy(holiday = "除夕"), List("今年除夕", "大年三十", "年三十")),
+    (ymdhms(2013, 12, 30, 20, grain=Hour, calendar = Lunar(false)), List("除夕晚上八点")),
     (ymd(2021, 12, 29, calendar = Lunar(false), holiday = "除夕"), List("2021年除夕")), // 2021年没有大年三十
     (
       localDateTimeInterval(
@@ -148,8 +149,8 @@ object Examples extends DimExamples {
   val times = List(
     (hms(4, 30, 0), List("现在", "此时", "此刻", "当前", "4:30:00", "04点30分0秒")),
     (hm(15, 15), List("下午三点十五", "下午3:15", "15:15", "3:15pm", "3:15p.m", "下午三点一刻", "下午的三点一刻")),
-    (yMdHms(d=13, H=2, grain = Hour), List("晚上两点")),
-    (yMdHms(d=12, H=17, grain = Hour), List("晚上五点")),
+    (ymdhms(d=13, h=2, grain = Hour), List("晚上两点")),
+    (ymdhms(d=12, h=17, grain = Hour), List("晚上五点")),
     (hm(16, 40), List("十六时四十分", "十六点四十")),
     (hm(6, 10), List("六点十分", "六点一十")),
     (hms(4, 33, 0), List("过三分钟")),

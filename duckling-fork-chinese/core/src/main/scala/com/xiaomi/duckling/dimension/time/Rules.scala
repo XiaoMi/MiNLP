@@ -191,14 +191,17 @@ trait Rules extends DimRules {
           //          else if (td1.timeGrain == Day && td2.timeGrain == Hour) None
           else {
             val hint =
-              if (td1.timeGrain == Year && td2.hint == MonthOnly) YearMonth
+              if (td1.timePred.isInstanceOf[SequencePredicate]) Sequence
+              else if (td1.timeGrain == Year && td2.hint == MonthOnly) YearMonth
               else Intersect
             // 10号八点，需要去掉AMPM (今天是10号9点时，不应再出20点)
             // 今天8点，需要根据当前时间是出8/20点
             val _td2 = if (td1.hint == Hint.RecentNominal) td2 else removeAMPM(td2)
             val _td1 = FuzzyDayIntervals.enlarge(td1, options.timeOptions.beforeEndOfInterval)
-            val td = intersect(_td1, _td2).map(_.copy(hint = hint))
-            tt(td)
+            hint match {
+              case Sequence => sequenceProd(_td1, _td2)
+              case _ => tt(intersect(_td1, _td2).map(_.copy(hint = hint)))
+            }
           }
       }
     )
@@ -533,7 +536,7 @@ trait Rules extends DimRules {
         case _ =>
           if (td1.timeGrain >= td2.timeGrain) {
             val cal = calendar(td1, td2)
-            if (td1.timeGrain > td2.timeGrain && recentHint(td2.hint)) {
+            if (td1.timeGrain > td2.timeGrain && (td1.timePred.isInstanceOf[SequencePredicate] || recentHint(td2.hint))) {
               tt(
                 TimeData(
                   ReplacePartPredicate(td1, td2),

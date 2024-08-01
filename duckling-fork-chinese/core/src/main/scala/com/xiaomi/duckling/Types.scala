@@ -78,7 +78,8 @@ object Types {
 
   def and(ps: Predicate*): Predicate = {
     case token: Token =>
-      ps.forall(p => p.isDefinedAt(token) && p(token))
+      val result = ps.forall(p => p.isDefinedAt(token) && p(token))
+      result
   }
 
   def or(ps: Predicate*): Predicate = {
