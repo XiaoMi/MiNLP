@@ -244,7 +244,7 @@ package object time {
       val end =
         if (t2.end.isEmpty) None
         else if (t1.end.isEmpty) t2.end
-        else t2.end.map(d => copy(thisGrain, t1.end.get, t2.end.get))
+        else t2.end.map(copy(thisGrain, t1.end.get, _))
       val t = t2.copy(start = start, end = end)
       thisGrain.finer() match {
         case Some(g) => copyGrain(g, stopGrain, t1, t)
