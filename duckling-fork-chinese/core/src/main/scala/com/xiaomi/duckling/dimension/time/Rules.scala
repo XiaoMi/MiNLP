@@ -373,8 +373,7 @@ trait Rules extends DimRules {
                 case TimeOfDay(_, _) => Day
                 case _               => NoGrain
               }
-            } else if (g == Year && td.timeGrain == Month) Year
-            else NoGrain
+            } else g
           val coarseDate = cycleNth(g, sign * v, roundGrain)
           tt(intersect(coarseDate, td))
         } else None
