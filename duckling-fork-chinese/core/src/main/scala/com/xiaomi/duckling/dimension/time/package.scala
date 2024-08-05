@@ -191,24 +191,66 @@ package object time {
       t1 <- resolveTimeData(t, td1)
       t2 <- resolveTimeData(t, td2)
     } yield {
-      val to = (td1.timeGrain, td2.timeGrain) match {
-        case (Year, Month) => t2.copy(start = t2.start.withYear(t1.start.year))
-        case (Year, Day)   => t2.copy(start = t2.start.withYear(t1.start.year))
-        case (Month, Day) =>
-          t2.copy(start = t2.start.withMonth(t1.start.month).withYear(t1.start.year))
-        case (Day, NoGrain) => // 今天现在
-          t2.copy(
-            start = t2.start
-              .withYear(t1.start.year)
-              .withMonth(t1.start.month)
-              .withDayOfMonth(t1.start.dayOfMonth)
-          )
-        case _ => null
-      }
+      val to =
+        if (td2.timePred.maxGrain.nonEmpty && td1.timeGrain > td2.timePred.maxGrain.get) {
+          copyGrain(Year, td2.timePred.maxGrain.get, t1, t2)
+        } else {
+          (td1.timeGrain, td2.timeGrain) match {
+            case (Year, Month) => t2.copy(start = t2.start.withYear(t1.start.year))
+            case (Year, Day) => t2.copy(start = t2.start.withYear(t1.start.year))
+            case (Month, Day) =>
+              t2.copy(start = t2.start.withMonth(t1.start.month).withYear(t1.start.year))
+            case (Day, NoGrain) => // 今天现在
+              t2.copy(
+                start = t2.start
+                  .withYear(t1.start.year)
+                  .withMonth(t1.start.month)
+                  .withDayOfMonth(t1.start.dayOfMonth)
+              )
+            case _ => null
+          }
+        }
       if (to == null) EmptySeries
       else if (to.start.isBefore(t.start)) (Stream(to), Stream.empty)
       else (Stream.empty, Stream(to))
     }).getOrElse(EmptySeries)
+  }
+
+  def copy(grain: Grain, t1: DuckDateTime, t2: DuckDateTime): DuckDateTime = {
+    grain match {
+      case Grain.Minute => t2.withMinute(t1.minute)
+      case Grain.Hour => t2.withHour(t1.hour)
+      case Grain.Day => t2.withDayOfMonth(t1.dayOfMonth)
+      case Grain.Month => t2.withMonth(t1.month)
+      case Grain.Year => t2.withYear(t1.year)
+      case _ => t2
+    }
+  }
+
+  @scala.annotation.tailrec
+  def copyGrain(thisGrain: Grain, stopGrain: Grain, t1: TimeObject, t2: TimeObject): TimeObject = {
+    if (t1.start.date.isInstanceOf[LunarDate]) {
+      if (thisGrain >= Day && stopGrain < Day) {
+        val start = t2.start.copy(date = t1.start.date)
+        val end =
+          if (t2.end.isEmpty) None
+          else if (t1.end.isEmpty) t2.end
+          else t2.end.map(d => d.copy(date = t1.start.date))
+        val t = t2.copy(start = start, end = end)
+        copyGrain(Hour, stopGrain, t1, t)
+      } else t2
+    } else if (thisGrain > stopGrain) {
+      val start = copy(thisGrain, t1.start, t2.start)
+      val end =
+        if (t2.end.isEmpty) None
+        else if (t1.end.isEmpty) t2.end
+        else t2.end.map(copy(thisGrain, t1.end.get, _))
+      val t = t2.copy(start = start, end = end)
+      thisGrain.finer() match {
+        case Some(g) => copyGrain(g, stopGrain, t1, t)
+        case _ => t2
+      }
+    } else t2
   }
 
   @scala.annotation.tailrec

@@ -45,11 +45,11 @@ object Examples extends DimExamples {
         Hour)
     ), List("每个月五号的早上")),
     (RepeatValue(DurationData(1, Month), start = ymd(m = 3, d = 5)), List("每个月的五号")),
-    (RepeatValue(DurationData(1, Month), start = yMdHms(M = 3, d = 2, H = 14, grain = Hour)), List("每月2号下午2点")),
+    (RepeatValue(DurationData(1, Month), start = ymdhms(M = 3, d = 2, h = 14, grain = Hour)), List("每月2号下午2点")),
     (RepeatValue(DurationData(1, Week), start = (ymd(d = 13), Some(form.DayOfWeek))), List("每周三", "每个星期三")),
     (RepeatValue(DurationData(1, Day), start = (h(8), Some(form.TimeOfDay(Some(8), false)))), List("每天上午八点", "每个上午八点")),
     (RepeatValue(workdayType = NonWorkday), List("非工作日", "节假日")),
-    (RepeatValue(workdayType = Workday, start = (yMdHms(d = 13, H = 3, grain = Hour), Some(form.TimeOfDay(Some(3), false)))), List("工作日三点", "工作日每天三点", "每个工作日三点")),
+    (RepeatValue(workdayType = Workday, start = (ymdhms(d = 13, h = 3, grain = Hour), Some(form.TimeOfDay(Some(3), false)))), List("工作日三点", "工作日每天三点", "每个工作日三点")),
     (RepeatValue(workdayType = Workday, start = (datetimeInterval(
       new DuckDateTime(LocalDateTime.of(2013, 2, 12, 8, 0, 0)),
       new DuckDateTime(LocalDateTime.of(2013, 2, 12, 12, 0, 0)),
