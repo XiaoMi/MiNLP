@@ -170,6 +170,30 @@ trait Rules extends DimRules {
     }
   )
 
+  private def intersectToken(options: Options, td1: TimeData, td2: TimeData): Option[Token] = {
+    // 破除(y-m)-d和y-(m-d)均构造出来的问题
+    if (td1.hint == YearMonth && td2.hint == DayOnly) None
+    // 固定顺序，避免(y-m)-(d H-M-S) 以及(y)-(m-d H-M-S)出现
+    else if (td1.timeGrain > Day && td2.timeGrain < Day) None
+    // 避免多路解析 [2017年三月2号早上][10点半] 和 [2017年三月2号][早上10点半]
+    //          else if (td1.timeGrain == Day && td2.timeGrain == Hour) None
+    else {
+      val hint =
+        if (td1.timePred.isInstanceOf[SequencePredicate]) Sequence
+        else if (td1.timeGrain == Year && td2.hint == MonthOnly) YearMonth
+        else if (td2.hint == Hint.PartOfDay || td2.form.nonEmpty) Hint.PartOfDay
+        else Intersect
+      // 10号八点，需要去掉AMPM (今天是10号9点时，不应再出20点)
+      // 今天8点，需要根据当前时间是出8/20点
+      val _td2 = if (td1.hint == Hint.RecentNominal) td2 else removeAMPM(td2)
+      val _td1 = FuzzyDayIntervals.enlarge(td1, options.timeOptions.beforeEndOfInterval)
+      hint match {
+        case Sequence => sequenceProd(_td1, _td2)
+        case _ => tt(intersect(_td1, _td2).map(_.copy(hint = hint, form = td2.form)))
+      }
+    }
+  }
+
   val ruleIntersect =
     Rule(
       name = "intersect",
@@ -183,26 +207,7 @@ trait Rules extends DimRules {
           if td1.timeGrain > td2.timeGrain && !(td1.hint == Hint.Date && td2.hint == Hint.Date) ||
             // 上午的8-9点
             td1.timeGrain == td2.timeGrain && td1.timeGrain == Hour && isAPartOfDay(t1) && !isAPartOfDay(t2) =>
-          // 破除(y-m)-d和y-(m-d)均构造出来的问题
-          if (td1.hint == YearMonth && td2.hint == DayOnly) None
-          // 固定顺序，避免(y-m)-(d H-M-S) 以及(y)-(m-d H-M-S)出现
-          else if (td1.timeGrain > Day && td2.timeGrain < Day) None
-          // 避免多路解析 [2017年三月2号早上][10点半] 和 [2017年三月2号][早上10点半]
-          //          else if (td1.timeGrain == Day && td2.timeGrain == Hour) None
-          else {
-            val hint =
-              if (td1.timePred.isInstanceOf[SequencePredicate]) Sequence
-              else if (td1.timeGrain == Year && td2.hint == MonthOnly) YearMonth
-              else Intersect
-            // 10号八点，需要去掉AMPM (今天是10号9点时，不应再出20点)
-            // 今天8点，需要根据当前时间是出8/20点
-            val _td2 = if (td1.hint == Hint.RecentNominal) td2 else removeAMPM(td2)
-            val _td1 = FuzzyDayIntervals.enlarge(td1, options.timeOptions.beforeEndOfInterval)
-            hint match {
-              case Sequence => sequenceProd(_td1, _td2)
-              case _ => tt(intersect(_td1, _td2).map(_.copy(hint = hint)))
-            }
-          }
+        intersectToken(options, td1, td2)
       }
     )
 
@@ -215,15 +220,7 @@ trait Rules extends DimRules {
         if td1.timeGrain > td2.timeGrain ||
           // 上午的8-9点
           td1.timeGrain == td2.timeGrain && td1.timeGrain == Hour && isAPartOfDay(t1) && !isAPartOfDay(t2) =>
-        if (td1.timeGrain > Day && td2.timeGrain < Day) None
-        else {
-          val hint =
-            if (td1.timeGrain == Year && td2.hint == MonthOnly) YearMonth
-            else NoHint
-          val _td1 = FuzzyDayIntervals.enlarge(td1, options.timeOptions.beforeEndOfInterval)
-          val td = intersect(_td1, removeAMPM(td2)).map(_.copy(hint = hint))
-          tt(td)
-        }
+        intersectToken(options, td1, td2)
     }
   )
 

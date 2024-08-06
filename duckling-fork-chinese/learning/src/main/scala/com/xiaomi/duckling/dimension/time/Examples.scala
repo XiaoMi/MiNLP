@@ -344,6 +344,15 @@ object Examples extends DimExamples {
       ),
       List("周一早上", "周一早晨", "周一清晨", "礼拜一早上", "礼拜一早晨", "下周一早上")
     ),
+    (
+      localDateTimeInterval(
+        LocalDateTime.of(2013, 2, 13, 4, 0, 0),
+        LocalDateTime.of(2013, 2, 13, 12, 0, 0),
+        Hour,
+        partOfDay = "早上"
+      ),
+      List("明天早上", "明天的早上")
+    ),
     (ymd(2013, 10, 7), List("十月第一个星期一", "十月的第一个星期一")),
     (
       localDateTimeInterval(
