@@ -18,7 +18,9 @@ package com.xiaomi.duckling.dimension.time.date
 
 import scalaz.std.string.parseInt
 import java.time.LocalDate
+import java.util.regex.Pattern
 
+import scala.collection.mutable
 import scala.util.Try
 
 import com.xiaomi.duckling.Types._
@@ -33,7 +35,7 @@ import com.xiaomi.duckling.dimension.time.duration.{isADecade, Duration, Duratio
 import com.xiaomi.duckling.dimension.time.enums.Grain._
 import com.xiaomi.duckling.dimension.time.enums.Hint.{NoHint, RecentNominal, YearMonth}
 import com.xiaomi.duckling.dimension.time.enums.IntervalType.{Closed, Open}
-import com.xiaomi.duckling.dimension.time.enums.{Grain, Hint}
+import com.xiaomi.duckling.dimension.time.enums.{Grain, Hint, IntervalType}
 import com.xiaomi.duckling.dimension.time.helper.TimeDataHelpers._
 import com.xiaomi.duckling.dimension.time.predicates.{EndOfGrainPredicate, SequencePredicate, TimeDatePredicate, _}
 import com.xiaomi.duckling.dimension.time.{GrainWrapper, TimeData}
@@ -396,6 +398,40 @@ trait Rules extends DimRules {
             Token(Date, td.copy(hint = hint))
           }
         }
+    }
+  )
+
+  private val WeekX = Pattern.compile("(周|星期)([一二三四五六日天])")
+  private val WeekDayStr = "12345671234567"
+
+  val ruleWeekXyz = Rule(
+    name = "周一周二",
+    pattern = List("((周|星期)[一二三四五六日天]){2,}".regex),
+    prod = regexMatch {case text :: _ =>
+      val m = WeekX.matcher(text)
+      var pos = 0
+      val days = mutable.Buffer[Int]()
+      while (m.find(pos)) {
+        val d = m.group(2) match {
+          case "一" => 1
+          case "二" => 2
+          case "三" => 3
+          case "四" => 4
+          case "五" => 5
+          case "六" => 6
+          case "日" | "天" => 7
+        }
+        days += d
+        pos = m.end()
+      }
+      WeekDayStr.indexOf(days.mkString("")) match {
+        case -1 => None
+        case _ =>
+          val td = TimeData(
+          TimeIntervalsPredicate(IntervalType.Closed, TimeDatePredicate(dayOfWeek = days.head), TimeDatePredicate(dayOfWeek = days.last), beforeEndOfInterval = true),
+          timeGrain = Day)
+          Token(Date, td)
+      }
     }
   )
 }

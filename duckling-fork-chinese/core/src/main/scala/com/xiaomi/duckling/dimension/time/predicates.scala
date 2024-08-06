@@ -187,6 +187,11 @@ object predicates {
     case _ => false
   }
 
+  val isInterval: Predicate = {
+    case Token(Time, td: TimeData) => td.timePred.isInstanceOf[TimeIntervalsPredicate]
+    case _ => false
+  }
+
   val isIntervalOfDay: Predicate = {
     case Token(Time, td: TimeData) =>
       td.form match {

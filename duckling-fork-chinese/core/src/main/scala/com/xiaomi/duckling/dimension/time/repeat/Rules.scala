@@ -22,11 +22,12 @@ import com.xiaomi.duckling.Types._
 import com.xiaomi.duckling.dimension.DimRules
 import com.xiaomi.duckling.dimension.implicits._
 import com.xiaomi.duckling.dimension.matcher.GroupMatch
-import com.xiaomi.duckling.dimension.matcher.Prods.{regexMatch, singleRegexMatch}
-import com.xiaomi.duckling.dimension.time.{form, Time, TimeData}
+import com.xiaomi.duckling.dimension.matcher.Prods.regexMatch
+import com.xiaomi.duckling.dimension.time.{form, GrainWrapper, Time, TimeData}
 import com.xiaomi.duckling.dimension.time.duration.{Duration, DurationData}
 import com.xiaomi.duckling.dimension.time.enums.{Grain, Hint}
-import com.xiaomi.duckling.dimension.time.predicates.{isAPartOfDay, isATimeOfDay, isHint, isNotLatent, isTimeDatePredicate, IntersectTimePredicate, TimeDatePredicate, TimeIntervalsPredicate}
+import com.xiaomi.duckling.dimension.time.helper.TimeDataHelpers.intersect
+import com.xiaomi.duckling.dimension.time.predicates._
 
 trait Rules extends DimRules with LazyLogging {
   /**
@@ -90,10 +91,12 @@ trait Rules extends DimRules with LazyLogging {
     }
   )
 
+  private val predicateEveryGrain = "每(一个?|个)?(年度?|月|周|星期|天|小时|分钟)的?".regex
+
   val ruleEveryGrainDatetime = Rule(
     name = "<every> <grain> <datetime>",
     pattern = List(
-      "每(一个?|个)?(年度?|月|周|星期|天|小时|分钟)的?".regex,
+      predicateEveryGrain,
       and(isDimension(Time), isNotLatent).predicate),
     prod = tokens {
       case Token(_, GroupMatch(_ :: _ :: grainToken :: _)) :: Token(_, td: TimeData) :: _
@@ -153,6 +156,56 @@ trait Rules extends DimRules with LazyLogging {
     pattern = List(isOnlyWorkdaysType.predicate, "的".regex, isHourTimes.predicate),
     prod = tokens { case Token(Repeat, rd: RepeatData) :: _ :: Token(Time, td: TimeData) :: _ =>
       workdaysTime(rd, td)
+    }
+  )
+
+  // 周一到周五早上八点
+  val ruleIntervalTime = Rule(
+    name = "<interval> <time/interval>",
+    pattern = List(isInterval.predicate, isDimension(Time).predicate),
+    prod = tokens { case Token(Time, outer: TimeData) :: Token(Time, inner: TimeData):: _ if outer.timeGrain > inner.timeGrain =>
+      val oInterval = outer.timePred.asInstanceOf[TimeIntervalsPredicate]
+      // start
+      val start = intersect(inner, TimeData(oInterval.p1, timeGrain=outer.timeGrain))
+      Token(Repeat, RepeatData(start = start, repeatNFromInterval = outer))
+    }
+  )
+
+  // 周一到周五早上的八点
+  val ruleIntervalTime1 = Rule(
+    name = "<interval> 的 <time/interval>",
+    pattern = List(isInterval.predicate, "的".regex, isDimension(Time).predicate),
+    prod = tokens { case Token(Time, outer: TimeData) :: _ :: Token(Time, inner: TimeData):: _ if outer.timeGrain > inner.timeGrain =>
+      val oInterval = outer.timePred.asInstanceOf[TimeIntervalsPredicate]
+      val start = intersect(inner.copy(hint = Hint.NoHint), TimeData(oInterval.p1, timeGrain=outer.timeGrain).copy(hint = Hint.NoHint))
+      Token(Repeat, RepeatData(start = start, repeatNFromInterval = outer))
+    }
+  )
+
+  val ruleEveryRepeat = Rule(
+    name = "每 x <repeat>",
+    pattern = List(predicateEveryGrain, isDimension(Repeat).predicate),
+    prod = tokens { case Token(_, GroupMatch(_ :: _ :: grainToken :: _)) :: Token(_, repeat: RepeatData):: _ =>
+      val grainHint: Option[Grain] = toGrain(grainToken)
+      (grainHint, repeat.repeatNFromInterval) match {
+        case (Some(everyGrain), Some(td)) if everyGrain >= td.timeGrain =>
+          val interval = DurationData(1, grainHint.getOrElse(everyGrain))
+          Token(Repeat, repeat.copy(interval = interval))
+        case _ => None
+      }
+    }
+  )
+
+  val ruleEveryRepeat1 = Rule(
+    name = "每 <repeat>",
+    pattern = List("每个?".regex, isDimension(Repeat).predicate),
+    prod = tokens { case _ :: Token(_, repeat: RepeatData):: _ =>
+      repeat.repeatNFromInterval match {
+        case Some(td) if td.timePred.maxGrain.isDefined =>
+          val interval = DurationData(1, td.timePred.maxGrain.get)
+          Token(Repeat, repeat.copy(interval = interval))
+        case _ => None
+      }
     }
   )
 }
