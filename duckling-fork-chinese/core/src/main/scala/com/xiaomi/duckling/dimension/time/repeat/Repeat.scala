@@ -85,6 +85,11 @@ case class RepeatValue(interval: Option[DurationData] = None,
   /**
    * 参考了 ISO 8601, Repeat = R[n]/[interval form]/Duration
    * 其中 interval form = a/b, /b, a/,
+   * 进行细化扩展
+   * Repeat_[time/interval grain 时间表达本身的粒度]_[time/interval 时间或区间表达]_{outer period 外层重复的间隔}_{n x inner_period 内层循环的次数和粒度}
+   * inner_period = 'n' inner repeat grain
+   * 比如每周三到周五的早上 => Repeat_Hour_2024-08-07T08:00:00/2024-08-07T12:00:00_P1W_3P1D
+   *
    * @return
    */
   override def schema: Option[String] = {
