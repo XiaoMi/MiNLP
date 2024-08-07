@@ -25,7 +25,7 @@ import com.xiaomi.duckling.dimension.time.{form, TimeValue}
 import com.xiaomi.duckling.dimension.time.duration.DurationData
 import com.xiaomi.duckling.dimension.time.enums.Grain._
 import com.xiaomi.duckling.dimension.time.Types.DuckDateTime
-import com.xiaomi.duckling.dimension.time.form.Form
+import com.xiaomi.duckling.dimension.time.form.{Form, PartOfDay, TimeOfDay}
 import com.xiaomi.duckling.dimension.time.helper.TimeValueHelpers._
 import com.xiaomi.duckling.dimension.time.repeat.WorkdayType.{NonWorkday, Workday}
 
@@ -47,13 +47,13 @@ object Examples extends DimExamples {
     (RepeatValue(DurationData(15, Minute, schema = "PT15M")), List("每隔15分钟", "隔15分钟")),
     (RepeatValue(
       DurationData(1, Month),
-      start = datetimeInterval(
+      start = Some(datetimeInterval(
         new DuckDateTime(LocalDateTime.of(2013, 3, 5, 4, 0, 0)),
         new DuckDateTime(LocalDateTime.of(2013, 3, 5, 12, 0, 0)),
-        Hour)
+        Hour, partOfDay = "早上"), PartOfDay("早上"))
     ), List("每个月五号的早上")),
     (RepeatValue(DurationData(1, Month), start = ymd(m = 3, d = 5)), List("每个月的五号")),
-    (RepeatValue(DurationData(1, Month), start = ymdhms(M = 3, d = 2, h = 14, grain = Hour)), List("每月2号下午2点")),
+    (RepeatValue(DurationData(1, Month), start = Some(ymdhms(M = 3, d = 2, h = 14, grain = Hour), TimeOfDay(14, false))), List("每月2号下午2点")),
     (RepeatValue(DurationData(1, Week), start = (ymd(d = 13), Some(form.DayOfWeek))), List("每周三", "每个星期三")),
     (RepeatValue(DurationData(1, Day), start = (h(8), Some(form.TimeOfDay(Some(8), false)))), List("每天上午八点", "每个上午八点")),
     (RepeatValue(workdayType = NonWorkday), List("非工作日", "节假日")),
