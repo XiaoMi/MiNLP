@@ -34,7 +34,7 @@ import com.xiaomi.duckling.dimension.time.enums.{Grain, Hint, IntervalDirection}
 import com.xiaomi.duckling.dimension.time.enums.Grain._
 import com.xiaomi.duckling.dimension.time.enums.Hint._
 import com.xiaomi.duckling.dimension.time.enums.IntervalType.{Closed, Open}
-import com.xiaomi.duckling.dimension.time.form.{PartOfDay, TimeOfDay, Weekend}
+import com.xiaomi.duckling.dimension.time.form.{DayOfWeek, PartOfDay, TimeOfDay, Weekend}
 import com.xiaomi.duckling.dimension.time.grain.{GrainData, TimeGrain}
 import com.xiaomi.duckling.dimension.time.helper.TimeDataHelpers._
 import com.xiaomi.duckling.dimension.time.predicates._
@@ -183,13 +183,18 @@ trait Rules extends DimRules {
         else if (td1.timeGrain == Year && td2.hint == MonthOnly) YearMonth
         else if (td2.hint == Hint.PartOfDay || td2.form.nonEmpty) Hint.PartOfDay
         else Intersect
+      val form = (td1.form, td2.form) match {
+        case (Some(PartOfDay(_)), Some(tod: TimeOfDay)) => Some(tod.copy(is12H = false))
+        case (Some(DayOfWeek), Some(_: TimeOfDay)) => td2.form
+        case _ => None
+      }
       // 10号八点，需要去掉AMPM (今天是10号9点时，不应再出20点)
       // 今天8点，需要根据当前时间是出8/20点
       val _td2 = if (td1.hint == Hint.RecentNominal) td2 else removeAMPM(td2)
       val _td1 = FuzzyDayIntervals.enlarge(td1, options.timeOptions.beforeEndOfInterval)
       hint match {
         case Sequence => sequenceProd(_td1, _td2)
-        case _ => tt(intersect(_td1, _td2).map(_.copy(hint = hint, form = td2.form)))
+        case _ => tt(intersect(_td1, _td2).map(_.copy(hint = hint, form = form)))
       }
     }
   }
