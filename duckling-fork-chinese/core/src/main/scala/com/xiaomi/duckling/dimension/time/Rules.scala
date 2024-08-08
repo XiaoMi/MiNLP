@@ -186,6 +186,7 @@ trait Rules extends DimRules {
       val form = (td1.form, td2.form) match {
         case (Some(PartOfDay(_)), Some(tod: TimeOfDay)) => Some(tod.copy(is12H = false))
         case (Some(DayOfWeek), Some(_: TimeOfDay)) => td2.form
+        case (None, _) => td2.form
         case _ => None
       }
       // 10号八点，需要去掉AMPM (今天是10号9点时，不应再出20点)
