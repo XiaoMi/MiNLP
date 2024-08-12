@@ -171,6 +171,7 @@ trait Rules extends DimRules {
   )
 
   private def intersectToken(options: Options, td1: TimeData, td2: TimeData): Option[Token] = {
+    println(td1, td2)
     // 破除(y-m)-d和y-(m-d)均构造出来的问题
     if (td1.hint == YearMonth && td2.hint == DayOnly) None
     // 固定顺序，避免(y-m)-(d H-M-S) 以及(y)-(m-d H-M-S)出现
@@ -221,8 +222,7 @@ trait Rules extends DimRules {
     name = "intersect: <x> 的 <y>",
     // "一日"单独是latent，但是可以参与组合
     pattern = List(isNotLatent.predicate, "的".regex, or(or(isNotLatent, isLatent0oClockOfDay), isADayOfMonth).predicate),
-    prod = {
-      case (options, (t1@Token(Time, td1: TimeData)) :: _ :: (t2@Token(Time, td2: TimeData)) :: _)
+    prod = {case (options, (t1@Token(Time, td1: TimeData)) :: _ :: (t2@Token(Time, td2: TimeData)) :: _)
         if td1.timeGrain > td2.timeGrain ||
           // 上午的8-9点
           td1.timeGrain == td2.timeGrain && td1.timeGrain == Hour && isAPartOfDay(t1) && !isAPartOfDay(t2) =>

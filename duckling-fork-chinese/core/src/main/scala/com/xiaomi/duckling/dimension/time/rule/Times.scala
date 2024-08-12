@@ -108,6 +108,17 @@ object Times {
     }
   )
 
+  val ruleDimTimePartOfDay1 = Rule(
+    name = "<dim time> 的 <part-of-day>",
+    pattern = List(isADayOfMonth.predicate, "的".regex, and(isAPartOfDay, isNotLatent).predicate),
+    prod = tokens {
+      case Token(Time, td1: TimeData) :: _ :: Token(Time, td2: TimeData) :: _ =>
+        for (td <- intersect(td1, td2)) yield {
+          tt(td.copy(form = td2.form, hint = Hint.PartOfDayAtLast))
+        }
+    }
+  )
+
   val rulePartOfDayDimTime = Rule(
     name = "<part-of-day> <dim time>",
     pattern = List(isAPartOfDay.predicate, isNotLatent.predicate),
@@ -192,6 +203,7 @@ object Times {
     ruleTimeOfDayOClock,
     ruleIntegerLatentTimeOfDay,
     ruleDimTimePartOfDay,
+    ruleDimTimePartOfDay1,
     ruleHhmmssCN_TimeOfDay,
     // ruleRelativeMinutesAfterPastIntegerOClockOfDay,
     ruleRelativeMinutesAfterPastIntegerHourOfDay,
