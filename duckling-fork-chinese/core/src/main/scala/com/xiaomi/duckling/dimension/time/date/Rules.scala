@@ -336,6 +336,37 @@ trait Rules extends DimRules {
         }
   })
 
+  def intersectProd(td1: TimeData, td2: TimeData) : Option[Token] = {
+    // 破除(y-m)-d和y-(m-d)均构造出来的问题
+    if (td1.hint == YearMonth && td2.hint == Hint.DayOnly) None
+    // 固定顺序，避免(y-m)-(d H-M-S) 以及(y)-(m-d H-M-S)出现
+    else if (td1.timeGrain > Day && td2.timeGrain < Day) None
+    // 避免多路解析 [2017年三月2号早上][10点半] 和 [2017年三月2号][早上10点半]
+    //          else if (td1.timeGrain == Day && td2.timeGrain == Hour) None
+    else {
+      // 十月不能与十月一日求交
+      val isAlreadySet = td2.timePred match {
+        case tdp: TimeDatePredicate =>
+          td1.timeGrain match {
+            case Year => tdp.year.nonEmpty
+            case Month => tdp.month.nonEmpty
+            case Day => tdp.dayOfMonth.nonEmpty
+            case _ => true
+          }
+        case _ => false
+      }
+      if (isAlreadySet) None
+      else {
+        val hint =
+          if (td1.timeGrain == Year && td2.hint == Hint.MonthOnly) YearMonth
+          else NoHint
+        for (td <- intersect(td1, td2)) yield {
+          Token(Date, td.copy(hint = hint))
+        }
+      }
+    }
+  }
+
   val ruleIntersect =
     Rule(
       name = "dates: intersect",
@@ -347,34 +378,7 @@ trait Rules extends DimRules {
       prod = tokens {
         case Token(Date, td1: TimeData) :: Token(Date, td2: TimeData) :: _
             if td1.timeGrain > td2.timeGrain =>
-          // 破除(y-m)-d和y-(m-d)均构造出来的问题
-          if (td1.hint == YearMonth && td2.hint == Hint.DayOnly) None
-          // 固定顺序，避免(y-m)-(d H-M-S) 以及(y)-(m-d H-M-S)出现
-          else if (td1.timeGrain > Day && td2.timeGrain < Day) None
-          // 避免多路解析 [2017年三月2号早上][10点半] 和 [2017年三月2号][早上10点半]
-          //          else if (td1.timeGrain == Day && td2.timeGrain == Hour) None
-          else {
-            // 十月不能与十月一日求交
-            val isAlreadySet = td2.timePred match {
-              case tdp: TimeDatePredicate =>
-                td1.timeGrain match {
-                  case Year => tdp.year.nonEmpty
-                  case Month => tdp.month.nonEmpty
-                  case Day => tdp.dayOfMonth.nonEmpty
-                  case _ => true
-                }
-              case _ => false
-            }
-            if (isAlreadySet) None
-            else {
-              val hint =
-                if (td1.timeGrain == Year && td2.hint == Hint.MonthOnly) YearMonth
-                else NoHint
-              for (td <- intersect(td1, td2)) yield {
-                Token(Date, td.copy(hint = hint))
-              }
-            }
-          }
+          intersectProd(td1, td2)
       }
     )
 
@@ -389,15 +393,7 @@ trait Rules extends DimRules {
     prod = tokens {
       case Token(Date, td1: TimeData) :: _ :: Token(Date, td2: TimeData) :: _
           if td1.timeGrain > td2.timeGrain =>
-        if (td1.timeGrain > Day && td2.timeGrain < Day) None
-        else {
-          val hint =
-            if (td1.timeGrain == Year && td2.hint == Hint.MonthOnly) YearMonth
-            else NoHint
-          for (td <- intersect(td1, td2)) yield {
-            Token(Date, td.copy(hint = hint))
-          }
-        }
+        intersectProd(td1, td2)
     }
   )
 

@@ -10,6 +10,8 @@ class FormTest extends UnitSpec {
   describe("Form") {
 
     val cases = Table[String, Option[Form]](("query", "form")
+      , ("周五的上午", PartOfDay("上午"))
+      , ("周五上午", PartOfDay("上午"))
       , ("每个月五号的早上", PartOfDay("早上"))
       , ("23号8点", TimeOfDay(8, true))
       , ("23号上午8点", TimeOfDay(8, false))
