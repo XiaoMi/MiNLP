@@ -72,7 +72,7 @@ object Dependencies {
   lazy val jlineJansi = "org.jline" % "jline-terminal-jansi" % "3.21.0"
   lazy val config = "com.typesafe" % "config" % "1.3.4"
   lazy val guava = "com.google.guava" % "guava" % "30.1.1-jre"
-  lazy val lombok = "org.projectlombok" % "lombok" % "1.18.24" % Provided
+  lazy val lombok = "org.projectlombok" % "lombok" % "1.18.30" % Provided
   lazy val httpclient = "org.apache.httpcomponents" % "httpclient" % "4.5.13"
   lazy val java8 = "org.scala-lang.modules" %% "scala-java8-compat" % "1.0.2"
   lazy val lunar = "com.github.heqiao2010" % "lunar" % "1.5"

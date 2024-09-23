@@ -171,7 +171,6 @@ trait Rules extends DimRules {
   )
 
   private def intersectToken(options: Options, td1: TimeData, td2: TimeData): Option[Token] = {
-    println(td1, td2)
     // 破除(y-m)-d和y-(m-d)均构造出来的问题
     if (td1.hint == YearMonth && td2.hint == DayOnly) None
     // 固定顺序，避免(y-m)-(d H-M-S) 以及(y)-(m-d H-M-S)出现

@@ -162,7 +162,7 @@ trait Rules extends DimRules with LazyLogging {
   // 周一到周五早上八点
   val ruleIntervalTime = Rule(
     name = "<interval> <time/interval>",
-    pattern = List(isInterval.predicate, isDimension(Time).predicate),
+    pattern = List(isInterval.predicate, and(isDimension(Time), isNotLatent).predicate),
     prod = tokens { case Token(Time, outer: TimeData) :: Token(Time, inner: TimeData):: _
       if outer.timeGrain > inner.timeGrain && (inner.timePred.maxGrain.isEmpty || outer.timeGrain > inner.timePred.maxGrain.get) =>
       val oInterval = outer.timePred.asInstanceOf[TimeIntervalsPredicate]
