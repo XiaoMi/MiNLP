@@ -180,7 +180,7 @@ object Engine extends LazyLogging {
       val p :: ps = rule.pattern
       val newRule = rule.copy(pattern = ps)
       if (verboseMatch) {
-        logger.info(s"apply rule of: ${rule.name}")
+        logger.info(s"match first - apply rule of: ${rule.name}")
       }
       val valid = lookupItem(sentence, p, stash, position)
       valid.map(mkMatch(route, newRule))
