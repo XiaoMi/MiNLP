@@ -131,8 +131,8 @@ object TimePredicateHelpers {
                    notImmediate: Boolean,
                    cyclicPred: TimePredicate,
                    basePred: TimePredicate): TimePredicate = {
-    def f(t: TimeObject, ctx: TimeContext): Option[TimeObject] = {
-      val (past, future) = runPredicate(cyclicPred)(t, ctx)
+    def f(t: TimeObject, ctx: TimeContext, options: Options): Option[TimeObject] = {
+      val (past, future) = runPredicate(cyclicPred)(t, ctx, null)
       val rest = if (n >= 0) {
         future match {
           case ahead #:: _ if notImmediate && timeBefore(ahead, t) => future.drop(n + 1)
@@ -151,7 +151,7 @@ object TimePredicateHelpers {
   def timeCycle(grain: Grain): CycleSeriesPredicate = timeCycle(grain, grain)
 
   def timeCycle(grain: Grain, roundGrain: Grain, step: Int = 1): CycleSeriesPredicate = {
-    CycleSeriesPredicate((t: TimeObject, _: TimeContext) => {
+    CycleSeriesPredicate((t: TimeObject, _: TimeContext, _: Options) => {
       timeSequence(grain, step, if (roundGrain != NoGrain) timeRound(t, roundGrain) else t)
     }, step, grain)
   }
@@ -160,10 +160,10 @@ object TimePredicateHelpers {
     * Takes `n` cycles of `f`
     */
   def takeN(literalN: Int, notImmediate: Boolean, cycleSP: CycleSeriesPredicate): TimePredicate = {
-    def series(t: TimeObject, context: TimeContext) = {
+    def series(t: TimeObject, context: TimeContext, options: Options) = {
       val baseTime = context.refTime
       // 确定起点
-      val (past, future) = runPredicate(cycleSP)(baseTime, context)
+      val (past, future) = runPredicate(cycleSP)(baseTime, context, options)
       val fut = future match {
         case ahead #:: rest if notImmediate && timeIntersect(ahead)(baseTime).nonEmpty => rest
         case _                                                                         => future
@@ -200,8 +200,8 @@ object TimePredicateHelpers {
     * 0 is the first element in the future
     */
   def takeNth(n: Int, notImmediate: Boolean, f: TimePredicate): TimePredicate = {
-    val series = (t: TimeObject, context: TimeContext) => {
-      val (past, future) = runPredicate(f)(context.refTime, context)
+    val series = (t: TimeObject, context: TimeContext, options: Options) => {
+      val (past, future) = runPredicate(f)(context.refTime, context, options)
       val rest = if (n >= 0) {
         future match {
           case Stream.Empty => Stream.Empty
@@ -232,7 +232,7 @@ object TimePredicateHelpers {
   }
 
   def solarTermPredicate(term: String): SeriesPredicate = {
-    val series: SeriesPredicateF = (t: TimeObject, context: TimeContext) => {
+    val series: SeriesPredicateF = (t: TimeObject, context: TimeContext, options: Options) => {
       if (!containSolarTerm(t.start.year, term)) (Stream.empty, Stream.empty)
       else {
         def f(step: Int)(to: TimeObject): TimeObject = {
