@@ -129,7 +129,7 @@ case class TimeData(timePred: TimePredicate,
       || hint != Hint.Recent && !options.timeOptions.alwaysInFuture)
     val valueOpt =
       try {
-        resolveTimeData(refTime, this, reverseTake)
+        resolveTimeData(refTime, this, reverseTake, options)
       } catch {
         case e: java.time.DateTimeException =>
           logger.error(s"time resolve failed with DateTimeException [${e.getMessage}]")
