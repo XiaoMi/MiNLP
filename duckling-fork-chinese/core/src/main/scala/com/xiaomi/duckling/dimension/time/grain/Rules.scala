@@ -41,7 +41,7 @@ trait Rules extends DimRules {
     case (name, regexPattern, grain) =>
       Rule(name = name, pattern = List(regexPattern.regex), prod = singleRegexMatch {
         case s =>
-          Token(TimeGrain, GrainData(grain, latentExpr.contains(s)))
+          Token(TimeGrain, GrainData(grain, latentExpr.contains(s), s))
       })
   }
 }

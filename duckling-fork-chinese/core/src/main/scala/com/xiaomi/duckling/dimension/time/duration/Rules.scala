@@ -43,7 +43,7 @@ trait Rules extends DimRules {
   }
 
   val tp: TokensProduction = {
-    case t1 :: Token(TimeGrain, GrainData(g, latent)) :: _ =>
+    case t1 :: Token(TimeGrain, GrainData(g, latent, _)) :: _ =>
       if (isDimension(UnitNumber)(t1) && !compatibleWithUnitNumber(g)) None
       else {
         if (isDimension(Numeral)(t1) && g == Month) None
@@ -95,7 +95,7 @@ trait Rules extends DimRules {
     name = "few <unit-of-duration>",
     pattern = List("几个?".regex, isDimension(TimeGrain).predicate),
     prod = optTokens {
-      case (options: Options, _ :: Token(TimeGrain, GrainData(g, _)) :: _) if options.timeOptions.durationFuzzyOn =>
+      case (options: Options, _ :: Token(TimeGrain, GrainData(g, _, _)) :: _) if options.timeOptions.durationFuzzyOn =>
         Token(Duration,
           DurationData(
             options.timeOptions.durationFuzzyValue, g,
@@ -118,7 +118,7 @@ trait Rules extends DimRules {
     name = "number.number grain",
     pattern = List("(\\d+)\\.(\\d+)".regex, isDimension(TimeGrain).predicate),
     prod = tokens {
-      case Token(_, GroupMatch(_ :: integer :: decimal :: _)) :: Token(_, GrainData(g, false)) :: _ =>
+      case Token(_, GroupMatch(_ :: integer :: decimal :: _)) :: Token(_, GrainData(g, false, _)) :: _ =>
         (for {
           i <- parseInt(integer).toOption
           d <- parseInt(decimal).toOption
@@ -144,7 +144,7 @@ trait Rules extends DimRules {
     name = "half a <time-grain>",
     pattern = List("半个?".regex, isDimension(TimeGrain).predicate),
     prod = tokens {
-      case _ :: Token(TimeGrain, GrainData(grain, _)) :: _ =>
+      case _ :: Token(TimeGrain, GrainData(grain, _, _)) :: _ =>
         for (d <- timesOneAndAHalf(grain, 0)) yield Token(Duration, d)
     }
   )
@@ -170,7 +170,7 @@ trait Rules extends DimRules {
     name = "<natural> half <unit-of-duration>",
     pattern = List(isDimension(UnitNumber).predicate, "半".regex, isDimension(TimeGrain).predicate),
     prod = tokens {
-      case t1 :: _ :: Token(TimeGrain, GrainData(g, _)) :: _ =>
+      case t1 :: _ :: Token(TimeGrain, GrainData(g, _, _)) :: _ =>
         for {
           i <- getIntValue(t1)
           d <- timesOneAndAHalf(g, i.toInt)
@@ -203,7 +203,7 @@ trait Rules extends DimRules {
       isNotLatentDuration.predicate
     ),
     prod = tokens {
-      case t1 :: Token(TimeGrain, GrainData(g, _)) :: _ :: Token(_, dd@DurationData(_, dg, _, _, _)) :: _
+      case t1 :: Token(TimeGrain, GrainData(g, _, _)) :: _ :: Token(_, dd@DurationData(_, dg, _, _, _)) :: _
         if g > dg && g != Month =>
         for (i <- getIntValue(t1)) yield Token(Duration, DurationData(i.toInt, g, schema = durationSchema(i.toInt.toString, g)) + dd)
     }
@@ -224,8 +224,8 @@ trait Rules extends DimRules {
       isDimension(TimeGrain).predicate
     ),
     prod = tokens {
-      case t1 :: Token(TimeGrain, GrainData(g0, _)) :: Token(DigitSequence, DigitSequenceData(s, _, _)) :: Token(TimeGrain, GrainData(g1, _)) :: _
-        if g0 > g1 =>
+      case t1 :: Token(TimeGrain, GrainData(g0, _, raw)) :: Token(DigitSequence, DigitSequenceData(s, _, _)) :: Token(TimeGrain, GrainData(g1, _, _)) :: _
+        if g0 > g1 && raw != "点" =>
         for (i <- getIntValue(t1)) yield Token(Duration, DurationData(i.toInt, g0, schema = durationSchema(i.toString, g0)) + DurationData(s.toInt, g1, schema = durationSchema(s.toInt.toString, g1)))
     }
   )

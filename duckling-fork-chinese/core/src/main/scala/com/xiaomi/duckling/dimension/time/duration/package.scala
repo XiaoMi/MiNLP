@@ -60,7 +60,7 @@ package object duration {
   }
 
   def isMonth: Predicate = {
-    case Token(TimeGrain, GrainData(Month, _)) => true
+    case Token(TimeGrain, GrainData(Month, _, _)) => true
   }
 
   def isNotLatentDuration: Predicate = {
@@ -72,7 +72,7 @@ package object duration {
   }
 
   def isNotLatentGrain: Predicate = {
-    case Token(TimeGrain, GrainData(_, latent)) => !latent
+    case Token(TimeGrain, GrainData(_, latent, _)) => !latent
   }
   
   private def grainShorthand(grain: Grain): String = {
