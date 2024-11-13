@@ -16,17 +16,16 @@
 
 package com.xiaomi.duckling.dimension.time.rule
 
-import org.apache.commons.lang3.StringUtils
-
 import scalaz.Scalaz._
 
 import com.xiaomi.duckling.Types._
 import com.xiaomi.duckling.dimension.implicits._
 import com.xiaomi.duckling.dimension.matcher.Prods.regexMatch
 import com.xiaomi.duckling.dimension.matcher.{GroupMatch, RegexMatch}
-import com.xiaomi.duckling.dimension.numeral.NumeralData
+import com.xiaomi.duckling.dimension.numeral.{Numeral, NumeralData}
 import com.xiaomi.duckling.dimension.numeral.Predicates._
 import com.xiaomi.duckling.dimension.numeral.Prods.integerMap
+import com.xiaomi.duckling.dimension.numeral.seq.{isDigitLeading0, isDigitOfWidth, DigitSequence, DigitSequenceData}
 import com.xiaomi.duckling.dimension.time.Prods._
 import com.xiaomi.duckling.dimension.time.enums.Hint
 import com.xiaomi.duckling.dimension.time.form.TimeOfDay
@@ -52,6 +51,17 @@ object Times {
           val s = parseInt(ss).toOption
           tt(hourMinuteSecond(is12H = 0 < h && h <= 12, h, m, s))
         }
+    }
+  )
+
+  val ruleMM = Rule(
+    name = "mm 分",
+    pattern = List(or(and(isDimension(DigitSequence), isDigitLeading0, isDigitOfWidth(2)), isIntegerBetween(0, 59)).predicate, "分".regex),
+    prod = tokens {
+      case Token(_, DigitSequenceData(seq, _, _)) :: _ =>
+        tt(minute(Integer.parseInt(seq)))
+      case Token(_, nd: NumeralData) :: _ =>
+        tt(minute(nd.value.toInt).copy(latent = true))
     }
   )
 
@@ -199,6 +209,7 @@ object Times {
 
   val rules = List(
     ruleNow,
+    ruleMM,
     ruleHhmmssTimeOfDay,
     ruleTimeOfDayOClock,
     ruleIntegerLatentTimeOfDay,

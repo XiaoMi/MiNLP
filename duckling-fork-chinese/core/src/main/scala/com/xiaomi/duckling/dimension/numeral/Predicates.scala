@@ -46,7 +46,7 @@ object Predicates {
   }
 
   val isIntegerBetween: (Int, Int) => Predicate = (low: Int, high: Int) => {
-    case Token(Numeral, NumeralData(v, _, _, _, _, _)) => isIntegerBetween(v, low, high)
+    case Token(Numeral, NumeralData(v, _, _, _, _, precision)) => precision == 0 && isIntegerBetween(v, low, high)
   }
 
   def isIntegerBetween(x: Double, low: Int, high: Int): Boolean = {
@@ -58,13 +58,13 @@ object Predicates {
   }
 
   val isNatural: Predicate = {
-    case Token(Numeral, NumeralData(v, _, _, _, _, _)) => isInteger(v) && v > 0
-    case Token(UnitNumber, NumeralData(v, _, _, _, _, _)) => isInteger(v) && v > 0
+    case Token(Numeral, NumeralData(v, _, _, _, _, precision)) => precision == 0 && isInteger(v) && v > 0
+    case Token(UnitNumber, NumeralData(v, _, _, _, _, precision)) => precision == 0 && isInteger(v) && v > 0
     case _ => false
   }
 
   val isInteger: Predicate = {
-    case Token(_, NumeralData(v, _, _, _, _, _)) => isInteger(v)
+    case Token(_, NumeralData(v, _, _, _, _, precision)) => precision == 0 && isInteger(v)
   }
 
   def isInteger(d: Double): Boolean = getIntValue(d).nonEmpty
