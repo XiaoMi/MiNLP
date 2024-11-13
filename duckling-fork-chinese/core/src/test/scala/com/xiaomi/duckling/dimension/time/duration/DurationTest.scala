@@ -14,20 +14,21 @@
  * limitations under the License.
  */
 
-package com.xiaomi.duckling.dimension.time.grain
+package com.xiaomi.duckling.dimension.time.duration
 
-import com.xiaomi.duckling.Types._
-import com.xiaomi.duckling.dimension.implicits._
-import com.xiaomi.duckling.dimension.time.enums.Grain
-import com.xiaomi.duckling.dimension.Dimension
+import com.xiaomi.duckling.Api.analyze
+import com.xiaomi.duckling.ranking.Testing._
+import com.xiaomi.duckling.UnitSpec
 
-case object TimeGrain extends Dimension with Rules {
-  override val name: String = "TimeGrain"
-}
+class DurationTest extends UnitSpec {
 
-case class GrainData(grain: Grain, latent: Boolean = false, raw: String) extends Resolvable with ResolvedValue {
+  private val options = testOptions.copy(targets = Set(Duration))
 
-  override def resolve(context: Context, options: Options): Option[(ResolvedValue, Boolean)] = {
-    (this, false)
+  describe("duration cases") {
+
+    it("零一年五月八月") {
+      val a = analyze("七点05分", testContext, options)
+      a shouldBe empty
+    }
   }
 }
