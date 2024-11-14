@@ -205,7 +205,7 @@ trait Rules extends DimRules {
   val ruleNamedMonthDayOfMonth = Rule(
     name = "date: <named-month> <day-of-month>",
     pattern =
-      List(and(isAMonth, isHint(Hint.MonthOnly)).predicate, isIntegerBetween(1, 31).predicate),
+      List(and(isAMonth, isHint(Hint.MonthOnly)).predicate, isIntegerBetween(11, 31).predicate),
     prod = tokens {
       case Token(Date, td: TimeData) :: token :: _ =>
         for (td <- intersectDOM(td, token)) yield {
