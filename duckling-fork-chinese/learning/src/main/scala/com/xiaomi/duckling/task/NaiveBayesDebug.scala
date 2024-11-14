@@ -49,7 +49,7 @@ object NaiveBayesDebug {
     val targets = FullDimensions.convert(dim.split(","))
     val options = Options(targets = targets, withLatent = false, full = true)
     options.rankOptions.setRanker(Some(Ranker.NaiveBayes))
-    options.rankOptions.setWinnerOnly(true)
+    options.rankOptions.setWinnerOnly(false)
     options.rankOptions.setCombinationRank(false)
     options.rankOptions.setRangeRankAhead(false)
     options.timeOptions.setResetTimeOfDay(false)
