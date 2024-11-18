@@ -116,14 +116,18 @@ trait Rules extends DimRules {
 
   val ruleDurationDotNumeral = Rule(
     name = "number.number grain",
-    pattern = List("(\\d+)\\.(\\d+)".regex, isDimension(TimeGrain).predicate),
+    pattern = List(isInteger.predicate, "[点\\.]".regex, or(isDimension(DigitSequence), isIntegerBetween(0, 9)).predicate, isDimension(TimeGrain).predicate),
     prod = tokens {
-      case Token(_, GroupMatch(_ :: integer :: decimal :: _)) :: Token(_, GrainData(g, false, _)) :: _ =>
+      case (t1@ Token(_, nd: NumeralData)) :: _ :: Token(_, decimal) :: Token(_, GrainData(g, false, _)) :: _ =>
+        val (dOpt, length) = decimal match {
+          case ds: DigitSequenceData => (parseInt(ds.seq).toOption, ds.seq.length)
+          case nd: NumeralData => (getIntValue(nd.value).map(_.toInt), 1)
+        }
         (for {
-          i <- parseInt(integer).toOption
-          d <- parseInt(decimal).toOption
+          i <- getIntValue(t1).map(_.toInt)
+          d <- dOpt
         } yield {
-          val mden = math.pow(10, decimal.length).toInt
+          val mden = math.pow(10, length).toInt
           val token: Option[Token] = g match {
             case Grain.NoGrain => None
             case Grain.Second => None
