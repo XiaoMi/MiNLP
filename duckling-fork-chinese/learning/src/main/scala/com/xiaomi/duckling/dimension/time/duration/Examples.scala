@@ -38,6 +38,7 @@ object Examples extends DimExamples {
     (DurationData(2000, Year, schema = Some("P2000Y")), List("两千年")),
     (DurationData(30, Minute, schema = Some("PT0H30M")), List("半小时")),
     (DurationData(30, Minute, schema = Some("PT30M")), List("0.5小时")),
+    (DurationData(90, Minute, schema = Some("PT90M")), List("1.5小时", "1.50小时", "一点五小时", "一点五零小时")),
     (DurationData(30, Minute, schema = Some("PT30M")), List("30分钟", "半个钟头")),
     (DurationData(12, Hour, schema = Some("P0DT12H")), List("半天")),
     (DurationData(90, Minute, schema = Some("PT1H30M")), List("一个半小时", "一小时30分钟", "一个小时30分钟")),
