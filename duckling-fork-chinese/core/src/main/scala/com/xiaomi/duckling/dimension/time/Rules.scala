@@ -46,7 +46,7 @@ trait Rules extends DimRules {
     pattern = List(
       "((这|今|本(?!现在))一?个?|明|上+一?个?|前一个?|(?<![一|查|看|搜|记|问|写])下+一?个?)".regex,
       // ❌ 下周一早上 =>  下[周一早上]
-      and(isDimension(Time), not(isAPartOfDay)).predicate
+      and(isDimension(Time), not(isAPartOfDay), not(isHint(FinalRule))).predicate
     ),
     prod = tokens {
       case Token(RegexMatch, GroupMatch(s :: _)) :: (t @ Token(Time, td: TimeData)) :: _ =>
