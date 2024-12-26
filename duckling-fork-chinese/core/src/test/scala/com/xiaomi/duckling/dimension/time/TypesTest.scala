@@ -26,20 +26,20 @@ import com.xiaomi.duckling.dimension.time.helper.TimeObjectHelpers.{timeIntersec
 import com.xiaomi.duckling.dimension.time.Types._
 import com.xiaomi.duckling.dimension.time.enums.Grain
 import com.xiaomi.duckling.ranking.Testing
-import com.xiaomi.duckling.Types.{Options, ZoneCN}
+import com.xiaomi.duckling.Types.ZoneCN
 import com.xiaomi.duckling.UnitSpec
 
 class TypesTest extends UnitSpec {
 
   describe("TypesTest") {
 
-    def round1(refTime: TimeObject, td: TimeData, options: Options): Option[TimeObject] = {
+    def round1(refTime: TimeObject, td: TimeData): Option[TimeObject] = {
       val tc = TimeContext(
         refTime = refTime,
         maxTime = timePlus(refTime, Grain.Year, 2000),
         minTime = timePlus(refTime, Grain.Year, -2000)
       )
-      val (past, future) = runPredicate(td.timePred)(refTime, tc, options)
+      val (past, future) = runPredicate(td.timePred)(refTime, tc)
 
       val valueOpt = future match {
         case Stream.Empty => past.headOption
@@ -53,14 +53,13 @@ class TypesTest extends UnitSpec {
 
     it("sequence apply demo") {
       val refTime = new TimeObject(Testing.testContext.referenceTime, Grain.Second)
-      val options = Options()
       val td1 = cycleNth(Day, 1)
 
-      val r1 = round1(refTime, td1, options).get
+      val r1 = round1(refTime, td1).get
       r1.start.dayOfMonth shouldBe 13
 
       val td2 = cycleNth(Day, 2)
-      val r2 = round1(r1, td2, options).get
+      val r2 = round1(r1, td2).get
       r2.start.dayOfMonth shouldBe 15
     }
 

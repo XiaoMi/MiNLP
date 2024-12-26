@@ -55,7 +55,7 @@ object NaiveBayesDebug {
     options.timeOptions.setResetTimeOfDay(false)
     options.timeOptions.setRecentInFuture(true)
     options.timeOptions.setAlwaysInFuture(true)
-    options.timeOptions.setBeforeEndOfInterval(true)
+    options.timeOptions.setBeforeEndOfInterval(false)
     options.numeralOptions.setAllowZeroLeadingDigits(false)
     options.numeralOptions.setCnSequenceAsNumber(false)
 
