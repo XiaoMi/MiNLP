@@ -113,16 +113,21 @@ package object time {
           // 逻辑比较混乱，待收集到问题再处理
           val happened =
             td.timePred match {
+              // 下午3点问“下午”， 12号 04:30 问 12号凌晨，还需要停留在12号
+              case _: TimeIntervalsPredicate | IntersectTimePredicate(TimeIntervalsPredicate(_, _, _, _), _) =>
+                val beforeEndOfInterval = td.timePred match {
+                  case TimeIntervalsPredicate(_, _, _, b) => b
+                  case IntersectTimePredicate(TimeIntervalsPredicate(_, _, _, b), _) => b
+                }
+                val g = if (td.timeGrain >= Grain.Day) td.timeGrain else Grain.NoGrain
+                if (!beforeEndOfInterval) timeBefore(ahead, refTime, g)
+                else endBefore(ahead, refTime, g)
               case _: TimeDatePredicate | _: IntersectTimePredicate =>
                 // 若参考时间是2013/2/12 04:30，在alwaysInFuture情况下
                 // 1. 过了一部分还需要再出的，12号 => 2/12，2月 => 2013/2
                 // 2. 问4点，需要给出 16:00
                 val g = if (td.timeGrain >= Grain.Day) td.timeGrain else Grain.NoGrain
                 timeBefore(ahead, refTime, g)
-              case TimeIntervalsPredicate(_, _, _, beforeEndOfInterval) =>
-                val g = if (td.timeGrain >= Grain.Day) td.timeGrain else Grain.NoGrain
-                if (!beforeEndOfInterval) timeBefore(ahead, refTime, g)
-                else endBefore(ahead, refTime, g)
               case _ => false
             }
           if (happened || td.notImmediate && timeIntersect(ahead)(refTime).nonEmpty) {
