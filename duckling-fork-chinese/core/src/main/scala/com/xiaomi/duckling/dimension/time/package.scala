@@ -17,9 +17,10 @@
 package com.xiaomi.duckling.dimension
 
 import com.github.heqiao2010.lunar.{LunarCalendar, LunarData}
+
 import java.time.LocalTime
 
-import com.xiaomi.duckling.Types.{conf, Options, ZoneCN}
+import com.xiaomi.duckling.Types.{ZoneCN, conf}
 import com.xiaomi.duckling.dimension.time.Types.{TimeContext, TimeObject, _}
 import com.xiaomi.duckling.dimension.time.enums.AMPM._
 import com.xiaomi.duckling.dimension.time.enums.Grain._
@@ -35,7 +36,7 @@ package object time {
   /**
     * Return a tuple of (past, future) elements
     */
-  type SeriesPredicateF = (TimeObject, TimeContext, Options) => PastFutureTime
+  type SeriesPredicateF = (TimeObject, TimeContext) => PastFutureTime
 
   implicit class GrainWrapper(grain: Grain) {
     def <(that: Grain): Boolean = grain.compareTo(that) < 0
@@ -81,12 +82,11 @@ package object time {
 
   def resolveTimeData(refTime: TimeObject,
                       td: TimeData,
-                      reverseTake: Boolean = false,
-                      options: Options): Option[TimeObject] = {
+                      reverseTake: Boolean = false): Option[TimeObject] = {
 
     val tc = refTimeContext(refTime, reverseTake)
 
-    val (past, future) = runPredicate(td.timePred)(refTime, tc, options)
+    val (past, future) = runPredicate(td.timePred)(refTime, tc)
 
     val reverse = if (reverseTake) {
       future match {
@@ -118,8 +118,7 @@ package object time {
                 // 1. 过了一部分还需要再出的，12号 => 2/12，2月 => 2013/2
                 // 2. 问4点，需要给出 16:00
                 val g = if (td.timeGrain >= Grain.Day) td.timeGrain else Grain.NoGrain
-                if (options.timeOptions.beforeEndOfInterval) endBefore(ahead, refTime, g)
-                else timeBefore(ahead, refTime, g)
+                timeBefore(ahead, refTime, g)
               case TimeIntervalsPredicate(_, _, _, beforeEndOfInterval) =>
                 val g = if (td.timeGrain >= Grain.Day) td.timeGrain else Grain.NoGrain
                 if (!beforeEndOfInterval) timeBefore(ahead, refTime, g)
@@ -135,7 +134,7 @@ package object time {
   }
 
   val EmptySeries: PastFutureTime = (Stream.empty, Stream.empty)
-  val EmptySeriesPredicate: SeriesPredicateF = (_: TimeObject, _: TimeContext, _: Options) => EmptySeries
+  val EmptySeriesPredicate: SeriesPredicateF = (_: TimeObject, _: TimeContext) => EmptySeries
 
   def runPredicate(tp: TimePredicate): SeriesPredicateF = {
     tp match {
@@ -154,9 +153,9 @@ package object time {
             year.map(runYearPredicate)
           ).flatten
 
-          def series(t: TimeObject, tc: TimeContext, options: Options): PastFutureTime = {
+          def series(t: TimeObject, tc: TimeContext): PastFutureTime = {
             val pred = toCompose.reduceOption(runCompose).getOrElse(EmptySeriesPredicate)
-            val (past, future) = pred(t, tc, options)
+            val (past, future) = pred(t, tc)
             (past, future)
           }
 
@@ -173,7 +172,7 @@ package object time {
     }
   }
 
-  def runEndOfGrainPredicate(t: TimeObject, context: TimeContext, options: Options): PastFutureTime = {
+  def runEndOfGrainPredicate(t: TimeObject, context: TimeContext): PastFutureTime = {
     val (start, grain) = t.grain match {
       case Grain.Month =>
         (t.start.plusMonths(1).plusDays(-1), Day)
@@ -187,10 +186,10 @@ package object time {
   def runReplacePartPredicate(
     td1: TimeData,
     td2: TimeData
-  )(t: TimeObject, context: TimeContext, options: Options): PastFutureTime = {
+  )(t: TimeObject, context: TimeContext): PastFutureTime = {
     (for {
-      t1 <- resolveTimeData(t, td1, options = options)
-      t2 <- resolveTimeData(t, td2, options = options)
+      t1 <- resolveTimeData(t, td1)
+      t2 <- resolveTimeData(t, td2)
     } yield {
       val to =
         if (td2.timePred.maxGrain.nonEmpty && td1.timeGrain > td2.timePred.maxGrain.get) {
@@ -256,14 +255,14 @@ package object time {
 
   @scala.annotation.tailrec
   def runSequencePredicate(list: List[TimeData])(t: TimeObject,
-                                                 context: TimeContext, options: Options): PastFutureTime = {
+                                                 context: TimeContext): PastFutureTime = {
     list match {
       case Nil => (Stream.empty, Stream(context.refTime))
       case td :: xs =>
-        resolveTimeData(t, td, options = options) match {
+        resolveTimeData(t, td) match {
           case Some(refTime) =>
             val tc = refTimeContext(refTime)
-            runSequencePredicate(xs)(refTime, tc, options)
+            runSequencePredicate(xs)(refTime, tc)
           case None => EmptySeries
         }
     }
@@ -273,13 +272,13 @@ package object time {
     runCompose(runPredicate(pred1), runPredicate(pred2))
   }
 
-  def runSecondPredicate(n: Int)(t: TimeObject, context: TimeContext, options: Options): PastFutureTime = {
+  def runSecondPredicate(n: Int)(t: TimeObject, context: TimeContext): PastFutureTime = {
     val s = t.start.second
     val anchor = timePlus(timeRound(t, Second), Second, n - s % 60)
     timeSequence(Minute, 1, anchor)
   }
 
-  def runMinutePredicate(n: Int)(t: TimeObject, context: TimeContext, options: Options): PastFutureTime = {
+  def runMinutePredicate(n: Int)(t: TimeObject, context: TimeContext): PastFutureTime = {
     val rounded = timeRound(t, Minute)
     val m = t.start.minute
     val anchor = timePlus(rounded, Minute, (n - m) % 60)
@@ -288,7 +287,7 @@ package object time {
 
   def runHourPredicate(
     ampm: Option[AMPM]
-  )(hour: (Boolean, Int))(t: TimeObject, context: TimeContext, options: Options): PastFutureTime = {
+  )(hour: (Boolean, Int))(t: TimeObject, context: TimeContext): PastFutureTime = {
     val (is12H, n) = hour
     val step = if (is12H && n <= 12 && ampm.isEmpty) 12 else 24
     val nAdjust = ampm match {
@@ -309,13 +308,13 @@ package object time {
     )
   }
 
-  def runDayOfTheWeekPredicate(n: Int)(t: TimeObject, context: TimeContext, options: Options): PastFutureTime = {
+  def runDayOfTheWeekPredicate(n: Int)(t: TimeObject, context: TimeContext): PastFutureTime = {
     val daysUntilNextWeek = Math.floorMod(n - t.start.dayOfWeek, 7)
     val anchor = timePlus(timeRound(t, Day), Day, daysUntilNextWeek)
     timeSequence(Day, 7, anchor)
   }
 
-  def runDayOfTheMonthPredicate(n: Int)(t: TimeObject, context: TimeContext, options: Options): PastFutureTime = {
+  def runDayOfTheMonthPredicate(n: Int)(t: TimeObject, context: TimeContext): PastFutureTime = {
 
     def enoughDays(t: TimeObject): Boolean = {
       n <= t.start.date.lengthOfMonth
@@ -335,7 +334,7 @@ package object time {
     (past, future)
   }
 
-  def runMonthPredicate(calendar: Option[Calendar])(n: Int)(t: TimeObject, context: TimeContext, options: Options): PastFutureTime = {
+  def runMonthPredicate(calendar: Option[Calendar])(n: Int)(t: TimeObject, context: TimeContext): PastFutureTime = {
     val y = timeRound(t, Year, calendar)
     val rounded =
       calendar match {
@@ -348,7 +347,7 @@ package object time {
     timeSequence(Year, 1, anchor)
   }
 
-  def runYearPredicate(n: Int)(t: TimeObject, context: TimeContext, options: Options): PastFutureTime = {
+  def runYearPredicate(n: Int)(t: TimeObject, context: TimeContext): PastFutureTime = {
     val year = n
     val tyear = t.start.year
     val y = timePlus(timeRound(t, Year), Year, year - tyear)
@@ -363,14 +362,14 @@ package object time {
     * Performs best when pred1 is smaller grain than pred2
     */
   def runCompose(pred1: SeriesPredicateF, pred2: SeriesPredicateF): SeriesPredicateF = {
-    val series = (nowTime: TimeObject, context: TimeContext, options: Options) => {
-      val (past, future) = pred2(nowTime, context, options)
+    val series = (nowTime: TimeObject, context: TimeContext) => {
+      val (past, future) = pred2(nowTime, context)
 
       def startsBefore(t1: TimeObject)(t: TimeObject): Boolean = timeStartsBeforeTheEndOf(t)(t1)
 
       def computeSeries(tokens: Stream[TimeObject]): Stream[TimeObject] = {
         tokens.take(safeMax).flatMap { time1 =>
-          val (past, future) = pred1(time1, fixedTimeContext(time1), options)
+          val (past, future) = pred1(time1, fixedTimeContext(time1))
           val before = future.takeWhile(startsBefore(time1))
           before.flatMap(timeIntersect(time1))
         }
@@ -388,8 +387,8 @@ package object time {
                                 pred2: TimePredicate,
                                 beforeEndOfInterval: Boolean): SeriesPredicateF = {
     // Pick the first interval *after* the given time segment
-    def f(thisSegment: TimeObject, ctx: TimeContext, options: Options): Option[TimeObject] = {
-      runPredicate(pred2)(thisSegment, ctx, options) match {
+    def f(thisSegment: TimeObject, ctx: TimeContext): Option[TimeObject] = {
+      runPredicate(pred2)(thisSegment, ctx) match {
         case (_, firstFuture #:: tail) =>
           // 避免9点-9点，左右一样（空区间）
           val end = if (firstFuture != thisSegment || tail.headOption.isEmpty) firstFuture else tail.head
@@ -398,8 +397,8 @@ package object time {
       }
     }
 
-    def b(thisSegment: TimeObject, ctx: TimeContext, options: Options): Option[TimeObject] = {
-      runPredicate(pred1)(thisSegment, ctx, options) match {
+    def b(thisSegment: TimeObject, ctx: TimeContext): Option[TimeObject] = {
+      runPredicate(pred1)(thisSegment, ctx) match {
         case (past, future) =>
           val choosed = future.take(safeMax).find(t => timeStartsBeforeTheEndOf(t)(thisSegment))
             .orElse(past.take(safeMax).find(t => timeStartsBeforeTheEndOf(t)(thisSegment)))
@@ -426,15 +425,15 @@ package object time {
     * @return Series generator for values that come from `f`
     */
   def timeSeqMap(dontReverse: Boolean,
-                 f: (TimeObject, TimeContext, Options) => Option[TimeObject],
+                 f: (TimeObject, TimeContext) => Option[TimeObject],
                  g: TimePredicate): SeriesPredicateF = {
-    def seriesF(nowTime: TimeObject, context: TimeContext, options: Options) = {
+    def seriesF(nowTime: TimeObject, context: TimeContext) = {
       // computes a single interval from `f` based on each interval in the series
       def applyF(series: Stream[TimeObject]) = {
-        series.take(safeMaxInterval).flatMap(f(_, context, options))
+        series.take(safeMaxInterval).flatMap(f(_, context))
       }
 
-      val (firstPast, firstFuture) = runPredicate(g)(nowTime, context, options)
+      val (firstPast, firstFuture) = runPredicate(g)(nowTime, context)
       val (past1, future1) = (applyF(firstPast), applyF(firstFuture))
 
       // Separate what's before and after now from the past's series
@@ -467,7 +466,7 @@ package object time {
     case _                  => false
   }
 
-  def runTimeOpenIntervalPredicate(it: IntervalDirection)(t: TimeObject, context: TimeContext, options: Options): PastFutureTime = {
+  def runTimeOpenIntervalPredicate(it: IntervalDirection)(t: TimeObject, context: TimeContext): PastFutureTime = {
     (Stream(t.copy(direction = Some(it))), Stream.empty)
   }
 }
