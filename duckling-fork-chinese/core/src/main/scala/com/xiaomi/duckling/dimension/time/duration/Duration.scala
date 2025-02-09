@@ -41,7 +41,8 @@ case object Duration extends Dimension with Rules {
   * @param latent 是否是潜在时间
   * @param fuzzy  是否是模糊时间（几天）
   */
-case class DurationData(value: Int, grain: Grain, latent: Boolean = false, fuzzy: Boolean = false, override val schema: Option[String] = None)
+case class DurationData(value: Int, grain: Grain, latent: Boolean = false, fuzzy: Boolean = false, half: Boolean = false,
+                        override val schema: Option[String] = None)
     extends ResolvedValue
     with Resolvable {
 

@@ -127,6 +127,14 @@ object Examples extends DimExamples {
       List("上半年")
     ),
     (
+      localDateTimeInterval(
+        LocalDateTime.of(2012, 1, 1, 0, 0, 0),
+        LocalDateTime.of(2012, 7, 1, 0, 0, 0),
+        Month
+      ),
+      List("去年上半年")
+    ),
+    (
         localDateTimeInterval(
           LocalDateTime.of(2014, 2, 4, 0, 0, 0),
           LocalDateTime.of(2014, 5, 5, 0, 0, 0),
