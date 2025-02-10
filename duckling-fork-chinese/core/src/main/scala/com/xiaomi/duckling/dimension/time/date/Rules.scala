@@ -257,7 +257,7 @@ trait Rules extends DimRules {
     name = "date - <ordinal> <quarter>",
     pattern = List("第".regex, isAQuarterOfYear.predicate),
     prod = {
-      case (options, _ :: Token(Duration, DurationData(value, _, _, _, _)) :: _) =>
+      case (options, _ :: Token(Duration, DurationData(value, _, _, _, _, _)) :: _) =>
         for (td <- interval(Closed, month(3 * value - 2), month(3 * value), options.timeOptions.beforeEndOfInterval)) yield {
           Token(Date, td.copy(reset = (Grain.resetTo(Quarter), 0)))
         }
