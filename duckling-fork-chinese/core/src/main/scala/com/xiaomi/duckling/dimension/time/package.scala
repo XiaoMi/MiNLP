@@ -197,8 +197,8 @@ package object time {
       t2 <- resolveTimeData(t, td2)
     } yield {
       val to =
-        if (td2.timePred.maxGrain.nonEmpty && td1.timeGrain > td2.timePred.maxGrain.get) {
-          copyGrain(Year, td2.timePred.maxGrain.get, t1, t2)
+        if (td2.timePred.maxGrain.nonEmpty && td1.timeGrain > td2.timePred.maxGrain.get && td1.timeGrain.finer().isDefined) {
+          copyGrain(Year, td1.timeGrain.finer().get, t1, t2)
         } else {
           (td1.timeGrain, td2.timeGrain) match {
             case (Year, Month) => t2.copy(start = t2.start.withYear(t1.start.year))
