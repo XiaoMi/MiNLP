@@ -18,7 +18,6 @@ package com.xiaomi.duckling.task
 
 import org.apache.commons.lang3.time.StopWatch
 import org.json4s.jackson.Serialization.write
-
 import com.xiaomi.duckling.Api
 import com.xiaomi.duckling.Api.formatToken
 import com.xiaomi.duckling.JsonSerde._
@@ -26,6 +25,8 @@ import com.xiaomi.duckling.Types._
 import com.xiaomi.duckling.dimension.FullDimensions
 import com.xiaomi.duckling.ranking.Ranker
 import com.xiaomi.duckling.ranking.Testing.testContext
+
+import java.time.ZonedDateTime
 
 object NaiveBayesDebug {
   private val context = testContext // .copy(referenceTime = ZonedDateTime.now())
@@ -49,7 +50,7 @@ object NaiveBayesDebug {
     val targets = FullDimensions.convert(dim.split(","))
     val options = Options(targets = targets, withLatent = false, full = true)
     options.rankOptions.setRanker(Some(Ranker.NaiveBayes))
-    options.rankOptions.setWinnerOnly(true)
+    options.rankOptions.setWinnerOnly(false)
     options.rankOptions.setCombinationRank(false)
     options.rankOptions.setRangeRankAhead(false)
     options.timeOptions.setResetTimeOfDay(false)

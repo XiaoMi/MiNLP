@@ -279,7 +279,7 @@ trait Rules extends DimRules {
     name = "recent/last/next <duration>",
     pattern = List(RecentPattern.regex, or(isNotLatentDuration, isFuzzyNotLatentDuration).predicate),
     prod = tokens {
-      case Token(_, GroupMatch(_ :: g1 :: g2 :: _)) :: Token(Duration, DurationData(v, g, _, fuzzy, _)) :: _ =>
+      case Token(_, GroupMatch(_ :: g1 :: g2 :: _)) :: Token(Duration, DurationData(v, g, _, fuzzy, half, _)) :: _ =>
         val s = if (StringUtils.isBlank(g1)) g2 else g1
         // 月必须是x个月
         s match {
@@ -294,7 +294,7 @@ trait Rules extends DimRules {
                 cycleN(notImmediate = false, Day, 30)
               }
               // = 1 已经在 this <cycle> 中定义过了
-              else if (s == "下" && (g == Day || v == 1)) None
+              else if (s == "下" && (g == Day || v == 1 || half)) None
               else {
                 val td1 = cycleN(notImmediate = false, g, v)
                 g match {
@@ -314,7 +314,7 @@ trait Rules extends DimRules {
               cycleN(notImmediate = false, Day, 7 * v).map(t => tt(t.at(Hint.Recent)))
             } else tt(cycleNth(g, 0))
           case "上" | "前" | "之前" | "往前"  | "向前" | "过去" | "过去" =>
-            if (s == "上" && (g == Day || g == Year)) None
+            if (s == "上" && (g == Day || g == Year || half)) None
             else if (s == "过去" && fuzzy) None
             else if (v > 1) tt(cycleN(notImmediate = true, g, -v).at(Hint.Recent))
             else tt(cycleNth(g, -1).at(Hint.Recent))
@@ -330,7 +330,7 @@ trait Rules extends DimRules {
     name = "n <cycle> next/last 1: <duration> 之后",
     pattern = List(isNotLatentDuration.predicate, "((之|以)?(后|前))|过后".regex),
     prod = optTokens {
-      case (options: Options, Token(Duration, DurationData(v, grain, false, _, _)) :: Token(_, GroupMatch(s :: _)) :: _) =>
+      case (options: Options, Token(Duration, DurationData(v, grain, false, _, _, _)) :: Token(_, GroupMatch(s :: _)) :: _) =>
         val offset = if (s.endsWith("后")) v else -v
         val roundGrain = if (options.timeOptions.inheritGrainOfDuration) grain else NoGrain
         tt(finalRule(cycleNth(grain, offset, roundGrain)))
@@ -344,7 +344,7 @@ trait Rules extends DimRules {
     name = "n <cycle> next/last: 过 <duration>",
     pattern = List("过".regex, isNotLatentDuration.predicate),
     prod = optTokens {
-      case (options: Options, _ :: Token(Duration, DurationData(v, grain, _, _, _)) :: _ ) =>
+      case (options: Options, _ :: Token(Duration, DurationData(v, grain, _, _, _, _)) :: _ ) =>
         val roundGrain = if (options.timeOptions.inheritGrainOfDuration) grain else NoGrain
         tt(finalRule(cycleNth(grain, v, roundGrain)))
     }
@@ -357,7 +357,7 @@ trait Rules extends DimRules {
     name = "n <cycle> next/last 3:过 <duration> 之后",
     pattern = List("过".regex, isNotLatentDuration.predicate, "之?(后|前)".regex),
     prod = optTokens {
-      case (options: Options, _ :: Token(Duration, DurationData(v, grain, _, _, _)) :: _ ) =>
+      case (options: Options, _ :: Token(Duration, DurationData(v, grain, _, _, _, _)) :: _ ) =>
         val roundGrain = if (options.timeOptions.inheritGrainOfDuration) grain else NoGrain
         tt(finalRule(cycleNth(grain, v, roundGrain)))
     }
@@ -370,7 +370,7 @@ trait Rules extends DimRules {
     name = "<duration> before/after <time>",
     pattern = List(isNotLatentDuration.predicate, "之?(前|后)的?".regex, isNotLatent.predicate),
     prod = tokens {
-      case Token(Duration, DurationData(v, g, _, _, _)) :: Token(_, GroupMatch(_ :: s :: _)) ::
+      case Token(Duration, DurationData(v, g, _, _, _, _)) :: Token(_, GroupMatch(_ :: s :: _)) ::
         Token(Time, td: TimeData) :: _ =>
         if (g > td.timeGrain) {
           val sign = if (s == "前") -1 else 1
@@ -410,7 +410,7 @@ trait Rules extends DimRules {
     name = "<time> before/after 2",
     pattern = List(and(isADayOfMonth, isNotLatent).predicate, "的".regex, isNotLatentDuration.predicate, "[之以]?([前后])".regex),
     prod = tokens {
-      case Token(Time, td: TimeData) :: _ :: Token(Duration, DurationData(v, g, _, _, _)) :: Token(_, GroupMatch(_ :: d :: _)) :: _ =>
+      case Token(Time, td: TimeData) :: _ :: Token(Duration, DurationData(v, g, _, _, _, _)) :: Token(_, GroupMatch(_ :: d :: _)) :: _ =>
         val dv = if (d == "前") -v else v
         val dg = if (g <= Day) g else Day
         
@@ -423,7 +423,7 @@ trait Rules extends DimRules {
     name = "<time> before/after 3",
     pattern = List(and(isADayOfMonth, isNotLatent).predicate, isNotLatentDuration.predicate, "[之以]?([前后])".regex),
     prod = tokens {
-      case Token(Time, td: TimeData) :: Token(Duration, DurationData(v, g, _, _, _)) :: Token(_, GroupMatch(_ :: d :: _)) :: _ =>
+      case Token(Time, td: TimeData) :: Token(Duration, DurationData(v, g, _, _, _, _)) :: Token(_, GroupMatch(_ :: d :: _)) :: _ =>
         val dv = if (d == "前") -v else v
         val dg = if (g <= Day) g else Day
         
@@ -436,7 +436,7 @@ trait Rules extends DimRules {
     name = "<time> after duration",
     pattern = List(isADayOfMonth.predicate, "(再?过|往后(数|推)|后面?的第?)".regex, isNotLatentDuration.predicate),
     prod = tokens {
-      case Token(Time, td: TimeData) :: _ :: Token(Duration, DurationData(v, g, _, _, _)) :: _ =>
+      case Token(Time, td: TimeData) :: _ :: Token(Duration, DurationData(v, g, _, _, _, _)) :: _ =>
         val dv = v
         val dg = if (g <= Day) g else Day
         
@@ -449,7 +449,7 @@ trait Rules extends DimRules {
     name = "<time> before duration",
     pattern = List(isADayOfMonth.predicate, "(往前(数|推)|前面?的第?)".regex, isNotLatentDuration.predicate),
     prod = tokens {
-      case Token(Time, td: TimeData) :: _ :: Token(Duration, DurationData(v, g, _, _, _)) :: _ =>
+      case Token(Time, td: TimeData) :: _ :: Token(Duration, DurationData(v, g, _, _, _, _)) :: _ =>
         val dv = -v
         val dg = if (g <= Day) g else Day
       
@@ -516,7 +516,7 @@ trait Rules extends DimRules {
     name = "in a <duration>",
     pattern = List(isNotLatentDuration.predicate, "[之以]?内".regex),
     prod = tokens {
-      case Token(Duration, DurationData(value, grain, _, _, _)) :: _ =>
+      case Token(Duration, DurationData(value, grain, _, _, _, _)) :: _ =>
         val (g, v) = grain match {
           case Month => (Day, value * 30)
           case Week => (Day, value * 7)
@@ -601,7 +601,7 @@ trait Rules extends DimRules {
       List(isHint(RecentNominal).predicate, "(往|向|之)?(前|后)的?".regex, isNotLatentDuration.predicate),
     prod = optTokens {
       case (options, Token(_, td1: TimeData) :: Token(_, GroupMatch(_ :: s :: _)) ::
-        Token(_, DurationData(value, grain, latent, _, _)) :: _)
+        Token(_, DurationData(value, grain, latent, _, _, _)) :: _)
         if options.timeOptions.sequence && td1.timeGrain == grain =>
         val sign = if (s == "前") -1 else 1
         val td2 = cycleN(notImmediate = false, grain, sign * value)

@@ -255,7 +255,7 @@ object predicates {
   }
 
   val isAQuarterOfYear: Predicate = {
-    case Token(Duration, DurationData(value, grain, _, _, _)) =>
+    case Token(Duration, DurationData(value, grain, _, _, _, _)) =>
       grain == Quarter && value >= 1 && value <= 4
   }
 
@@ -308,7 +308,7 @@ object predicates {
   }
 
   val isDurationAmountGt1: Predicate = {
-    case Token(Duration, DurationData(value, _, _, _, _)) => value > 1
+    case Token(Duration, DurationData(value, _, _, _, _, _)) => value > 1
   }
 
   val isGrainGeDay: Predicate = {
