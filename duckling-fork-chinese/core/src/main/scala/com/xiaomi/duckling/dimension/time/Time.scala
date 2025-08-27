@@ -208,7 +208,7 @@ case class TimeData(timePred: TimePredicate,
       case TimeDatePredicate(second, minute, hour, _, _, dayOfMonth, month, year, _) =>
         // 如：2021年10月1日12点三十分
         Simple(year, month, dayOfMonth, hour, minute, second, offset=Some(false))
-      case IntersectTimePredicate(TimeDatePredicate(second, minute, hour, _, _, _, _, _, _), IntersectTimePredicate(TimeDatePredicate(_, _, _, _, _, dayOfMonth, month, _, _), SeriesPredicate(_))) =>
+      case IntersectTimePredicate(TimeDatePredicate(second, minute, hour, _, _, _, _, _, _), IntersectTimePredicate(TimeDatePredicate(_, _, _, _, _, dayOfMonth, month, _, _), SeriesPredicate(_, _))) =>
         // 如： 明年三月一号十二点三十分, 年份隐式表达SeriesPredicate
         Simple(None, month, dayOfMonth, hour, minute, second, offset=Some(true))
       case IntersectTimePredicate(SequencePredicate(_), TimeDatePredicate(_, _, _, _, _, _, _, year, _)) =>
@@ -217,26 +217,26 @@ case class TimeData(timePred: TimePredicate,
       case IntersectTimePredicate(TimeDatePredicate(second, minute, hour, _, _, _, _, _, _), SequencePredicate(_)) =>
         // 如：除夕十二点三十分，没有年份表达，除夕SequencePredicate
         Simple(hour=hour, minute=minute, second=second, offset=Some(false))
-      case IntersectTimePredicate(TimeDatePredicate(second, minute, hour, _, _, _, _, _, _), IntersectTimePredicate(SequencePredicate(_), SeriesPredicate(_))) =>
+      case IntersectTimePredicate(TimeDatePredicate(second, minute, hour, _, _, _, _, _, _), IntersectTimePredicate(SequencePredicate(_), SeriesPredicate(_, _))) =>
         // 如：今年除夕十二点三十分，年份隐式表达，除夕SequencePredicate
         Simple(hour=hour, minute=minute, second=second, offset=Some(true))
       case IntersectTimePredicate(TimeDatePredicate(second, minute, hour, _, _, _, _, _, _), IntersectTimePredicate(_, TimeDatePredicate(_, _, _, _, _, _, _, year, _))) =>
         // 如：2021年[除夕、节气、西方节日]十二点三十分，有具体年份表达
         Simple(year=year, hour=hour, minute=minute, second=second, offset=Some(false))
-      case IntersectTimePredicate(TimeDatePredicate(second, minute, hour, _, _, _, _, _, _), IntersectTimePredicate(SeriesPredicate(_), SeriesPredicate(_))) =>
+      case IntersectTimePredicate(TimeDatePredicate(second, minute, hour, _, _, _, _, _, _), IntersectTimePredicate(SeriesPredicate(_, _), SeriesPredicate(_, _))) =>
         // 如：明年[清明节、西方节日]十二点三十分，年份隐式表达，节气SeriesPredicate
         Simple(hour=hour, minute=minute, second=second, offset=Some(true))
-      case IntersectTimePredicate(SeriesPredicate(_), TimeDatePredicate(second, minute, hour, _, _, _, _, year, _)) =>
+      case IntersectTimePredicate(SeriesPredicate(_, _), TimeDatePredicate(second, minute, hour, _, _, _, _, year, _)) =>
         // 如：2021年[清明节、西方节日]，节气需要根据年份查表获取具体日期，只抽取年，节气SeriesPredicate
         Simple(year=year, hour=hour, minute=minute, second=second, offset=Some(false))
-      case IntersectTimePredicate(TimeDatePredicate(second, minute, hour, _, _, dayOfMonth, month, _, _), SeriesPredicate(_)) =>
+      case IntersectTimePredicate(TimeDatePredicate(second, minute, hour, _, _, dayOfMonth, month, _, _), SeriesPredicate(_, grain)) =>
         // 如：[清明节、西方节日]十二点三十分，今年国庆节，明年中秋节，今天十二点三十分，年份/日期隐式表达和节气SeriesPredicate
         val offset = (second.isDefined || minute.isDefined || hour.isDefined) && holiday.exists(_.nonEmpty)
         Simple(None, month, dayOfMonth, hour, minute, second, offset=Some(!offset))
-      case IntersectTimePredicate(SeriesPredicate(_), SeriesPredicate(_)) =>
+      case IntersectTimePredicate(SeriesPredicate(_, _), SeriesPredicate(_, _)) =>
         // 如：今年[清明节、西方节日]，年份隐式表达和节气SeriesPredicate
         Simple(offset=Some(true))
-      case SeriesPredicate(_) =>
+      case SeriesPredicate(_, _) =>
         // 如：[清明节、西方节日]西方节日和节气SeriesPredicate
         Simple(offset=if (holiday.exists(_.nonEmpty)) Some(false) else Some(true))
       case _ => Simple()

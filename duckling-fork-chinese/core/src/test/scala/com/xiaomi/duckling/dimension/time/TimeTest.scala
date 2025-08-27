@@ -139,9 +139,13 @@ class TimeTest extends UnitSpec {
       }
     }
 
-    it("fix #187") {
+    it("不需要支持的") {
       val opt = options.copy(full = true, withLatent = false)
-      val cases = Table("query", "国庆晚", "十月一晚", "下钟", "晚")
+      val cases = Table("query",
+        // fix #187
+        "国庆晚", "十月一晚", "下钟", "晚",
+        // fix #259
+        "上午今天早上七点")
       forAll(cases) {query =>
         parse(query, options = opt) should be (empty)
       }

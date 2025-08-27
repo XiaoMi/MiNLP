@@ -144,7 +144,7 @@ package object time {
   def runPredicate(tp: TimePredicate): SeriesPredicateF = {
     tp match {
       case EmptyTimePredicate => EmptySeriesPredicate
-      case SeriesPredicate(f) => f
+      case SeriesPredicate(f, _) => f
       case TimeDatePredicate(sec, min, hour, ampm, dayOfWeek, dayOfMonth, month, year, calendar) =>
         if (hour.isEmpty && ampm.nonEmpty) EmptySeriesPredicate
         else {
