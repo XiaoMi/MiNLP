@@ -73,8 +73,9 @@ object predicates {
     }
   }
 
-  case class SeriesPredicate(f: SeriesPredicateF) extends TimePredicate {
+  case class SeriesPredicate(f: SeriesPredicateF, grainOpt: Option[Grain]) extends TimePredicate {
     override def toString: String = "f:Series"
+    override val maxGrain: Option[Grain] = grainOpt
   }
 
   case class IntersectTimePredicate(pred1: TimePredicate, pred2: TimePredicate)
@@ -105,12 +106,17 @@ object predicates {
   /**
    * 用td1的部分信息替换td2的结果，解决明年的今天、上个月的今天之类的问题
    */
-  case class ReplacePartPredicate(td1: TimeData, td2: TimeData) extends TimePredicate
+  case class ReplacePartPredicate(td1: TimeData, td2: TimeData) extends TimePredicate {
+    override val maxGrain: Option[Grain] = td1.timeGrain
+  }
 
   case object EndOfGrainPredicate extends TimePredicate
 
   case class CycleSeriesPredicate(seriesF: SeriesPredicateF, n: Int, grain: Grain)
-    extends TimePredicate
+    extends TimePredicate {
+
+    override val maxGrain: Option[Grain] = Some(grain)
+  }
 
   val singleNumeber: Predicate = isIntegerBetween(0, 9)
 

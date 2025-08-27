@@ -145,7 +145,7 @@ object TimePredicateHelpers {
       }
     }
 
-    SeriesPredicate(timeSeqMap(false, f, basePred))
+    SeriesPredicate(timeSeqMap(false, f, basePred), basePred.maxGrain)
   }
 
   def timeCycle(grain: Grain): CycleSeriesPredicate = timeCycle(grain, grain)
@@ -192,7 +192,7 @@ object TimePredicateHelpers {
       }
     }
 
-    SeriesPredicate(series)
+    SeriesPredicate(series, cycleSP.maxGrain)
   }
 
   /**
@@ -221,7 +221,7 @@ object TimePredicateHelpers {
           else (Stream(nth), Stream.empty)
       }
     }
-    SeriesPredicate(series)
+    SeriesPredicate(series, f.maxGrain)
   }
 
   /**
@@ -255,7 +255,7 @@ object TimePredicateHelpers {
         (Stream.iterate(anchor)(f(-1)).tail, Stream.iterate(anchor)(f(1)))
       }
     }
-    SeriesPredicate(series)
+    SeriesPredicate(series, Some(Day))
   }
 
   /**

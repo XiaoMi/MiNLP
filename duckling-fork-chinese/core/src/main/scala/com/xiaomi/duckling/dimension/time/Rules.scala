@@ -213,7 +213,10 @@ trait Rules extends DimRules {
           if td1.timeGrain > td2.timeGrain && !(td1.hint == Hint.Date && td2.hint == Hint.Date) ||
             // 上午的8-9点
             td1.timeGrain == td2.timeGrain && td1.timeGrain == Hour && isAPartOfDay(t1) && !isAPartOfDay(t2) =>
-        intersectToken(options, td1, td2)
+          val g1 = td1.timePred.maxGrain
+          val g2 = td2.timePred.maxGrain
+          if (g1.isDefined && g2.isDefined && g1.get < g2.get) None
+          else intersectToken(options, td1, td2)
       }
     )
 
