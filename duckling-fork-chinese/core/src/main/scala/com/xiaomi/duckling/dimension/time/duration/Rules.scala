@@ -64,7 +64,7 @@ trait Rules extends DimRules {
     name = "<integer> <unit-of-duration>",
     pattern = List(
       and(
-        isNatural,
+        isNonNegative,
         isNumberOrUnitNumber,
         not(isDigitLengthGt(1)),
         // 一九八七 年 不召回
