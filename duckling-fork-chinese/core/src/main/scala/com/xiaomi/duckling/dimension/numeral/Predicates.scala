@@ -63,6 +63,12 @@ object Predicates {
     case _ => false
   }
 
+  val isNonNegative: Predicate = {
+    case Token(Numeral, NumeralData(v, _, _, _, _, precision)) => precision == 0 && isInteger(v) && v >= 0
+    case Token(UnitNumber, NumeralData(v, _, _, _, _, precision)) => precision == 0 && isInteger(v) && v >= 0
+    case _ => false
+  }
+
   val isInteger: Predicate = {
     case Token(_, NumeralData(v, _, _, _, _, precision)) => precision == 0 && isInteger(v)
   }

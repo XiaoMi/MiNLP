@@ -53,7 +53,7 @@ trait Rules extends DimRules {
               val n = math.floor(v).toInt
               // 2012年 不召回, 两千年召回
               if (seq.nonEmpty && g == Year && 1950 <= n && n <= 2050) None
-              else Token(Duration, DurationData(n, g, latent = latent, schema = durationSchema(n.toString, g)))
+              else Token(Duration, DurationData(n, g, latent = if (v == 0) true else latent, schema = durationSchema(n.toString, g)))
             case _ => None
           }
         }
@@ -64,7 +64,7 @@ trait Rules extends DimRules {
     name = "<integer> <unit-of-duration>",
     pattern = List(
       and(
-        isNatural,
+        isNonNegative,
         isNumberOrUnitNumber,
         not(isDigitLengthGt(1)),
         // 一九八七 年 不召回
