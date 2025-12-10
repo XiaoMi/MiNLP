@@ -512,6 +512,7 @@ object Examples extends DimExamples {
     ),
     (datetime(LocalDateTime.of(2013, 2, 11, 4, 30, 0), Second), List("昨天现在")),
     (datetime(LocalDateTime.of(2013, 2, 22, 8, 0, 0), Hour), List("下周五8点")),
+    (datetime(LocalDateTime.of(2013, 2, 15, 0, 0, 0), Day), List("下一个15号")),
     (datetime(LocalDateTime.of(2013, 11, 20, 20, 0, 0), Hour), List("11.20 20点")),
     (datetime(LocalDateTime.of(2013, 12, 24, 0, 0, 0), Day), List("圣诞节的前一天", "圣诞节前一天")),
     (datetime(LocalDateTime.of(2013, 2, 12, 5, 5, 0), Minute), List("05分")),

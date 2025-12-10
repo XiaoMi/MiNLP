@@ -46,7 +46,7 @@ trait Rules extends DimRules {
     pattern = List(
       "((这|今|本(?!现在))一?个?|明|上+一?个?|前一个?|(?<![一|查|看|搜|记|问|写])下+一?个?)".regex,
       // ❌ 下周一早上 =>  下[周一早上]
-      and(isDimension(Time), isNotLatent, not(isHint(Intersect, FinalRule)), not(isAPartOfDay)).predicate
+      and(isDimension(Time), not(isAPartOfDay), not(isHint(FinalRule))).predicate
     ),
     prod = tokens {
       case Token(RegexMatch, GroupMatch(s :: _)) :: (t @ Token(Time, td: TimeData)) :: _ =>
@@ -58,7 +58,9 @@ trait Rules extends DimRules {
             case '上'             => -1 * s.takeWhile(_ == '上').length
             case '下'             =>
               val n = 1 * s.takeWhile(_ == '下').length
-              if (td.holiday.nonEmpty && n > 0) n - 1 else n
+              if (td.holiday.nonEmpty && n > 0) n - 1
+              else if (s.endsWith("个")) n - 1
+              else n
           }
 
         val isValidCombination = s(0) match { // 病态表达验证
@@ -68,7 +70,7 @@ trait Rules extends DimRules {
               case Day if td.form.contains(Weekend) => true // 本周末
               case _ => false
             }
-          case '上' | '下' => // 上/下， 不与‘天’和‘确切年’组合，eg:本今天，下二零一九年
+          case '上' | '下' if !s.endsWith("个")=> // 上/下， 不与‘天’和‘确切年’组合，eg:本今天，下二零一九年
             if (td.timeGrain == Day && td.holiday.isEmpty && !td.form.contains(Weekend) // 下周末是可以的
               || td.timeGrain == Year) false
             else true
