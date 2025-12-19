@@ -1,5 +1,5 @@
 import Dependencies._
-
+asd
 // 配置大量参考了
 // Scalaz [[https://github.com/scalaz/scalaz]]项目的配置
 // 以及 https://github.com/olafurpg/sbt-ci-release
